@@ -215,7 +215,8 @@ public class Main {
 
 
     private void printNBCCode(PlayPlusParser.RootContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
-        NBCPrinter printer = new NBCPrinter(outputFile);
+
+        NBCPrinter printer = new NBCPrinter("nbcCode.nbc");
         NBCVisitor visitor = new NBCVisitor(symTable, printer);
         tree.accept(visitor);
         printer.flush();

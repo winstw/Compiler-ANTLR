@@ -12,7 +12,7 @@ public class SymTableFiller extends PlayPlusBaseListener {
 
     private final Map<String, Integer> symTable;
 
-    private int offset = 0; // The offset of the variable in the PMachine stack
+    private int nId = 0; //
 
     public SymTableFiller() {
         this.symTable = Maps.newHashMap();
@@ -25,8 +25,8 @@ public class SymTableFiller extends PlayPlusBaseListener {
 
     private void addVariable(String var) {
         if (!symTable.containsKey(var)) {
-            symTable.put(var, offset);
-            offset++;
+            symTable.put(var, nId);
+            nId++;
         }
     }
 

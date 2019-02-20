@@ -32,9 +32,9 @@ public class NBCVisitor extends PlayPlusBaseVisitor<Object> {
     @Override
     public Object visitAffectInstr(PlayPlusParser.AffectInstrContext ctx) {
         String var = ctx.ID().getText();
-        printer.printLoadAdress(NBCCodeTypes.Int, 0, symTable.get(var)); // Load variable adress
+        /* Here you need to print the instructions  */
+        printer.printLoadAdress(var, 0);
         ctx.expression().accept(this); // Compute expression
-     //   printer.printStore(PCodeTypes.Int);
         return null;
     }
 
@@ -48,18 +48,25 @@ public class NBCVisitor extends PlayPlusBaseVisitor<Object> {
     @Override
     public Object visitVariableExpr(PlayPlusParser.VariableExprContext ctx) {
         String var = ctx.ID().getText();
-        printer.printLoad(NBCCodeTypes.Int, 0, symTable.get(var)); // Load value in cell at given adress
+        printer.printLoad(NBCCodeTypes.Int, var);
+        /* Here you need to print the variables  */
         return null;
     }
 
-    @Override
-    public Object visitPlusMinusExpr(PlayPlusParser.PlusMinusExprContext ctx) {
-        ctx.expression(0).accept(this); // Print left expression
-        ctx.expression(1).accept(this); // Print right expression
-        if(ctx.PLUS()!= null){
-            printer.printAdd(NBCCodeTypes.Int);
+ //   @Override
+    public Integer visitPlusMinusExpr(PlayPlusParser.PlusMinusExprContext ctx) {
+        String nLeft = ctx.left.getText();
+        String nRight = ctx.right.getText();
+        String operator = ctx.op.getText();
+        PlayPlusParser.AffectInstrContext instr = (PlayPlusParser.AffectInstrContext) ctx.parent;
+        String var = instr.ID().getText();
+        int value = 0;
+        if(operator.equals("+")){
+            value = Integer.parseInt(nLeft) + Integer.parseInt(nRight); // Get value
+            printer.printAdd(NBCCodeTypes.Int, var, value);
         } else {
-            printer.printSub(NBCCodeTypes.Int);
+            value = Integer.parseInt(nLeft) - Integer.parseInt(nRight); // Get value
+            printer.printSub(NBCCodeTypes.Int, var, value);
         }
         return null;
     }

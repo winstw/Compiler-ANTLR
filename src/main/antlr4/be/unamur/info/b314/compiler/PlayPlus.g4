@@ -9,5 +9,5 @@ instruction: AFFECT LPAR ID COMMA expression RPAR   #affectInstr
 
 expression: NUMBER                                  #constantExpr
           | ID                                      #variableExpr
-          | expression op=(PLUS|MINUS) expression   #plusMinusExpr
+          | left=expression op=(PLUS|MINUS) right=expression   #plusMinusExpr
           ;

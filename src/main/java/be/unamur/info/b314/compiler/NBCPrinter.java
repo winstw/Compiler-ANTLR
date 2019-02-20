@@ -37,20 +37,22 @@ public class NBCPrinter {
         writer = new PrintWriter(out);
     }
 
-    public void printLoad(NBCCodeTypes type, int diff, int offset) {
-        writer.printf("lod %s %d %d", type.representation, diff, offset).println();
-    }
 
     public void printLoadConstant(NBCCodeTypes type, int value) {
         writer.printf("ldc %s %d", type.representation, value).println();
     }
 
-    public void printLoadAdress(NBCCodeTypes type, int diff, int offset) {
-        writer.printf("lda %s %d %d", type.representation, diff, offset).println();
+    public void printLoadAdress(String var, int nvar) {
+        writer.printf("mov %s %d", var, nvar).println();
+    }
+
+
+    public void printLoad(NBCCodeTypes type,  String  var) {
+        writer.printf("%s %s", var, type.representation).println();
     }
 
     public void printStop() {
-        writer.println("stp");
+        writer.println("");
     }
 
     public void printComments(String comment) {
@@ -58,60 +60,18 @@ public class NBCPrinter {
     }
 
 
-    public void printAdd(NBCCodeTypes type) {
-        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) || type.equals(NBCCodeTypes.Char));
-        writer.printf("add %s", type.representation).println();
+    public void printAdd(NBCCodeTypes type, String nvar, int value) {
+        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int));
+        writer.printf("add %s %d  ",  nvar, value).println();
     }
 
-    public void printSub(NBCCodeTypes type) {
-        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) || type.equals(NBCCodeTypes.Char));
-        writer.printf("sub %s", type.representation).println();
-    }
-
-    public void printMul(NBCCodeTypes type) {
-        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) || type.equals(NBCCodeTypes.Char));
-        writer.printf("mul %s", type.representation).println();
-    }
-
-    public void printDiv(NBCCodeTypes type) {
-        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) || type.equals(NBCCodeTypes.Char));
-        writer.printf("div %s", type.representation).println();
-    }
-
-    public void printMod(NBCCodeTypes type) {
-        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) || type.equals(NBCCodeTypes.Char));
-        writer.printf("mod %s", type.representation).println();
+    public void printSub(NBCCodeTypes type, String nvar, int value) {
+        Preconditions.checkArgument(type.equals(NBCCodeTypes.Int) );
+        writer.printf("sub %s %d ", nvar, value).println();
     }
 
 
-    public void printOr() {
-        writer.println("or b");
-    }
 
-    public void printAnd() {
-        writer.println("and b");
-    }
-
-    public void printNot() {
-        writer.println("not b");
-    }
-
-    public void printRead() {
-        writer.println("read");
-    }
-
-    public void printPrin() {
-        writer.println("prin");
-    }
-
-    public void printCheck(int p, int q) {
-        writer.printf("chk %d %d", p, q).println();
-    }
-    
-    public void printIndexedAdressComputation(int q) {
-        writer.printf("ixa %d", q).println();
-    }
-    
     public void flush() {
         writer.flush();
     }

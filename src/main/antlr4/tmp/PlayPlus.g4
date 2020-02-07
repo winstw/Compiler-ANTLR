@@ -1,6 +1,6 @@
 grammar PlayPlus;
 
-import PlayPLusWords;
+import PlayPlusWords;
 
 root: instruction+;
 

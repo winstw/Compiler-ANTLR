@@ -30,7 +30,7 @@ scalar : 'boolean'
        ;
 
 
-array : scalar'[' (DIGIT)+ (',' (DIGIT)+)? ']';
+array : scalar'[' INT (',' INT)? ']';
 
 structure: ID 'as' 'record' (varDecl)+ 'end';
 
@@ -52,84 +52,37 @@ constDecl : 'const' ID 'as' type '=' initVar ';';
 
 enumDecl : 'enum' ID '=' '(' ID (',' ID)* ')' ';' ;
 
-// exprD : exprEnt
-//       | STRING
-//       | CHAR
-//       | exprBool
-//       | exprG
-//       | ID'(' (exprD (','exprD)*)? ')'
-//       | '(' exprD ')'
-//       ;
-
-// exprEnt : INT
-//         | exprD '+' exprD
-//         | exprD '-' exprD
-//         | exprD '*' exprD
-//         | exprD '/' exprD
-//         | exprD '%' exprD
-//         | '-' exprD
-//         ;
-
-// exprBool : 'true'
-//          | 'false'
-//          | exprD 'and' exprD
-//          | exprD 'or' exprD
-//          | exprD '<' exprD
-//          | exprD '>' exprD
-//          | exprD '=' exprD
-//          | exprD '<=' exprD
-//          | exprD '>=' exprD
-//          | exprD '<>' exprD
-//          ;
-
-
-exprD :
-      STRING      #string
+exprD : STRING      #STRINGExpr
       | CHAR       #char
-// exprBool
-      | 'true'     #true
-      | 'false'    #false
-      | exprD 'and' exprD  #andExpr
-      | exprD 'or' exprD   #orExpr
-      | exprD '<' exprD    # lessExpr
-      | exprD '>' exprD    # greaterExpr
-      | exprD '=' exprD    # eqExpr
-      | exprD '<=' exprD   # lessEqExpr
-      | exprD '>=' exprD   # greatEqExpr
-      | exprD '<>' exprD   # notExpr
+      | '(' exprD ')'                                           # parens
+      | exprG                                                   # exprGExpr
+      | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
 
-// exprEnt
-      | INT                # intExpr
-      | exprD '+' exprD    # plusExpr
-      | exprD '-' exprD    # minusExpr
-      | exprD '*' exprD    # timesExpr
-      | exprD '/' exprD    # divExpr
-      | exprD '%' exprD    # modExpr
-      | '-' exprD          # unaryMinusExpr
-      | exprG              # exprGExpr
-      | ID'(' (exprD (','exprD)*)? ')' # funcExpr
-      | '(' exprD ')'                  # parens
+      // exprEnt copied here to avoid indirect recursion
+      | INT                                                     # intExpr
+      | '-' exprD                                               # unaryMinusExpr
+      | exprD ('*' | '/' | '%') exprD                           # timesDivideExpr
+      | exprD ('+' | '-') exprD                                 # plusMinusExpr
+
+      // exprBool copied here to avoid indirect recursion
+      | 'true'                                                  # trueExpr
+      | 'false'                                                 # falseExpr
+      | exprD op=('=' | '<' | '>' | '<=' | '>=' | '<>') exprD   # comparExpr
+      | exprD op=('and' | 'or') exprD                           # andOrExpr
+      | 'not' exprD                                             # notExpr
       ;
 
 exprEnt : INT
-        | exprD '+' exprD
-        | exprD '-' exprD
-        | exprD '*' exprD
-        | exprD '/' exprD
-        | exprD '%' exprD
         | '-' exprD
+        | exprD ('*' | '/' | '%') exprD
+        | exprD ('+' | '-') exprD
         ;
 
 exprBool : 'true'
          | 'false'
-         | exprD 'and' exprD
-         | exprD 'or' exprD
-         | exprD '<' exprD
-         | exprD '>' exprD
-         | exprD '=' exprD
-         | exprD '<=' exprD
-         | exprD '>=' exprD
-         | exprD '<>' exprD
+         | exprD op=('='|'<' | '>' | '<=' | '>=' | '<>') exprD
+         | exprD op=('and' | 'or') exprD
+         | 'not' exprD
          ;
 
 exprG : ID
@@ -144,6 +97,7 @@ instruction: 'if' '(' exprD ')' 'then' instruction+ 'end'
            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'
            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'
            | exprG ':=' exprD ';'
+           | exprD ';'
            | actionType ';'
            ;
 

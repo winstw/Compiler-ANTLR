@@ -3,16 +3,13 @@ grammar Slip;
 import SlipWords;
 
 program : impDecl
-            ((varDecl)* | (fctDecl)* | (constDecl)* | (enumDecl)*)
-            'main' 'as' 'function' '(' ')' ':' 'void'
-            'do'
-              ('dig()' | (instruction)*)
-            'end'
-            ;
+            ((varDecl)* | (fctDecl)* | (constDecl)* | (enumDecl)*) mainDecl;
+
+mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
 instBlock : ((varDecl)* | (enumDecl)* | (constDecl)* | (structure)*) instruction+;
 
-argList : ID (',' ID)* 'as' type (ID (',' ID)* 'as' type)*;
+argList : ID (',' ID)* 'as' type (',' ID (',' ID)* 'as' type)*;
 
 fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | 'void') 'do' (instBlock)+ 'end';
 
@@ -52,8 +49,8 @@ constDecl : 'const' ID 'as' type '=' initVar ';';
 
 enumDecl : 'enum' ID '=' '(' ID (',' ID)* ')' ';' ;
 
-exprD : STRING      #STRINGExpr
-      | CHAR       #char
+exprD : STRING                                                  # string
+      | CHAR                                                    # char
       | '(' exprD ')'                                           # parens
       | exprG                                                   # exprGExpr
       | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
@@ -107,6 +104,7 @@ actionType : 'left(' (exprD)? ')'
            | 'down(' (exprD)? ')'
            | 'jump(' (exprD)? ')'
            | 'fight()'
-           | 'dig()'
+           | dig
            ;
 
+dig : 'dig()';

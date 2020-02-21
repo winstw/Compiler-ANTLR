@@ -1,7 +1,7 @@
 #import "file.map"
 
 user as userRecord as record
-    /* coucou les nuls */
+    /* coucou les nuls *
     age as integer = 2;
     // hello;
 end = 2;

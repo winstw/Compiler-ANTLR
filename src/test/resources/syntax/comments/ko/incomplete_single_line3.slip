@@ -11,7 +11,7 @@ bastien as integer[3] = (3, 5, 5, 67);
 /// commentaire;
 main as/*mauvaise idée*/function(): void
 do
-    emil as integer = 23; // commentaire emil as integer = 23;
+    emil as integer = 23; / commentaire emil as integer = 23;
     // commentaire
     dig();
     user.age := 4;

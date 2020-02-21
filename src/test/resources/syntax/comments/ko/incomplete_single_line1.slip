@@ -3,7 +3,7 @@
 user as userRecord as record
     /* coucou les nuls */
     age as integer = 2;
-    // hello;
+    / hello;
 end = 2;
 
 bastien as integer[3] = (3, 5, 5, 67);
@@ -14,7 +14,8 @@ do
     emil as integer = 23; // commentaire emil as integer = 23;
     // commentaire
     dig();
-
+    user.age := 4;
+    bastien[2] := 45;
 
     /*
 
@@ -38,6 +39,6 @@ do
 
 end
 
-/ coucou
+// coucou
 
 /* dfg */

@@ -1,7 +1,7 @@
 #import "file.map"
 
 user as userRecord as record
-    /* coucou les nuls */
+    * coucou les nuls *
     age as integer = 2;
     // hello;
 end = 2;
@@ -12,9 +12,10 @@ bastien as integer[3] = (3, 5, 5, 67);
 main as/*mauvaise idée*/function(): void
 do
     emil as integer = 23; // commentaire emil as integer = 23;
-    / commentaire
+    // commentaire
     dig();
-
+    user.age := 4;
+    bastien[2] := 45;
 
     /*
 

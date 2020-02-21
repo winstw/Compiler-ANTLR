@@ -2,8 +2,8 @@ package be.unamur.info.b314.compiler.main;
 
 
 
-import be.unamur.info.b314.compiler.PlayPlusLexer;
-import be.unamur.info.b314.compiler.PlayPlusParser;
+import be.unamur.info.b314.compiler.SlipLexer;
+import be.unamur.info.b314.compiler.SlipParser;
 
 
 import be.unamur.info.b314.compiler.NBCPrinter;
@@ -54,6 +54,28 @@ public class Main {
      * @param args Command line arguments.
      */
     public static void main(String[] args) {
+
+        // Print the tested file
+        String filename = args[1];
+
+        try {
+            String line = "";
+            BufferedReader br = new BufferedReader(new FileReader(filename));
+            LOG.debug("-- Printing file content --");
+
+            while ((line = br.readLine()) != null) {
+                LOG.debug(line);
+            }
+
+            LOG.debug("-- End of file content --");
+        } catch (FileNotFoundException e) {
+            LOG.error("File not found");
+        } catch (IOException e) {
+            LOG.error("Unable to read the file.");
+        }
+
+
+
         Main main = new Main();
         CommandLineParser parser = new DefaultParser();
         CommandLine line = null;
@@ -96,7 +118,7 @@ public class Main {
      */
     private File outputFile;
 
-    private PlayPlusParser parser;
+    private SlipParser parser;
 
     private Main() {
         // Create command line options
@@ -164,7 +186,7 @@ public class Main {
 
         // Get abstract syntax tree
         LOG.debug("Parsing input");
-        PlayPlusParser.RootContext tree = parse(new ANTLRInputStream(new FileInputStream(inputFile)));
+        SlipParser.ProgramContext tree = parse(new ANTLRInputStream(new FileInputStream(inputFile)));
         LOG.debug("Parsing input: done");
         LOG.debug("AST is {}", tree.toStringTree(parser));
         // Build symbol table
@@ -181,19 +203,20 @@ public class Main {
     /**
      * Builds the abstract syntax tree from input.
      */
-    private PlayPlusParser.RootContext parse(ANTLRInputStream input) throws ParseCancellationException {
+    private SlipParser.ProgramContext parse(ANTLRInputStream input) throws ParseCancellationException {
         // Create the token stream
-        CommonTokenStream tokens = new CommonTokenStream(new PlayPlusLexer(input));
+        CommonTokenStream tokens = new CommonTokenStream(new SlipLexer(input));
         // Intialise parser
-        parser = new PlayPlusParser(tokens);
+        parser = new SlipParser(tokens);
         // Set error listener to adoc implementation
         parser.removeErrorListeners();
         MyConsoleErrorListener errorListener = new MyConsoleErrorListener();
-        parser.addErrorListener(errorListener);
+        // parser.addErrorListener(errorListener);
+        parser.setErrorHandler(new SlipErrorStrategy());
         // Launch parsing
-        PlayPlusParser.RootContext tree;
+        SlipParser.ProgramContext tree;
         try {
-            tree = parser.root();
+            tree = parser.program();
         } catch (RecognitionException e) {
             throw new IllegalArgumentException("Error while retrieving parsing tree!", e);
         }
@@ -206,7 +229,7 @@ public class Main {
     /**
      * Builds symbol table from AST.
      */
-    private Map<String, Integer> fillSymTable(PlayPlusParser.RootContext tree) {
+    private Map<String, Integer> fillSymTable(SlipParser.ProgramContext tree) {
         SymTableFiller filler = new SymTableFiller();
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(filler, tree);
@@ -214,7 +237,7 @@ public class Main {
     }
 
 
-    private void printNBCCode(PlayPlusParser.RootContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
+    private void printNBCCode(SlipParser.ProgramContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
 
         NBCPrinter printer = new NBCPrinter("nbcCode.nbc");
         NBCVisitor visitor = new NBCVisitor(symTable, printer);

@@ -28,7 +28,7 @@ public class SlipErrorStrategy extends DefaultErrorStrategy {
     }
 
     @Override
-    public Token recoverInline(Parser recognizer) throws RecognitionException {
+    public Token recoverInline(Parser recognizer) {
         System.out.println("recoverInLine");
         throw new ParserException(new InputMismatchException(recognizer));
     }

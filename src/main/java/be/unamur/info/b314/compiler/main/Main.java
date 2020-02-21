@@ -18,6 +18,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 
+import java.io.FileReader;
+import java.io.BufferedReader;
+
 import be.unamur.info.b314.compiler.SymTableFiller;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;

@@ -3,14 +3,14 @@ grammar Slip;
 import SlipWords;
 
 
-program : (prog | map) ;
+program : (prog | map) EOF;
 
 map : 'map' ':' INT INT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
 prog : impDecl
-            (enumDecl | varDecl | fctDecl | constDecl)* mainDecl;
+            (enumDecl | varDecl | fctDecl | constDecl | structure)* mainDecl;
 
 mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
@@ -105,13 +105,13 @@ instruction: 'if' '(' exprD ')' 'then' instruction+ 'end'
            | actionType ';'
            ;
 
-actionType : 'left(' (exprD)? ')'
-           | 'right(' (exprD)? ')'
-           | 'up(' (exprD)? ')'
-           | 'down(' (exprD)? ')'
-           | 'jump(' (exprD)? ')'
-           | 'fight()'
+actionType : 'left' '(' (exprD)? ')'
+           | 'right' '(' (exprD)? ')'
+           | 'up' '(' (exprD)? ')'
+           | 'down' '(' (exprD)? ')'
+           | 'jump' '(' (exprD)? ')'
+           | 'fight' '(' ')'
            | dig
            ;
 
-dig : 'dig()';
+dig : 'dig' '(' ')';

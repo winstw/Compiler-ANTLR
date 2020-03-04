@@ -32,9 +32,9 @@ scalar : 'boolean'
        | 'integer'
        | 'char'
        ;
-int : ('-')? NAT;
+number : ('-')? NAT;
 
-array : scalar'[' int (',' int)? ']';
+array : scalar'[' number (',' number)? ']';
 
 structure: ID 'as' 'record' (varDecl)+ 'end' ';';
 
@@ -42,7 +42,7 @@ varDecl  : ID (',' ID)* 'as' type ('=' initVar)? ';' ;
 
 initVar  : 'true'
          | 'false'
-         | int
+         | number
          | STRING
          | CHAR
          | exprEnt
@@ -63,7 +63,7 @@ exprD : STRING                                                  # string
       | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
 
       // exprEnt copied here to avoid indirect recursion
-      | int                                                     # intExpr
+      | number                                                     # intExpr
       | '-' exprD                                               # unaryMinusExpr
       | exprD ('*' | '/' | '%') exprD                           # timesDivideExpr
       | exprD ('+' | '-') exprD                                 # plusMinusExpr
@@ -76,7 +76,7 @@ exprD : STRING                                                  # string
       | 'not' exprD                                             # notExpr
       ;
 
-exprEnt : int
+exprEnt : number
         | '-' exprD
         | exprD ('*' | '/' | '%') exprD
         | exprD ('+' | '-') exprD

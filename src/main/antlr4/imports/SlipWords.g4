@@ -8,7 +8,7 @@ fragment DIGIT : '0'..'9';
 
 fragment LETTER : 'A'..'Z' | 'a'..'z';
 
-INT : ('-')? (DIGIT)+;
+NAT: DIGIT+;
 
 CHAR : '\'' (DIGIT | LETTER | ':' | '.' | '&' | '/' | '\\' | ';')+ '\'';
 

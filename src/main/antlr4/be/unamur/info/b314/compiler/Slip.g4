@@ -2,18 +2,25 @@ grammar Slip;
 
 import SlipWords;
 
-program : impDecl
-            ((varDecl)* | (fctDecl)* | (constDecl)* | (enumDecl)*) mainDecl;
+
+program : (prog | map) ;
+
+map : 'map' ':' INT INT line+;
+
+line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
+
+prog : impDecl
+            (enumDecl | varDecl | fctDecl | constDecl)* mainDecl;
 
 mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
-instBlock : ((varDecl)* | (enumDecl)* | (constDecl)* | (structure)*) instruction+;
+instBlock : (varDecl | enumDecl | constDecl | structure)* instruction+;
 
 argList : ID (',' ID)* 'as' type (',' ID (',' ID)* 'as' type)*;
 
 fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | 'void') 'do' (instBlock)+ 'end';
 
-impDecl : '#import' FILENAME;
+impDecl : '#' 'import' FILENAME;
 
 type : scalar
      | array

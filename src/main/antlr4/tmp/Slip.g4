@@ -3,9 +3,9 @@ grammar Slip;
 import SlipWords;
 
 
-program : (prog | map) EOF;
+program : (prog | map);
 
-map : 'map' ':' INT INT line+;
+map : 'map' ':' NAT NAT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
@@ -32,17 +32,17 @@ scalar : 'boolean'
        | 'integer'
        | 'char'
        ;
+int : ('-')? NAT;
 
+array : scalar'[' int (',' int)? ']';
 
-array : scalar'[' INT (',' INT)? ']';
-
-structure: ID 'as' 'record' (varDecl)+ 'end';
+structure: ID 'as' 'record' (varDecl)+ 'end' ';';
 
 varDecl  : ID (',' ID)* 'as' type ('=' initVar)? ';' ;
 
 initVar  : 'true'
          | 'false'
-         | INT
+         | int
          | STRING
          | CHAR
          | exprEnt
@@ -63,7 +63,7 @@ exprD : STRING                                                  # string
       | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
 
       // exprEnt copied here to avoid indirect recursion
-      | INT                                                     # intExpr
+      | int                                                     # intExpr
       | '-' exprD                                               # unaryMinusExpr
       | exprD ('*' | '/' | '%') exprD                           # timesDivideExpr
       | exprD ('+' | '-') exprD                                 # plusMinusExpr
@@ -76,7 +76,7 @@ exprD : STRING                                                  # string
       | 'not' exprD                                             # notExpr
       ;
 
-exprEnt : INT
+exprEnt : int
         | '-' exprD
         | exprD ('*' | '/' | '%') exprD
         | exprD ('+' | '-') exprD

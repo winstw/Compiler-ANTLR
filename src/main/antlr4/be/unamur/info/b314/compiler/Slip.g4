@@ -10,11 +10,11 @@ map : 'map' ':' NAT NAT line+;
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
 prog : impDecl
-            (enumDecl | varDecl | fctDecl | constDecl | structure)* mainDecl;
+            (enumDecl | varDecl | fctDecl | constDecl)* mainDecl;
 
 mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
-instBlock : (varDecl | enumDecl | constDecl | structure)* instruction+;
+instBlock : (varDecl | enumDecl | constDecl)* instruction+;
 
 argList : ID (',' ID)* 'as' type (',' ID (',' ID)* 'as' type)*;
 
@@ -36,7 +36,7 @@ number : ('-')? NAT;
 
 array : scalar'[' number (',' number)? ']';
 
-structure: ID 'as' 'record' (varDecl)+ 'end' ';';
+structure: 'record' (varDecl)+ 'end';
 
 varDecl  : ID (',' ID)* 'as' type ('=' initVar)? ';' ;
 

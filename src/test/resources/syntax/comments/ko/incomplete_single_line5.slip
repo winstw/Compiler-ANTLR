@@ -1,34 +1,14 @@
 #import "file.map"
 
-user as userRecord as record
-    /* coucou les nuls */
-    age as integer = 2;
-    // hello;
-end = 2;
-
-bastien as integer[3] = (3, 5, 5, 67);
-
 /// commentaire;
 main as/*mauvaise idée*/function(): void
 do
-    emil as integer = 23; // commentaire emil as integer = 23;
     // commentaire
-    dig();
-    user.age := 4;
-    bastien[2] := 45;
+    // dig();
 
     /*
 
     */
-
-    if(emil < 3) then
-        emil := emil + 1;
-
-        if(emil > 15) then
-            emil = emil + 3;
-        end
-
-    end
 
     /*
 
@@ -39,6 +19,6 @@ do
 
 end
 
-/ coucou
+// coucou
 
 /* dfg */

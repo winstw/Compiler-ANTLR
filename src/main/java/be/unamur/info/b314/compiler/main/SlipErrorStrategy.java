@@ -23,13 +23,13 @@ public class SlipErrorStrategy extends DefaultErrorStrategy {
 
     @Override
     public void recover(Parser recognizer, RecognitionException e) {
-        System.out.println("recover");
+        System.err.println("recover");
         throw new ParserException(e);
     }
 
     @Override
     public Token recoverInline(Parser recognizer) {
-        System.out.println("recoverInLine");
+        System.err.println("recoverInLine");
         throw new ParserException(new InputMismatchException(recognizer));
     }
 

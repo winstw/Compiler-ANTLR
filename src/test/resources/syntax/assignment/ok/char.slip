@@ -1,0 +1,7 @@
+#import "file.map"
+
+main as function(): void
+do
+ letter := 'A';
+ dig();
+end

@@ -3,7 +3,7 @@ grammar Slip;
 import SlipWords;
 
 
-program : (prog | map);
+program : (prog | map) EOF;
 
 map : 'map' ':' NAT NAT line+;
 

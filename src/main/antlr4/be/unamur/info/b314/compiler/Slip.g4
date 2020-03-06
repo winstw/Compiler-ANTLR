@@ -101,7 +101,6 @@ instruction: 'if' '(' exprD ')' 'then' instruction+ 'end'
            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'
            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'
            | exprG ':=' exprD ';'
-           | exprD ';'
            | actionType ';'
            ;
 

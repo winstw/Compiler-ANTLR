@@ -14,7 +14,7 @@ CHAR : '\'' (DIGIT | LETTER | ':' | '.' | '&' | '/' | '\\' | ';')+ '\'';
 
 ID: LETTER (LETTER | DIGIT)* ;
 
-COMMENT : ('/*' (.*?) '*/' | '//' .*?'\r'?'\n') -> skip;
+COMMENT : ('/*' (.*?) '*/' | '//' .*? ('\r'?'\n' | EOF)) -> skip;
 
 WS: [ \t\n]+ -> skip;
 

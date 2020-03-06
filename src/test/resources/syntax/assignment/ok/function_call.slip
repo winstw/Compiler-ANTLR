@@ -1,0 +1,7 @@
+#import "file.map"
+
+main as function(): void
+do
+ numbers := test(4, 2);
+ dig();
+end

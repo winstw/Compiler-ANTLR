@@ -40,13 +40,7 @@ structure: 'record' (varDecl)+ 'end';
 
 varDecl  : ID (',' ID)* 'as' type ('=' initVar)? ';' ;
 
-initVar  : 'true'
-         | 'false'
-         | number
-         | STRING
-         | CHAR
-         | exprEnt
-         | exprBool
+initVar  : exprD
          | initArrays
          ;
 
@@ -76,24 +70,11 @@ exprD : STRING                                                  # string
       | 'not' exprD                                             # notExpr
       ;
 
-exprEnt : number
-        | '-' exprD
-        | exprD ('*' | '/' | '%') exprD
-        | exprD ('+' | '-') exprD
-        ;
-
-exprBool : 'true'
-         | 'false'
-         | exprD op=('='|'<' | '>' | '<=' | '>=' | '<>') exprD
-         | exprD op=('and' | 'or') exprD
-         | 'not' exprD
-         ;
 
 exprG : ID
       | ID'['exprD (','exprD)? ']'
       | exprG'.'ID
       ;
-
 
 instruction: 'if' '(' exprD ')' 'then' instruction+ 'end'
            | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'

@@ -40,8 +40,38 @@ public class SlipSyntaxActionsTest {
 
 
     @Test
-    public void test_down_jump_right_ok() throws Exception{
+    public void test_exprg_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/exprg_arg.slip", testFolder.newFile(), true, "syntax::actions: exprg_arg.slip");
+    }
+
+
+    @Test
+    public void test_func_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/func_arg.slip", testFolder.newFile(), true, "syntax::actions: func_arg.slip");
+    }
+
+
+    @Test
+    public void test_bool_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/bool_arg.slip", testFolder.newFile(), true, "syntax::actions: bool_arg.slip");
+    }
+
+
+    @Test
+    public void test_string_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/string_arg.slip", testFolder.newFile(), true, "syntax::actions: string_arg.slip");
+    }
+
+
+    @Test
+    public void test_no_arg_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/actions/ok/no_arg.slip", testFolder.newFile(), true, "syntax::actions: no_arg.slip");
+    }
+
+
+    @Test
+    public void test_char_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/char_arg.slip", testFolder.newFile(), true, "syntax::actions: char_arg.slip");
     }
 
 

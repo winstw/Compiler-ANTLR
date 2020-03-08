@@ -1,6 +1,7 @@
 #import "file.map"
 beta as int;
+
 main as function(): void
-do
-dig();
+ do
+ dig();
 end

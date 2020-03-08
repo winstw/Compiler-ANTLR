@@ -2,10 +2,11 @@
 alpha as boolean;
 beta as integer;
 epsilon as char;
+
 main as function(): void
-do
-alpha:=true;
-beta:=3;
-epsilon:='B';
-dig();
+ do
+ alpha:=true;
+ beta:=3;
+ epsilon:='B';
+ dig();
 end

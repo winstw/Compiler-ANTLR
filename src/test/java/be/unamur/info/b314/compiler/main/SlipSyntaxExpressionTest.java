@@ -40,4 +40,10 @@ public class SlipSyntaxExpressionTest {
 
 
     // tests KO
+    @Test
+    public void test_ExpressionBooleanKO_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/expression/ko/ExpressionBooleanKO.slip", testFolder.newFile(), false, "syntax::expression: ExpressionBooleanKO.slip");
+    }
+
+
 }

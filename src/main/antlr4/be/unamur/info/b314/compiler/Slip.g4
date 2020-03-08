@@ -55,7 +55,7 @@ exprD : STRING                                                  # string
       | '(' exprD ')'                                           # parens
       | exprG                                                   # exprGExpr
       | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
-
+      |'(' (exprD (','exprD)*)? ')'                             #arrayExpr
       // exprEnt copied here to avoid indirect recursion
       | number                                                     # intExpr
       | '-' exprD                                               # unaryMinusExpr

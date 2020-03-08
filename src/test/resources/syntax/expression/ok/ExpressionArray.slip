@@ -1,10 +1,7 @@
-
 #import "world.map"
-eta as record 
-theta as integer;
-theta as char[6];
-end;
+tab as integer[2];
 main as function(): void
 do
+tab:=(2,3);
 dig();
 end

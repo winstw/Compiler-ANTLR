@@ -27,5 +27,17 @@ public class SlipSyntaxExpressionTest {
     };
 
     // tests OK
+    @Test
+    public void test_ExpressionScalar_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/expression/ok/ExpressionScalar.slip", testFolder.newFile(), true, "syntax::expression: ExpressionScalar.slip");
+    }
+
+
+    @Test
+    public void test_ExpressionArray_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/expression/ok/ExpressionArray.slip", testFolder.newFile(), true, "syntax::expression: ExpressionArray.slip");
+    }
+
+
     // tests KO
 }

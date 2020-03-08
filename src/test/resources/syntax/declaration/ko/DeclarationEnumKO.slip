@@ -1,8 +1,4 @@
 #import "world.map"
-alpha as boolean;
-beta as integer;
-epsilon as char;
-dzeta as integer[2];
 enum days =('monday');
 main as function(): void
 do

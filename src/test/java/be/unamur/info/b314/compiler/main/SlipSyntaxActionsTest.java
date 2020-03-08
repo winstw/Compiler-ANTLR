@@ -41,7 +41,7 @@ public class SlipSyntaxActionsTest {
 
     @Test
     public void test_down_jump_right_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/down_jump_right.slip", testFolder.newFile(), true, "syntax::actions: down_jump_right.slip");
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/no_arg.slip", testFolder.newFile(), true, "syntax::actions: no_arg.slip");
     }
 
 

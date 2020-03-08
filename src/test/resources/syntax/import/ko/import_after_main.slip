@@ -1,0 +1,6 @@
+main as function(): void
+do
+    dig();
+end
+
+#import "file.map"

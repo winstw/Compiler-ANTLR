@@ -2,8 +2,11 @@
 
 main as function(): void
 do
+ left();
+ right();
+ up();
  down();
  jump();
- right();
+ fight();
  dig();
 end

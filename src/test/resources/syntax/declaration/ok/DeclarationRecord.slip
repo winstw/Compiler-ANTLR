@@ -4,7 +4,8 @@ eta as record
 theta as integer;
 theta as char[6];
 end;
+
 main as function(): void
-do
-dig();
+ do
+ dig();
 end

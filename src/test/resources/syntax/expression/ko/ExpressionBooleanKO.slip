@@ -1,8 +1,8 @@
 #import "world.map"
-tab as integer[2];
+alpha as boolean;
 
 main as function(): void
  do
- tab[1]:=(3);
-dig();
+ alpha:=TRU
+ dig();
 end

@@ -1,6 +1,7 @@
 #import "world.map"
 enum days =('monday');
+
 main as function(): void
-do
-dig();
+ do
+ dig();
 end

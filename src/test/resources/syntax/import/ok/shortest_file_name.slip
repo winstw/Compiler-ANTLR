@@ -1,0 +1,6 @@
+#import "m.map"
+
+main as function(): void
+do
+    dig();
+end

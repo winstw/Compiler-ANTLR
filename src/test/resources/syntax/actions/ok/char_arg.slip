@@ -1,0 +1,11 @@
+#import "file.map"
+
+main as function(): void
+do
+ left('h');
+ right('h');
+ up('h');
+ down('h');
+ jump('h');
+ dig();
+end

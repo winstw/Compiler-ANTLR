@@ -28,18 +28,6 @@ public class SlipSyntaxDeclarationTest {
 
     // tests OK
     @Test
-    public void test_DeclarationRecord_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationRecord.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationRecord.slip");
-    }
-
-
-    @Test
-    public void test_DeclarationEnum_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationEnum.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationEnum.slip");
-    }
-
-
-    @Test
     public void test_declaration_ok_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/declaration/ok/declaration_ok.slip", testFolder.newFile(), true, "syntax::declaration: declaration_ok.slip");
     }
@@ -47,26 +35,14 @@ public class SlipSyntaxDeclarationTest {
 
     // tests KO
     @Test
-    public void test_declaration_int_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/declaration_int.slip", testFolder.newFile(), false, "syntax::declaration: declaration_int.slip");
-    }
-
-
-    @Test
     public void test_declaration_bool_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/declaration/ko/declaration_bool.slip", testFolder.newFile(), false, "syntax::declaration: declaration_bool.slip");
     }
 
 
     @Test
-    public void test_DeclarationEnumKO_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/DeclarationEnumKO.slip", testFolder.newFile(), false, "syntax::declaration: DeclarationEnumKO.slip");
-    }
-
-
-    @Test
-    public void test_DeclarationRecordKO_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/DeclarationRecordKO.slip", testFolder.newFile(), false, "syntax::declaration: DeclarationRecordKO.slip");
+    public void test_declaration_int_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/declaration_int.slip", testFolder.newFile(), false, "syntax::declaration: declaration_int.slip");
     }
 
 

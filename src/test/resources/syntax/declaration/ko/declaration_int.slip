@@ -1,0 +1,9 @@
+#import "file.map"
+alpha as boolean;
+beta as int;
+gamma as string;
+epsilon as char;
+main as function(): void
+do
+dig();
+end

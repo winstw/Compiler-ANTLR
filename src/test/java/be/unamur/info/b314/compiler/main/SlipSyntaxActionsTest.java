@@ -34,20 +34,8 @@ public class SlipSyntaxActionsTest {
 
 
     @Test
-    public void test_left_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/left.slip", testFolder.newFile(), true, "syntax::actions: left.slip");
-    }
-
-
-    @Test
-    public void test_exprg_arg_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/exprg_arg.slip", testFolder.newFile(), true, "syntax::actions: exprg_arg.slip");
-    }
-
-
-    @Test
-    public void test_func_arg_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/func_arg.slip", testFolder.newFile(), true, "syntax::actions: func_arg.slip");
+    public void test_char_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/char_arg.slip", testFolder.newFile(), true, "syntax::actions: char_arg.slip");
     }
 
 
@@ -58,8 +46,8 @@ public class SlipSyntaxActionsTest {
 
 
     @Test
-    public void test_string_arg_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/string_arg.slip", testFolder.newFile(), true, "syntax::actions: string_arg.slip");
+    public void test_left_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/left.slip", testFolder.newFile(), true, "syntax::actions: left.slip");
     }
 
 
@@ -70,8 +58,20 @@ public class SlipSyntaxActionsTest {
 
 
     @Test
-    public void test_char_arg_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/char_arg.slip", testFolder.newFile(), true, "syntax::actions: char_arg.slip");
+    public void test_string_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/string_arg.slip", testFolder.newFile(), true, "syntax::actions: string_arg.slip");
+    }
+
+
+    @Test
+    public void test_func_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/func_arg.slip", testFolder.newFile(), true, "syntax::actions: func_arg.slip");
+    }
+
+
+    @Test
+    public void test_exprg_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/exprg_arg.slip", testFolder.newFile(), true, "syntax::actions: exprg_arg.slip");
     }
 
 

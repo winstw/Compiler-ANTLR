@@ -59,12 +59,6 @@ public class SlipSyntaxImportTest {
 
     // tests KO
     @Test
-    public void test_file_name_starting_with_number_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/import/ko/file_name_starting_with_number.slip", testFolder.newFile(), false, "syntax::import: file_name_starting_with_number.slip");
-    }
-
-
-    @Test
     public void test_invalid_extension_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/import/ko/invalid_extension.slip", testFolder.newFile(), false, "syntax::import: invalid_extension.slip");
     }
@@ -73,6 +67,12 @@ public class SlipSyntaxImportTest {
     @Test
     public void test_import_after_main_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/import/ko/import_after_main.slip", testFolder.newFile(), false, "syntax::import: import_after_main.slip");
+    }
+
+
+    @Test
+    public void test_file_name_starting_with_number_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/import/ko/file_name_starting_with_number.slip", testFolder.newFile(), false, "syntax::import: file_name_starting_with_number.slip");
     }
 
 

@@ -1,5 +1,5 @@
 #import "world.map"
-tab as integer[2] = (3,2);
+alpha as boolean = 7>=2;
 
 main as function(): void
  do

@@ -1,0 +1,6 @@
+#import "file.txt"
+
+main as function(): void
+do
+    dig();
+end

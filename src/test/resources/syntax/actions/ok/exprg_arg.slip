@@ -1,0 +1,26 @@
+#import "file.map"
+
+main as function(): void
+do
+ left(hello);
+ left(hello[2]);
+ left(hello.bonjour);
+ left(hello[2].bonjour);
+ right(hello);
+ right(hello[2]);
+ right(hello.bonjour);
+ right(hello[2].bonjour);
+ up(hello);
+ up(hello[2]);
+ up(hello.bonjour);
+ up(hello[2].bonjour);
+ down(hello);
+ down(hello[2]);
+ down(hello.bonjour);
+ down(hello[2].bonjour);
+ jump(hello);
+ jump(hello[2]);
+ jump(hello.bonjour);
+ jump(hello[2].bonjour);
+ dig();
+end

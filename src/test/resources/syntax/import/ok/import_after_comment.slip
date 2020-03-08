@@ -1,14 +1,7 @@
+// Comment
 #import "file.map"
 
-/// commentaire;
-/*
 main as function(): void
 do
     dig();
-
 end
-*/
-
-// coucou
-
-/* dfg */

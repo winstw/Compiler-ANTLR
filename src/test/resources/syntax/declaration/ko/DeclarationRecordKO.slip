@@ -1,0 +1,13 @@
+#import "world.map"
+alpha as boolean;
+beta as integer;
+epsilon as char;
+dzeta as integer[2];
+eta as record ;
+theta as integer;
+theta as char[6];
+end;
+main as function(): void
+do
+dig();
+end

@@ -16,7 +16,7 @@ mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instructio
 
 instBlock : (varDecl | enumDecl | constDecl)* instruction+;
 
-argList : ID (',' ID)* 'as' type (',' ID (',' ID)* 'as' type)*;
+argList : varDef(',' varDef)*;
 
 fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | 'void') 'do' (instBlock)+ 'end';
 
@@ -38,7 +38,9 @@ array : scalar'[' number (',' number)? ']';
 
 structure: 'record' (varDecl)+ 'end';
 
-varDecl  : ID (',' ID)* 'as' type ('=' initVar)? ';' ;
+varDecl  : varDef ('=' initVar)? ';' ;
+
+varDef : ID (',' ID)* 'as' type;
 
 initVar  : exprD
          | initArrays

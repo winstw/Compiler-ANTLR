@@ -18,7 +18,7 @@ instBlock : (varDecl | enumDecl | constDecl)* instruction+;
 
 argList : varDef(',' varDef)*;
 
-fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | 'void') 'do' (instBlock)+ 'end';
+fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | VOIDTYPE) 'do' (instBlock)+ 'end';
 
 impDecl : '#' 'import' FILENAME;
 
@@ -28,9 +28,9 @@ type : scalar
      ;
 
 
-scalar : 'boolean'
-       | 'integer'
-       | 'char'
+scalar : BOOLEANTYPE
+       | INTEGERTYPE
+       | CHARTYPE
        ;
 number : ('-')? NAT;
 

@@ -2,7 +2,10 @@
 
 lexer grammar SlipWords;
 
-
+BOOLEANTYPE: 'boolean';
+INTEGERTYPE: 'integer';
+CHARTYPE: 'char';
+VOIDTYPE: 'void';
 
 fragment DIGIT : '0'..'9';
 

@@ -1,0 +1,30 @@
+#import "file.map"
+
+x as integer = 1;
+y as integer = 3;
+isTrue as boolean = true;
+isFalse as boolean = false;
+
+add as function(a, b as integer): integer
+do
+    result as integer;
+    result := a + b;
+end
+
+check as function(a, b as boolean): boolean
+do
+    result as boolean;
+    result := a or b;
+end
+
+main as function(): void
+do
+    sum as integer;
+    sum := add(x, y);
+
+    myBool as boolean;
+    myBool := check(isTrue, isFalse);
+
+
+    dig();
+end

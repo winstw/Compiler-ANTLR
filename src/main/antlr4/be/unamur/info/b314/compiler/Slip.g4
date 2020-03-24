@@ -18,7 +18,8 @@ instBlock : (varDecl | enumDecl | constDecl)* instruction+;
 
 argList : varDef(',' varDef)*;
 
-fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | VOIDTYPE) 'do' (instBlock)+ 'end';
+fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' fctType 'do' (instBlock)+ 'end';
+fctType: scalar | VOIDTYPE;
 
 impDecl : '#' 'import' FILENAME;
 

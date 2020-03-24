@@ -9,16 +9,17 @@ map : 'map' ':' NAT NAT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
-prog : impDecl
-            (enumDecl | varDecl | fctDecl | constDecl)* mainDecl;
+prog : impDecl (enumDecl | varDecl | funcDecl | constDecl)* mainDecl;
 
 mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
 instBlock : (varDecl | enumDecl | constDecl)* instruction+;
 
-argList : varDef (',' varDef)*;
+argList : varDef(',' varDef)*;
 
-fctDecl : ID 'as' 'function' '(' (argList)? ')' ':' (scalar | 'void') 'do' (instBlock)+ 'end';
+funcDecl : ID 'as' 'function' '(' (argList)? ')' ':' funcType 'do' (instBlock)+ 'end';
+
+funcType : scalar | VOIDTYPE;
 
 impDecl : '#' 'import' FILENAME;
 
@@ -28,29 +29,30 @@ type : scalar
      ;
 
 
-scalar : 'boolean'
-       | 'integer'
-       | 'char'
+scalar : BOOLEANTYPE
+       | INTEGERTYPE
+       | CHARTYPE
        ;
+
 number : ('-')? NAT;
 
 array : scalar'[' number (',' number)? ']';
 
-structure: 'record' (varDecl)+ 'end';
+structure : 'record' (varDecl)+ 'end';
 
-varDecl  : varDef ('=' initVar)? ';' ;
+varDecl : varDef ('=' initVar)? ';';
 
 varDef : ID (',' ID)* 'as' type;
 
-initVar  : exprD
-         | initArrays
-         ;
+initVar : exprD
+        | initArrays
+        ;
 
-initArrays: '(' (initVar (',' initVar)*)?')' ;
+initArrays : '(' (initVar (',' initVar)*)?')';
 
 constDecl : 'const' ID 'as' type '=' initVar ';';
 
-enumDecl : 'enum' ID '=' '(' ID (',' ID)* ')' ';' ;
+enumDecl : 'enum' ID '=' '(' ID (',' ID)* ')' ';';
 
 exprD : STRING                                                  # string
       | CHAR                                                    # char
@@ -59,7 +61,7 @@ exprD : STRING                                                  # string
       | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
 
       // exprEnt copied here to avoid indirect recursion
-      | number                                                     # intExpr
+      | number                                                  # intExpr
       | '-' exprD                                               # unaryMinusExpr
       | exprD ('*' | '/' | '%') exprD                           # timesDivideExpr
       | exprD ('+' | '-') exprD                                 # plusMinusExpr
@@ -78,14 +80,14 @@ exprG : ID
       | exprG'.'ID
       ;
 
-instruction: 'if' '(' exprD ')' 'then' instruction+ 'end'
-           | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'
-           | 'while' '(' exprD ')' 'do' instruction+ 'end'
-           | 'repeat' instruction+ 'until' '(' exprD ')' 'end'
-           | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'
-           | exprG ':=' exprD ';'
-           | actionType ';'
-           ;
+instruction : 'if' '(' exprD ')' 'then' instruction+ 'end'
+            | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'
+            | 'while' '(' exprD ')' 'do' instruction+ 'end'
+            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'
+            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'
+            | exprG ':=' exprD ';'
+            | actionType ';'
+            ;
 
 actionType : 'left' '(' (exprD)? ')'
            | 'right' '(' (exprD)? ')'

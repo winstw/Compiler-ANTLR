@@ -4,10 +4,18 @@ x as integer = 1;
 y as integer = 3;
 isTrue as boolean = true;
 isFalse as boolean = false;
+add as integer;
+
+emil, geoffroy, jb as record
+    age as integer;
+    town as integer;
+    age as char;
+end;
 
 add as function(a, b as integer): integer
 do
     result as integer;
+    result as boolean;
     result := a + b;
 end
 
@@ -20,11 +28,10 @@ end
 main as function(): void
 do
     sum as integer;
-    sum := add(x, y);
+    coucou := add(x, y);
 
     myBool as boolean;
     myBool := check(isTrue, isFalse);
-
 
     dig();
 end

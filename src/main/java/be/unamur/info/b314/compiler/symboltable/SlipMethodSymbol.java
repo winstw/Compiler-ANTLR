@@ -6,4 +6,21 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         super(name, type, parentScope);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("function ");
+        sb.append(getName());
+
+        for (String key : symbols.keySet()) {
+            sb.append("\n\t");
+            sb.append(key);
+            sb.append(": ");
+            sb.append(symbols.get(key).getType());
+        }
+
+        sb.append("\n");
+
+        return sb.toString();
+    }
+
 }

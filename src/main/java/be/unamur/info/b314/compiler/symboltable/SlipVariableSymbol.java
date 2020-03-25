@@ -6,4 +6,13 @@ public class SlipVariableSymbol extends SlipBaseSymbol {
         super(name, type);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("variable: ");
+        sb.append(getName());
+        sb.append(": ");
+        sb.append(getType());
+        sb.append("\n");
+        return sb.toString();
+    }
 }

@@ -9,7 +9,18 @@ package be.unamur.info.b314.compiler.symboltable;
  */
 public interface SlipSymbol {
     enum Types {
-        INTEGER, CHARACTER, BOOLEAN, VOID, STRUCT
+        INTEGER("integer"), CHARACTER("char"), BOOLEAN("boolean"), VOID("void"), STRUCT("record");
+
+        private String name;
+
+        Types(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
 
     /**

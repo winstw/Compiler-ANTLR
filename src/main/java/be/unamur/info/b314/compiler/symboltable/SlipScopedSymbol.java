@@ -11,7 +11,7 @@ public abstract class SlipScopedSymbol extends SlipBaseScope implements SlipSymb
 
     @Override
     public Types getType() {
-        return null;
+        return type;
     }
 
 }

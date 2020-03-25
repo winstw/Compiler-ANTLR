@@ -12,4 +12,22 @@ public class SlipStructureSymbol extends SlipScopedSymbol {
     public SlipSymbol resolve(String name) throws SymbolNotFoundException {
         return super.resolve(name);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("record ");
+        sb.append(getName());
+
+        for (String key : symbols.keySet()) {
+            sb.append("\n\t");
+            sb.append(key);
+            sb.append(": ");
+            sb.append(symbols.get(key).getType());
+        }
+
+        sb.append("\n");
+
+        return sb.toString();
+    }
+
 }

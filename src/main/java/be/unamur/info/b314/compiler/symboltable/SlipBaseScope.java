@@ -9,7 +9,7 @@ import java.util.Map;
 public abstract class SlipBaseScope implements SlipScope{
 
     private String name;
-    private Map<String, SlipSymbol> symbols;
+    protected Map<String, SlipSymbol> symbols;
     private SlipScope parentScope;
 
     public SlipBaseScope(String name, SlipScope parentScope) {

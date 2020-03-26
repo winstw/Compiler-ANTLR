@@ -4,7 +4,7 @@ x as integer = 1;
 y as integer = 3;
 isTrue as boolean = true;
 isFalse as boolean = false;
-add as integer;
+// add as integer;
 
 emil, geoffroy, jb as record
     age as integer;
@@ -15,8 +15,9 @@ end;
 add as function(a, b as integer): integer
 do
     result as integer;
-    result as boolean;
     result := a + b;
+    result as boolean;
+    result := true;
 end
 
 check as function(a, b as boolean): boolean

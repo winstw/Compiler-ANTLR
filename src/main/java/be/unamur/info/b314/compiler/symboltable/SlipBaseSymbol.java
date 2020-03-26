@@ -4,10 +4,12 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
 
     private String name;
     private SlipSymbol.Types type;
+    private boolean isAssignable;
 
-    public SlipBaseSymbol(String name, Types type) {
+    public SlipBaseSymbol(String name, Types type, boolean isAssignable) {
         this.name = name;
         this.type = type;
+        this.isAssignable = isAssignable;
     }
 
     @Override
@@ -20,4 +22,8 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
         return type;
     }
 
+    @Override
+    public boolean isAssignable() {
+        return isAssignable;
+    }
 }

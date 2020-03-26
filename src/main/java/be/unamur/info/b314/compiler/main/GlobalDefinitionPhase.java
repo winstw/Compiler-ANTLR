@@ -108,7 +108,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope);
+            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, true);
 
             try {
                 currentScope.define(symbol);
@@ -130,7 +130,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
     private void defineVariable(SlipParser.VarDefContext ctx, SlipSymbol.Types type) {
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipSymbol symbol = new SlipVariableSymbol(name, type);
+            SlipSymbol symbol = new SlipVariableSymbol(name, type, true);
 
             try {
                 currentScope.define(symbol);
@@ -168,7 +168,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
     private void defineConstantStructure(SlipParser.ConstDeclContext ctx) {
 
             String name = ctx.ID().getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope);
+            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, false);
 
             try {
                 currentScope.define(symbol);
@@ -189,7 +189,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
     private void defineConstant(SlipParser.ConstDeclContext ctx, SlipSymbol.Types type) {
 
         String name = ctx.ID().getText();
-        SlipSymbol symbol = new SlipVariableSymbol(name, type);
+        SlipSymbol symbol = new SlipVariableSymbol(name, type, false);
 
         try {
             currentScope.define(symbol);

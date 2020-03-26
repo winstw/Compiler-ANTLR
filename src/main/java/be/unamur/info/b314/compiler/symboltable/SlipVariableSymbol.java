@@ -2,8 +2,8 @@ package be.unamur.info.b314.compiler.symboltable;
 
 public class SlipVariableSymbol extends SlipBaseSymbol {
 
-    public SlipVariableSymbol(String name, Types type) {
-        super(name, type);
+    public SlipVariableSymbol(String name, Types type, boolean isAssignable) {
+        super(name, type, isAssignable);
     }
 
     @Override

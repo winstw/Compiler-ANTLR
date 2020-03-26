@@ -2,8 +2,9 @@
 
 x as integer = 1;
 y as integer = 3;
-isTrue as boolean = true;
+const isTrue as boolean = true;
 isFalse as boolean = false;
+isFalse as boolean = true;
 // add as integer;
 
 emil, geoffroy, jb as record

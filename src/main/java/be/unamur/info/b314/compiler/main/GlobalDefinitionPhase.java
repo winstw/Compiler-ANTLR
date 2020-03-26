@@ -30,13 +30,13 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
         visitor.visit(tree);
     }
 
-    public ParseTreeProperty<SlipScope> getScopes() {
-        return scopes;
-    }
-
     private ParseTreeProperty<SlipScope> scopes = new ParseTreeProperty<>();
     private SlipScope currentScope;
     private boolean errorOccuried = false;
+
+    public ParseTreeProperty<SlipScope> getScopes() {
+        return scopes;
+    }
 
     @Override
     public Integer visitProgram(SlipParser.ProgramContext ctx) {
@@ -142,7 +142,6 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
 
             }
 
-            System.out.println(symbol);
         }
 
     }
@@ -201,8 +200,6 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
 
         }
 
-        System.out.println(symbol);
-
     }
 
     @Override
@@ -228,6 +225,12 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
         } catch (SymbolAlreadyDefinedException e) {
             errorOccuried = true;
             printError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
+        }
+
+        for (SlipParser.VarDefContext var : ctx.argList().varDef()) {
+            for (TerminalNode node : var.ID()) {
+                symbol.addParameter(getType(var.type().start.getType()));
+            }
         }
 
     }

@@ -1,9 +1,14 @@
 package be.unamur.info.b314.compiler.symboltable;
 
+import java.util.ArrayList;
+
 public class SlipMethodSymbol extends SlipScopedSymbol {
+
+    ArrayList<SlipSymbol.Types> parameterTypes;
 
     public SlipMethodSymbol(String name, Types type, SlipScope parentScope) {
         super(name, type, parentScope, false);
+        parameterTypes = new ArrayList<>();
     }
 
     @Override
@@ -21,6 +26,14 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         sb.append("\n");
 
         return sb.toString();
+    }
+
+    /**
+     * @modifies this
+     * @effect add type to parameterTypes
+     */
+    public void addParameter(SlipSymbol.Types type) {
+        parameterTypes.add(type);
     }
 
 }

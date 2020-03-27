@@ -9,11 +9,11 @@ map : 'map' ':' NAT NAT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
-prog : impDecl (enumDecl | varDecl | funcDecl | constDecl)* mainDecl;
+prog : impDecl (varDecl | funcDecl | constDecl)* mainDecl;
 
 mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
 
-instBlock : (varDecl | enumDecl | constDecl)* instruction+;
+instBlock : (varDecl | constDecl)* instruction+;
 
 argList : varDef(',' varDef)*;
 
@@ -51,8 +51,6 @@ initVar : exprD
 initArrays : '(' (initVar (',' initVar)*)?')';
 
 constDecl : 'const' ID 'as' type '=' initVar ';';
-
-enumDecl : 'enum' ID '=' '(' ID (',' ID)* ')' ';';
 
 exprD : STRING                                                  # string
       | CHAR                                                    # char

@@ -44,7 +44,7 @@ public abstract class SlipBaseScope implements SlipScope{
         SlipSymbol symbol = symbols.get(name);
 
         if (parentScope != null && symbol == null) {
-            parentScope.resolve(name);
+            symbol = parentScope.resolve(name);
         }
 
         if (symbol == null) {

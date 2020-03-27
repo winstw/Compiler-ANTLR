@@ -37,6 +37,10 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         parameterTypes.add(type);
     }
 
+    public int getNumberOfParameters() {
+        return parameterTypes.size();
+    }
+
     public Iterator<SlipSymbol.Types> getParameterTypes() {
         return this.parameterTypes.iterator();
     }

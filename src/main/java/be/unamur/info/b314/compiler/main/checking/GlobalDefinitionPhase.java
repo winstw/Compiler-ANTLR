@@ -256,6 +256,8 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
             printError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
         }
 
+        scopes.put(ctx, symbol);
+
         return 1;
     }
 

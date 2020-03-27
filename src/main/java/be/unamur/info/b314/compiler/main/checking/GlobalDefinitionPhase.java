@@ -1,13 +1,13 @@
-package be.unamur.info.b314.compiler.main;
+package be.unamur.info.b314.compiler.main.checking;
 
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
+import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
 import be.unamur.info.b314.compiler.symboltable.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -15,6 +15,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
+
+import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
+import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
 public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
 
@@ -36,6 +39,10 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
 
     public ParseTreeProperty<SlipScope> getScopes() {
         return scopes;
+    }
+
+    public boolean hasErrorOccuried() {
+        return errorOccuried;
     }
 
     @Override
@@ -251,17 +258,4 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
         return 1;
     }
 
-    public static SlipSymbol.Types getType(int typeToken) {
-        switch (typeToken) {
-            case SlipParser.VOIDTYPE: return SlipSymbol.Types.VOID;
-            case SlipParser.INTEGERTYPE: return SlipSymbol.Types.INTEGER;
-            case SlipParser.CHARTYPE: return SlipSymbol.Types.CHARACTER;
-            case SlipParser.BOOLEANTYPE: return SlipSymbol.Types.BOOLEAN;
-            default: return SlipSymbol.Types.STRUCT;
-        }
-    }
-
-    public static void printError(Token t, String msg) {
-        System.err.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
-    }
 }

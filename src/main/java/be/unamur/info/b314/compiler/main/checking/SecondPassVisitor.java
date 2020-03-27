@@ -1,27 +1,24 @@
-package be.unamur.info.b314.compiler.main;
+package be.unamur.info.b314.compiler.main.checking;
 
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
+import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
 import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Types;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
-import be.unamur.info.b314.compiler.main.GlobalDefinitionPhase;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Iterator;
-import java.util.List;
 
 public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     public static void main(String[] args) throws IOException {
@@ -37,11 +34,16 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         SecondPassVisitor second = new SecondPassVisitor(visitor.getScopes());
         second.visitProgram(tree);
     }
-    ParseTreeProperty<SlipScope> scopes;
-    SlipScope currentScope;
+    private ParseTreeProperty<SlipScope> scopes;
+    private SlipScope currentScope;
+    private boolean errorOccuried = false;
 
-    SecondPassVisitor(ParseTreeProperty<SlipScope> scopes){
+    public SecondPassVisitor(ParseTreeProperty<SlipScope> scopes){
         this.scopes = scopes;
+    }
+
+    public boolean hasErrorOccuried() {
+        return errorOccuried;
     }
 
     @Override

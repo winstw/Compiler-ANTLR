@@ -2,6 +2,8 @@
 
 x as integer = 1;
 y as integer = 3;
+//z as integer;
+//z := 2;
 const isTrue as boolean = true;
 isFalse as boolean = false;
 isFalse as boolean = true;
@@ -31,9 +33,10 @@ main as function(): void
 do
     sum as integer;
     coucou := add(x, y);
-
+    
     myBool as boolean;
-    myBool := check(isTrue, isFalse);
+//    myBool := check(isTrue, isFalse);
+    myBool := chock(isTrue, isFalse);
 
     dig();
 end

@@ -10,7 +10,7 @@ package be.unamur.info.b314.compiler.symboltable;
  */
 public interface SlipSymbol {
     enum Types {
-        INTEGER("integer"), CHARACTER("char"), BOOLEAN("boolean"), VOID("void"), STRUCT("record");
+        INTEGER("integer"), CHARACTER("char"), BOOLEAN("boolean"), VOID("void"), STRUCT("record"), STRING("string");
 
         private String name;
 

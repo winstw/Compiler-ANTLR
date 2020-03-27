@@ -1,4 +1,3 @@
-
 package be.unamur.info.b314.compiler.main;
 
 import org.antlr.v4.runtime.ConsoleErrorListener;

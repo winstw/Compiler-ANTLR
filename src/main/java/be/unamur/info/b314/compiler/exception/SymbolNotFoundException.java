@@ -7,7 +7,7 @@ package be.unamur.info.b314.compiler.exception;
  *
  * @author James Ortiz - james.ortizvega@unamur.be
  */
-public class SymbolNotFoundException extends Exception{
+public class SymbolNotFoundException extends RuntimeException{
 
     public SymbolNotFoundException() {
     }

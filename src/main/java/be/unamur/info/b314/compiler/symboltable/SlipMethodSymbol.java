@@ -1,6 +1,7 @@
 package be.unamur.info.b314.compiler.symboltable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class SlipMethodSymbol extends SlipScopedSymbol {
 
@@ -36,4 +37,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         parameterTypes.add(type);
     }
 
+    public Iterator<SlipSymbol.Types> getParameterTypes() {
+        return this.parameterTypes.iterator();
+    }
 }

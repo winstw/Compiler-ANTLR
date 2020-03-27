@@ -75,18 +75,18 @@ exprD : STRING                                                  # string
       ;
 
 
-exprG : ID
-      | ID'['exprD (','exprD)? ']'
-      | exprG'.'ID
+exprG : ID                                                      # leftExprID
+      | ID'['exprD (','exprD)? ']'                              # leftExprArray
+      | exprG'.'ID                                              # leftExprRecord
       ;
 
-instruction : 'if' '(' exprD ')' 'then' instruction+ 'end'
-            | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'
-            | 'while' '(' exprD ')' 'do' instruction+ 'end'
-            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'
-            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'
-            | exprG ':=' exprD ';'
-            | actionType ';'
+instruction : 'if' '(' exprD ')' 'then' instruction+ 'end'                      # ifThenInstr
+            | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'  # ifThenElseInstr
+            | 'while' '(' exprD ')' 'do' instruction+ 'end'                     # whileInstr
+            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'                 # untilInstr
+            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'            # forInstr
+            | exprG ':=' exprD ';'                                              # assignInstr
+            | actionType ';'                                                    # actionInstr
             ;
 
 actionType : 'left' '(' (exprD)? ')'

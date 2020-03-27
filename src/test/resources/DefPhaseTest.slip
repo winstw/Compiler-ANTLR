@@ -1,0 +1,42 @@
+#import "file.map"
+
+x as integer = 1;
+y as integer = 3;
+//z as integer;
+//z := 2;
+const isTrue as boolean = true;
+isFalse as boolean = false;
+isFalse as boolean = true;
+// add as integer;
+
+emil, geoffroy, jb as record
+    age as integer;
+    town as integer;
+    age as char;
+end;
+
+add as function(a, b as integer): integer
+do
+    result as integer;
+    result := a + b;
+    result as boolean;
+    result := true;
+end
+
+check as function(a, b as boolean): boolean
+do
+    result as boolean;
+    result := a or b;
+end
+
+main as function(): void
+do
+    sum as integer;
+    coucou := add(x, y);
+    
+    myBool as boolean;
+//    myBool := check(isTrue, isFalse);
+    myBool := chock(isTrue, isFalse);
+
+    dig();
+end

@@ -10,7 +10,13 @@ public class SlipStructureSymbol extends SlipScopedSymbol {
 
     @Override
     public SlipSymbol resolve(String name) throws SymbolNotFoundException {
-        return super.resolve(name);
+        SlipSymbol symbol = symbols.get(name);
+
+        if (symbol == null) {
+            throw new SymbolNotFoundException();
+        }
+
+        return symbol;
     }
 
     @Override

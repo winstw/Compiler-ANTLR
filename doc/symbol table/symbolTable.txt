@@ -1,0 +1,71 @@
+@startuml
+
+enum Type {
+    void
+    integer
+    boolean
+    char
+    struct
+}
+
+interface SlipSymbol {
+    +String getName()
+    +String getType()
+    +boolean isAssignable()
+}
+
+abstract class SlipBaseSymbol {
+    -String name
+    -Type type
+    -boolean isAssignable
+}
+
+class SlipVariableSymbol
+class SlipArraySymbol
+
+
+interface SlipScope {
+    +String getName()
+    +void define(SlipSymbol symbol)
+    +SlipSymbol resolve(String name)
+    +SlipScope getParentScope()
+}
+
+abstract class SlipBaseScope {
+    -String name
+    -SlipScope parentScope
+    -Map<String, SlipSymbol> symbols
+}
+
+abstract class SlipScopedSymbol {
+    -Type type
+    -boolean isAssignable
+}
+
+class SlipMethodSymbol {
+    -Type parameterTypes[0-N]
+
+    +void addParameter(Type type)
+    +Type[] getParameterType()
+}
+class SlipStructureSymbol
+class SlipGlobalScope
+
+
+SlipSymbol <|-- SlipBaseSymbol
+SlipSymbol <|-- SlipScopedSymbol
+
+SlipScope <|-- SlipBaseScope
+
+SlipBaseSymbol <|-- SlipVariableSymbol
+SlipBaseSymbol <|-- SlipArraySymbol
+
+SlipBaseScope <|-- SlipScopedSymbol
+SlipBaseScope <|-- SlipGlobalScope
+
+SlipScopedSymbol <|-- SlipMethodSymbol
+SlipScopedSymbol <|-- SlipStructureSymbol
+
+SlipBaseScope "[0-N] child scope" -- "[0-1] parent scope" SlipScope: englobedBy >
+
+@enduml

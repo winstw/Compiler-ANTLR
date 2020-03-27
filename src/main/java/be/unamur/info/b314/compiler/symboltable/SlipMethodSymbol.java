@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 public class SlipMethodSymbol extends SlipScopedSymbol {
 
-    ArrayList<SlipSymbol.Types> parameterTypes;
+    private ArrayList<SlipSymbol.Types> parameterTypes;
 
     public SlipMethodSymbol(String name, Types type, SlipScope parentScope) {
         super(name, type, parentScope, false);

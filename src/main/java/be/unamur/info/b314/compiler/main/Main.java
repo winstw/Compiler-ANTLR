@@ -4,6 +4,7 @@ package be.unamur.info.b314.compiler.main;
 
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
+import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
 
 
 import be.unamur.info.b314.compiler.NBCPrinter;

@@ -6,7 +6,7 @@ import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SlipBaseScope implements SlipScope{
+public class SlipBaseScope implements SlipScope{
 
     private String name;
     protected Map<String, SlipSymbol> symbols;

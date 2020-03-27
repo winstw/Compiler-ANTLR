@@ -59,7 +59,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         }
 
         System.out.println("=== END SECOND PHASE ===");
-        System.out.println(this.currentScope);
+
         return Types.VOID;
     }
 
@@ -71,6 +71,21 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         for(ParseTree child: ctx.children) {
             visit(child);
         }
+        System.out.println(this.currentScope);
+        this.currentScope = null;
+        return Types.VOID;
+    }
+
+    @Override
+    public Types visitMainDecl(SlipParser.MainDeclContext ctx) {
+        this.currentScope = scopes.get(ctx);
+
+        for(ParseTree child: ctx.children) {
+            visit(child);
+        }
+
+        this.currentScope = this.currentScope.getParentScope();
+
         return Types.VOID;
     }
 
@@ -80,12 +95,25 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         SlipScope localScope = scopes.get(ctx);
         this.currentScope = localScope;
         System.out.println("SCOPE : " + currentScope.getName());
+
+        visit(ctx.argList());
+
         for (SlipParser.InstBlockContext inst: ctx.instBlock()){
             visit(inst);
         }
         System.out.println(currentScope);
         this.currentScope = localScope.getParentScope();
         System.out.println("SCOPE : " + currentScope.getName());
+        return Types.VOID;
+    }
+
+    @Override
+    public Types visitArgList(SlipParser.ArgListContext ctx) {
+
+        for(SlipParser.VarDefContext varDef : ctx.varDef()) {
+            visit(varDef);
+        }
+
         return Types.VOID;
     }
 
@@ -102,21 +130,31 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         try {
             SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(ctx.ID().getText());
             System.out.println("FUNC CALL : " + scopedFunc + " Type : " + scopedFunc.getType());
+
+            if (ctx.exprD().size() != scopedFunc.getNumberOfParameters()) {
+                errorOccuried = true;
+                printError(ctx.start, String.format("function %s expects %d argument(s)", scopedFunc.getName(), scopedFunc.getNumberOfParameters()));
+                return scopedFunc.getType();
+            }
+
             Iterator<Types> declaredParams = scopedFunc.getParameterTypes();
             for (SlipParser.ExprDContext param : ctx.exprD()){
                 Types effectiveParam = visit(param);
-                /**
-                 * EMIL: ATTENTION ICI RISQUE D'EXCEPTION SI PLUS DE PARAM EFFECTIF ME SEMBLE, A TEST
-                 */
-                Types declaredParam = declaredParams.next();
-                System.out.println("EFFECTIVE : " + effectiveParam + " DECLARED : " + declaredParam);
-                if (effectiveParam != declaredParam){
+                if (declaredParams.hasNext()) {
+                    Types declaredParam = declaredParams.next();
+                    System.out.println("EFFECTIVE : " + effectiveParam + " DECLARED : " + declaredParam);
+                    if (effectiveParam != declaredParam){
+                        errorOccuried =  true;
+                        printError(param.start, String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParam, effectiveParam));
+                    }
+                } else {
                     errorOccuried =  true;
-                    printError(param.start, String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParam, effectiveParam));
+                    System.out.println("too many arguments");
                 }
             }
+
             return scopedFunc.getType();
-        } catch (Exception e) {
+        } catch (SymbolNotFoundException e) {
             errorOccuried = true;
             printError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
         }

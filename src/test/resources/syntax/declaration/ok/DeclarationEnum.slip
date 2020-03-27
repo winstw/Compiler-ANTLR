@@ -1,6 +1,6 @@
 
 #import "world.map"
-enum days =(monday,tuesday,wednesday,thursday,friday,saturday,sunday);
+// enum days =(monday,tuesday,wednesday,thursday,friday,saturday,sunday);
 
 main as function(): void
  do

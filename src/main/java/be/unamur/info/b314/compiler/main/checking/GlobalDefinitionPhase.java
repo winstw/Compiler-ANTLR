@@ -224,6 +224,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Integer> {
         String name = ctx.ID().getText();
         SlipSymbol.Types type = getType(ctx.funcType().start.getType());
         SlipMethodSymbol symbol = new SlipMethodSymbol(name, type, currentScope);
+        scopes.put(ctx, symbol);
 
         try {
             currentScope.define(symbol);

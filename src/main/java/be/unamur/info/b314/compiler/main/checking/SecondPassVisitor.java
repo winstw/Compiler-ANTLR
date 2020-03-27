@@ -76,7 +76,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
     @Override
     public Types visitFuncDecl(SlipParser.FuncDeclContext ctx){
-        // !!! scope creation and function inspection
+        // function inspection
         SlipScope localScope = scopes.get(ctx);
         this.currentScope = localScope;
         System.out.println("SCOPE : " + currentScope.getName());
@@ -217,6 +217,11 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     @Override
     public Types visitString(SlipParser.StringContext ctx){
         return Types.STRING;
+    }
+
+    @Override
+    public Types visitChar(SlipParser.CharContext ctx) {
+        return Types.CHARACTER;
     }
 
     @Override

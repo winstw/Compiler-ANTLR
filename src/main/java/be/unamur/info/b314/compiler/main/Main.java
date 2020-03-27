@@ -23,6 +23,7 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 
 import be.unamur.info.b314.compiler.SymTableFiller;
+import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -195,11 +196,14 @@ public class Main {
         LOG.debug("AST is {}", tree.toStringTree(parser));
         // Build symbol table
         LOG.debug("Building symbol table");
-        Map<String, Integer> symTable = fillSymTable(tree);
+        //Map<String, Integer> symTable = fillSymTable(tree);
+        if (!SemanticChecker.run(tree)) {
+            throw new RuntimeException("there is semantic error");
+        }
         LOG.debug("Building symbol table: done");
         // Print NBC Code
         LOG.debug("Printing NBC Code");
-        printNBCCode(tree, symTable);
+        //printNBCCode(tree, symTable);
         LOG.debug("Printing NBC Code: done");
 
     }

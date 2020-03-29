@@ -94,7 +94,9 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         this.currentScope = localScope;
         System.out.println("SCOPE : " + currentScope.getName());
 
-        visit(ctx.argList());
+        if (ctx.argList() != null) {
+            visit(ctx.argList());
+        }
 
         for (SlipParser.InstBlockContext inst: ctx.instBlock()){
             visit(inst);

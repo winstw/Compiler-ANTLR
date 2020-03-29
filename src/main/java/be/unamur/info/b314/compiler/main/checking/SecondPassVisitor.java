@@ -554,6 +554,17 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
     @Override
     public Types visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
+
+        for (SlipParser.ExprDContext expr : ctx.exprD()) {
+            Types type = visit(expr);
+
+            if (type != Types.INTEGER) {
+                errorOccuried = true;
+                printError(expr.start, "can only compare integer expressions");
+            }
+
+        }
+
         return Types.BOOLEAN;
     }
 

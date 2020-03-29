@@ -5,90 +5,93 @@ import SlipWords;
 
 program : (prog | map) EOF;
 
-map : 'map' ':' NAT NAT line+;
+map : MAP COLON NAT NAT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
-prog : impDecl (declaration | funcDecl | constDecl)* mainDecl;
+prog : impDecl (declaration | funcDecl | constDecl | enumDecl)* mainDecl;
 
-mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((declaration | instruction)* dig ';' (declaration | instruction)*) 'end';
+mainDecl : MAIN AS FUNCTION LPAR RPAR COLON VOIDTYPE DO ((declaration | instruction | enumDecl)* dig SEMICOLON (declaration | instruction | enumDecl)*) END;
 
-instBlock : (declaration | constDecl)* instruction+;
+enumDecl : ENUM ID EQUAL LPAR ID (COMMA ID)* RPAR SEMICOLON;
 
-argList : varDef(',' varDef)*;
-varDef : ID (',' ID)* 'as' scalar;
+instBlock : (declaration | constDecl | enumDecl)* instruction+;
 
-funcDecl : ID 'as' 'function' '(' (argList)? ')' ':' funcType 'do' (instBlock)+ 'end';
+argList : varDef(COMMA varDef)*;
+varDef : ID (COMMA ID)* AS scalar;
+
+funcDecl : ID AS FUNCTION LPAR (argList)? RPAR COLON funcType DO (instBlock)+ END;
 
 funcType : scalar | VOIDTYPE;
 
-impDecl : '#' 'import' FILENAME;
+impDecl : HASH IMPORT FILENAME;
 
 scalar : BOOLEANTYPE
        | INTEGERTYPE
        | CHARTYPE
        ;
 
-number : ('-')? NAT;
+number : (MINUS)? NAT;
 
-declaration: (varDecl | arrayDecl | structDecl) ';';
-varDecl : ID (',' ID)* 'as' scalar ('=' exprD)?;
-arrayDecl : ID (',' ID)* 'as' scalar '[' number (',' number)* ']' ('=' initArrays)?;
-structDecl : ID (',' ID)* 'as' 'record' (declaration)+ 'end';
+declaration: (varDecl | arrayDecl | structDecl) SEMICOLON;
+varDecl : ID (COMMA ID)* AS scalar (EQUAL exprD)?;
+arrayDecl : ID (COMMA ID)* AS scalar LSQU number (COMMA number)* RSQU (EQUAL initArrays)?;
+structDecl : ID (COMMA ID)* AS STRUCT (declaration)+ END;
 
 initVar : exprD
         | initArrays
         ;
 
-initArrays : '(' (initVar (',' initVar)*)?')';
+initArrays : LPAR (initVar (COMMA initVar)*)? RPAR;
 
-constDecl : 'const' (constVar | constArray | constStruct) ';';
-constVar : ID 'as' scalar '=' exprD;
-constArray : ID 'as' scalar '[' number (',' number)* ']' '=' initArrays ;
-constStruct : ID 'as' 'record' (declaration)+ 'end';
+constDecl : CONST (constVar | constArray | constStruct) SEMICOLON;
+constVar : ID AS scalar EQUAL exprD;
+constArray : ID AS scalar LSQU number (COMMA number)* RSQU EQUAL initArrays ;
+constStruct : ID AS STRUCT (declaration)+ END;
 
-exprD : STRING                                                  # string
-      | CHAR                                                    # char
-      | '(' exprD ')'                                           # parens
-      | exprG                                                   # exprGExpr
-      | ID'(' (exprD (','exprD)*)? ')'                          # funcExpr
+exprD : STRING                                  # string
+      | CHAR                                    # char
+      | LPAR exprD RPAR                         # parens
+      | exprG                                   # exprGExpr
+      | ID LPAR (exprD (COMMA exprD)*)? RPAR    # funcExpr
 
       // exprEnt copied here to avoid indirect recursion
-      | number                                                  # intExpr
-      | '-' exprD                                               # unaryMinusExpr
-      | exprD ('*' | '/' | '%') exprD                           # timesDivideExpr
-      | exprD ('+' | '-') exprD                                 # plusMinusExpr
+      | number                                  # intExpr
+      | MINUS exprD                             # unaryMinusExpr
+      | exprD (TIMES | DIVIDE | MODULO) exprD   # timesDivideExpr
+      | exprD (PLUS | MINUS) exprD              # plusMinusExpr
 
       // exprBool copied here to avoid indirect recursion
-      | 'true'                                                  # trueExpr
-      | 'false'                                                 # falseExpr
-      | exprD op=('=' | '<' | '>' | '<=' | '>=' | '<>') exprD   # comparExpr
-      | exprD op=('and' | 'or') exprD                           # andOrExpr
-      | 'not' exprD                                             # notExpr
+      | TRUE                                    # trueExpr
+      | FALSE                                   # falseExpr
+      | exprD op=(EQUAL | DIFF) exprD           # comparExpr
+      | exprD op=(LT | GT | LTOE | GTOE) exprD  # comparIntExpr
+      | exprD op=(AND | OR) exprD               # andOrExpr
+      | NOT exprD                               # notExpr
       ;
 
 
-exprG : ID                                                      # leftExprID
-      | ID'['exprD (','exprD)? ']'                              # leftExprArray
-      | exprG'.'ID                                              # leftExprRecord
+exprG : ID                                      # leftExprID
+      | ID LSQU exprD (COMMA exprD)? RSQU       # leftExprArray
+      | exprG DOT ID                            # leftExprRecord
       ;
 
-instruction : 'if' '(' exprD ')' 'then' instruction+ 'end'                      # ifThenInstr
-            | 'if' '(' exprD ')' 'then' instruction+ 'else' instruction+ 'end'  # ifThenElseInstr
-            | 'while' '(' exprD ')' 'do' instruction+ 'end'                     # whileInstr
-            | 'repeat' instruction+ 'until' '(' exprD ')' 'end'                 # untilInstr
-            | 'for' ID ':=' exprD 'to' exprD 'do' instruction+ 'end'            # forInstr
-            | exprG ':=' exprD ';'                                              # assignInstr
-            | actionType ';'                                                    # actionInstr
+instruction : IF LPAR exprD RPAR THEN instruction+ END                      # ifThenInstr
+            | IF LPAR exprD RPAR THEN instruction+ ELSE instruction+ END    # ifThenElseInstr
+            | WHILE LPAR exprD RPAR DO instruction+ END                     # whileInstr
+            | REPEAT instruction+ UNTIL LPAR exprD RPAR END                 # untilInstr
+            | FOR ID AFFECT exprD TO exprD DO instruction+ END              # forInstr
+            | exprG AFFECT exprD SEMICOLON                                  # assignInstr
+            | actionType SEMICOLON                                          # actionInstr
             ;
 
-actionType : 'left' '(' (exprD)? ')'
-           | 'right' '(' (exprD)? ')'
-           | 'up' '(' (exprD)? ')'
-           | 'down' '(' (exprD)? ')'
-           | 'jump' '(' (exprD)? ')'
-           | 'fight' '(' ')'
+actionType : LEFT LPAR exprD? RPAR
+           | RIGHT LPAR exprD? RPAR
+           | UP LPAR exprD? RPAR
+           | DOWN LPAR exprD? RPAR
+           | JUMP LPAR exprD? RPAR
+           | FIGTH LPAR RPAR
            | dig
            ;
 
-dig : 'dig' '(' ')';
+dig : 'dig()';

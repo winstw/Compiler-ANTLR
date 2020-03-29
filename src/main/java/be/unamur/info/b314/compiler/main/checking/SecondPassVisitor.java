@@ -509,6 +509,17 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
     @Override
     public Types visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
+
+        for (SlipParser.ExprDContext expr: ctx.exprD()) {
+            Types type = visit(expr);
+
+            if (type != Types.INTEGER) {
+                errorOccuried = true;
+                printError(expr.start, "can only use '+' and '-' operators on expressions of type integer");
+            }
+
+        }
+
         return Types.INTEGER;
     }
 

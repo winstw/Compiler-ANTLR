@@ -9,25 +9,20 @@ map : 'map' ':' NAT NAT line+;
 
 line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
 
-prog : impDecl (varDecl | funcDecl | constDecl)* mainDecl;
+prog : impDecl (declaration | funcDecl | constDecl)* mainDecl;
 
-mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((varDecl | instruction)* dig ';' (varDecl | instruction)*) 'end';
+mainDecl : 'main' 'as' 'function' '(' ')' ':' 'void' 'do' ((declaration | instruction)* dig ';' (declaration | instruction)*) 'end';
 
-instBlock : (varDecl | constDecl)* instruction+;
+instBlock : (declaration | constDecl)* instruction+;
 
 argList : varDef(',' varDef)*;
+varDef : ID (',' ID)* 'as' scalar;
 
 funcDecl : ID 'as' 'function' '(' (argList)? ')' ':' funcType 'do' (instBlock)+ 'end';
 
 funcType : scalar | VOIDTYPE;
 
 impDecl : '#' 'import' FILENAME;
-
-type : scalar
-     | array
-     | structure
-     ;
-
 
 scalar : BOOLEANTYPE
        | INTEGERTYPE
@@ -36,13 +31,10 @@ scalar : BOOLEANTYPE
 
 number : ('-')? NAT;
 
-array : scalar'[' number (',' number)? ']';
-
-structure : 'record' (varDecl)+ 'end';
-
-varDecl : varDef ('=' initVar)? ';';
-
-varDef : ID (',' ID)* 'as' type;
+declaration: (varDecl | arrayDecl | structDecl) ';';
+varDecl : ID (',' ID)* 'as' scalar ('=' exprD)?;
+arrayDecl : ID (',' ID)* 'as' scalar '[' number (',' number)* ']' ('=' initArrays)?;
+structDecl : ID (',' ID)* 'as' 'record' (declaration)+ 'end';
 
 initVar : exprD
         | initArrays
@@ -50,7 +42,10 @@ initVar : exprD
 
 initArrays : '(' (initVar (',' initVar)*)?')';
 
-constDecl : 'const' ID 'as' type '=' initVar ';';
+constDecl : 'const' (constVar | constArray | constStruct) ';';
+constVar : ID 'as' scalar '=' exprD;
+constArray : ID 'as' scalar '[' number (',' number)* ']' '=' initArrays ;
+constStruct : ID 'as' 'record' (declaration)+ 'end';
 
 exprD : STRING                                                  # string
       | CHAR                                                    # char

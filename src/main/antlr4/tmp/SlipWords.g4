@@ -49,6 +49,7 @@ INTEGERTYPE : 'integer';
 CHARTYPE : 'char';
 VOIDTYPE : 'void';
 STRUCT: 'record';
+ENUM: 'enum';
 
 // Instructions
 IF: 'if';

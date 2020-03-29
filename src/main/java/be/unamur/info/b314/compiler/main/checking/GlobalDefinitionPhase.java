@@ -316,9 +316,11 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
             printError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
         }
 
-        for (SlipParser.VarDefContext var : ctx.argList().varDef()) {
-            for (TerminalNode node : var.ID()) {
-                symbol.addParameter(visit(var.scalar()));
+        if (ctx.argList() != null) {
+            for (SlipParser.VarDefContext var : ctx.argList().varDef()) {
+                for (TerminalNode node : var.ID()) {
+                    symbol.addParameter(visit(var.scalar()));
+                }
             }
         }
 

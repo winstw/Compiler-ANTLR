@@ -483,6 +483,13 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
     @Override
     public Types visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
+        Types type = visit(ctx.exprD());
+
+        if (type != Types.INTEGER) {
+            errorOccuried = true;
+            printError(ctx.exprD().start, "can only negate integer expression");
+        }
+
         return Types.INTEGER;
     }
     @Override

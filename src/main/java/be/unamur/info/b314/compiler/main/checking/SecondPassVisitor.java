@@ -540,6 +540,15 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
     @Override
     public Types visitComparExpr(SlipParser.ComparExprContext ctx){
+
+        Types leftExprType = visit(ctx.exprD(0));
+        Types rightExprType = visit(ctx.exprD(1));
+
+        if (leftExprType != rightExprType) {
+            errorOccuried = true;
+            printError(ctx.start, "can only compare expressions of the same type");
+        }
+
         return Types.BOOLEAN;
     }
 

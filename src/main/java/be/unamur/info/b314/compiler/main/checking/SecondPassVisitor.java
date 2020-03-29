@@ -527,10 +527,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     public Types visitTrueExpr(SlipParser.TrueExprContext ctx){
         return Types.BOOLEAN;
     }
+
     @Override
     public Types visitAndOrExpr(SlipParser.AndOrExprContext ctx){
         return Types.BOOLEAN;
     }
+
     @Override
     public Types visitFalseExpr(SlipParser.FalseExprContext ctx){
         return Types.BOOLEAN;
@@ -540,6 +542,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     public Types visitComparExpr(SlipParser.ComparExprContext ctx){
         return Types.BOOLEAN;
     }
+
+    @Override
+    public Types visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
+        return Types.BOOLEAN;
+    }
+
     @Override
     public Types visitNotExpr(SlipParser.NotExprContext ctx){
         if (visit(ctx.exprD()) != Types.BOOLEAN) {

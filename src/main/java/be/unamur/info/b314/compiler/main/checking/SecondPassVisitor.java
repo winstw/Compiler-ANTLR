@@ -68,9 +68,9 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         SlipScope globalScope = scopes.get(ctx);
         this.currentScope = globalScope;
         System.out.println("SCOPE : " + currentScope.getName());
-        for(ParseTree child: ctx.children) {
-            visit(child);
-        }
+
+        visitChildren(ctx);
+
         System.out.println(this.currentScope);
         this.currentScope = null;
         return Types.VOID;
@@ -80,9 +80,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     public Types visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = scopes.get(ctx);
 
-        for(ParseTree child: ctx.children) {
-            visit(child);
-        }
+        visitChildren(ctx);
 
         this.currentScope = this.currentScope.getParentScope();
 
@@ -162,26 +160,15 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitVarDecl(SlipParser.VarDeclContext ctx){
-        Types definedVarType = visit(ctx.varDef());
-        System.out.println("VAR DECLARATION : " + definedVarType);
-        // type check initialisation
-        if (ctx.initVar() != null) {
-            Types initVarType = visit(ctx.initVar());
-            System.out.println("in visitVarDECL, init var : " + initVarType);
-            if (initVarType != definedVarType) {
-                errorOccuried = true;
-                printError(ctx.initVar().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-            }
-        }
-
-        return Types.VOID;
+    public Types visitDeclaration(SlipParser.DeclarationContext ctx) {
+        return visitChildren(ctx);
     }
 
     @Override
-    public Types visitVarDef(SlipParser.VarDefContext ctx){
-        Types definedVarType = visit(ctx.type());
-        // add new var definition to the local scope (already done in first pass for global scope)
+    public Types visitVarDecl(SlipParser.VarDeclContext ctx){
+        Types definedVarType = visit(ctx.scalar());
+        System.out.println("VAR DECLARATION : " + definedVarType);
+
         if (this.currentScope.getName() != "global") {
             for (TerminalNode id : ctx.ID()) {
                 try {
@@ -192,7 +179,209 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 }
             }
         }
+
+        // type check initialisation
+        if (ctx.exprD() != null) {
+            Types initVarType = visit(ctx.exprD());
+            System.out.println("in visitVarDECL, init var : " + initVarType);
+            if (initVarType != definedVarType) {
+                errorOccuried = true;
+                printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            }
+        }
+
         return definedVarType;
+    }
+
+    @Override
+    public Types visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
+
+        Types definedVarType = visit(ctx.scalar());
+
+        if (currentScope.getName() != "global") {
+            for (TerminalNode node : ctx.ID()) {
+                String name = node.getText();
+                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, true);
+
+                try {
+                    currentScope.define(symbol);
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (SymbolAlreadyDefinedException e) {
+                    errorOccuried = true;
+                    printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+
+                }
+
+            }
+        }
+
+        // type check initialisation
+        if (ctx.initArrays() != null) {
+            Types initVarType = visit(ctx.initArrays());
+            System.out.println("in visitVarDECL, init var : " + initVarType);
+            if (initVarType != definedVarType) {
+                errorOccuried = true;
+                printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            }
+        }
+
+        return definedVarType;
+    }
+
+    @Override
+    public Types visitInitArrays(SlipParser.InitArraysContext ctx) {
+
+        // TODO
+        // Comment faire avec les tableaux de tableaux??
+
+        return super.visitInitArrays(ctx);
+    }
+
+    @Override
+    public Types visitStructDecl(SlipParser.StructDeclContext ctx) {
+
+        if (currentScope.getName() != "global") {
+            for (TerminalNode node : ctx.ID()) {
+                String name = node.getText();
+                SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, true);
+
+                try {
+                    currentScope.define(symbol);
+                    currentScope = symbol;
+
+                    for (SlipParser.DeclarationContext var : ctx.declaration()) {
+                        visit(var);
+                    }
+
+                    currentScope = currentScope.getParentScope();
+
+                } catch (NullPointerException e) {
+                    e.printStackTrace();
+                } catch (SymbolAlreadyDefinedException e) {
+                    errorOccuried = true;
+                    printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                }
+
+            }
+        }
+
+        return Types.STRUCT;
+    }
+
+    @Override
+    public Types visitVarDef(SlipParser.VarDefContext ctx){
+        Types definedVarType = visit(ctx.scalar());
+        // add new var definition to the local scope (already done in first pass for global scope)
+        if (this.currentScope.getName() != "global") {
+            for (TerminalNode id : ctx.ID()) {
+                try {
+                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
+                } catch (SymbolAlreadyDefinedException e) {
+                    errorOccuried = true;
+                    printError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
+                }
+            }
+        }
+        return definedVarType;
+    }
+
+    @Override
+    public Types visitConstDecl(SlipParser.ConstDeclContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Types visitConstVar(SlipParser.ConstVarContext ctx) {
+
+        Types definedVarType = visit(ctx.scalar());
+        System.out.println("VAR DECLARATION : " + definedVarType);
+
+        if (this.currentScope.getName() != "global") {
+            try {
+                this.currentScope.define(new SlipVariableSymbol(ctx.ID().getText(), definedVarType, false));
+            } catch (SymbolAlreadyDefinedException e) {
+                errorOccuried = true;
+                printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", ctx.ID().getText(), currentScope.getName()));
+            }
+        }
+
+        // type check initialisation
+        if (ctx.exprD() != null) {
+            Types initVarType = visit(ctx.exprD());
+            System.out.println("in visitVarDECL, init var : " + initVarType);
+            if (initVarType != definedVarType) {
+                errorOccuried = true;
+                printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            }
+        }
+
+        return definedVarType;
+
+    }
+
+    @Override
+    public Types visitConstArray(SlipParser.ConstArrayContext ctx) {
+
+        Types definedVarType = visit(ctx.scalar());
+
+        if (currentScope.getName() != "global") {
+            String name = ctx.ID().getText();
+            SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, false);
+
+            try {
+                currentScope.define(symbol);
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (SymbolAlreadyDefinedException e) {
+                errorOccuried = true;
+                printError(ctx.start, String.format("constant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+
+            }
+
+        }
+
+        // type check initialisation
+        if (ctx.initArrays() != null) {
+            Types initVarType = visit(ctx.initArrays());
+            System.out.println("in visitVarDECL, init var : " + initVarType);
+            if (initVarType != definedVarType) {
+                errorOccuried = true;
+                printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            }
+        }
+
+        return definedVarType;
+
+    }
+
+    @Override
+    public Types visitConstStruct(SlipParser.ConstStructContext ctx) {
+
+        if (currentScope.getName() != "global") {
+            String name = ctx.ID().getText();
+            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, false);
+
+            try {
+                currentScope.define(symbol);
+                currentScope = symbol;
+
+                for (SlipParser.DeclarationContext var : ctx.declaration()) {
+                    visit(var);
+                }
+
+                currentScope = currentScope.getParentScope();
+
+            } catch (NullPointerException e) {
+                e.printStackTrace();
+            } catch (SymbolAlreadyDefinedException e) {
+                errorOccuried = true;
+                printError(ctx.start, String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+            }
+
+        }
+
+        return Types.STRUCT;
     }
 
     @Override
@@ -209,11 +398,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitStructure(SlipParser.StructureContext ctx) {
-        return Types.STRUCT;
-    }
-
-    @Override
     public Types visitExprGExpr(SlipParser.ExprGExprContext ctx){
         return visit(ctx.exprG());
     }
@@ -221,26 +405,55 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     @Override
     public Types visitLeftExprID(SlipParser.LeftExprIDContext ctx){
         String idName = ctx.ID().getText();
+
         try {
             SlipSymbol declaredId = currentScope.resolve(idName);
-            if (declaredId != null ) {
-                return declaredId.getType();
-            }
+            return declaredId.getType();
         } catch (SymbolNotFoundException e){
             errorOccuried = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Types.VOID;
     }
-//    @Override
-//    public Types visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
-//
-//    }
-//    @Override
-//    public Types visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
-//        return visit(ctx.ID());
-//    }
-//
+
+    @Override
+    public Types visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
+        String idName = ctx.ID().getText();
+        try {
+            SlipSymbol declaredId = currentScope.resolve(idName);
+            return declaredId.getType();
+        } catch (SymbolNotFoundException e){
+            errorOccuried = true;
+            printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+        }
+        return Types.VOID;
+    }
+
+    @Override
+    public Types visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
+
+        StructExprGVisitor visitor = new StructExprGVisitor(currentScope);
+        Types type = visitor.visit(ctx);
+
+        if (visitor.hasErrorOccuried()) {
+            errorOccuried = true;
+        }
+
+        return type;
+    }
+
+    @Override
+    public Types visitAssignInstr(SlipParser.AssignInstrContext ctx) {
+        Types exprGType = visit(ctx.exprG());
+        Types exprDType = visit(ctx.exprD());
+
+        if (exprGType != exprDType) {
+            errorOccuried = true;
+            printError(ctx.start, String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
+        }
+
+        return super.visitAssignInstr(ctx);
+    }
 
     @Override
     public Types visitParens(SlipParser.ParensContext ctx){

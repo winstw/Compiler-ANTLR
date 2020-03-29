@@ -454,7 +454,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             printError(ctx.start, String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
         }
 
-        return super.visitAssignInstr(ctx);
+        return Types.VOID;
     }
 
     @Override

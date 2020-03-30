@@ -94,4 +94,4 @@ actionType : LEFT LPAR exprD? RPAR
            | dig
            ;
 
-dig : 'dig()';
+dig : DIG LPAR RPAR;

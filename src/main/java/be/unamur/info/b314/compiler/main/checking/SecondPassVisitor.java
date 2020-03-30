@@ -584,7 +584,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         if (type != Types.BOOLEAN) {
             errorOccuried = true;
-            printError(ctx.exprD().start, "expression must of type boolean");
+            printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
@@ -601,7 +601,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         if (type != Types.BOOLEAN) {
             errorOccuried = true;
-            printError(ctx.exprD().start, "expression must of type boolean");
+            printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
@@ -627,4 +627,5 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         return Types.VOID;
     }
+
 }

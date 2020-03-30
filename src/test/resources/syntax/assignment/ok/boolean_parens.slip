@@ -2,6 +2,7 @@
 
 main as function(): void
 do
- result := (false or true);
- dig();
+    result as boolean;
+    result := (false or true);
+    dig();
 end

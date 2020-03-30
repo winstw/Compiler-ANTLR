@@ -1,7 +1,8 @@
 #import "world.map"
+
 alpha as integer = 4+5;
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

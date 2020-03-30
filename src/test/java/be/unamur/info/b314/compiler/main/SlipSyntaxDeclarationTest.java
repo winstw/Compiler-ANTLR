@@ -34,14 +34,20 @@ public class SlipSyntaxDeclarationTest {
 
 
     @Test
+    public void test_DeclarationEnum_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationEnum.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationEnum.slip");
+    }
+
+
+    @Test
     public void test_Declaration2DArrayValues_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/declaration/ok/Declaration2DArrayValues.slip", testFolder.newFile(), true, "syntax::declaration: Declaration2DArrayValues.slip");
     }
 
 
     @Test
-    public void test_DeclarationEnum_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationEnum.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationEnum.slip");
+    public void test_DeclarationArrayValues_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationArrayValues.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationArrayValues.slip");
     }
 
 
@@ -57,22 +63,10 @@ public class SlipSyntaxDeclarationTest {
     }
 
 
-    @Test
-    public void test_DeclarationArrayValues_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ok/DeclarationArrayValues.slip", testFolder.newFile(), true, "syntax::declaration: DeclarationArrayValues.slip");
-    }
-
-
     // tests KO
     @Test
     public void test_DeclarationArrayValuesKO_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/declaration/ko/DeclarationArrayValuesKO.slip", testFolder.newFile(), false, "syntax::declaration: DeclarationArrayValuesKO.slip");
-    }
-
-
-    @Test
-    public void test_declaration_int_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/declaration_int.slip", testFolder.newFile(), false, "syntax::declaration: declaration_int.slip");
     }
 
 
@@ -85,6 +79,12 @@ public class SlipSyntaxDeclarationTest {
     @Test
     public void test_DeclarationEnumKO_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/declaration/ko/DeclarationEnumKO.slip", testFolder.newFile(), false, "syntax::declaration: DeclarationEnumKO.slip");
+    }
+
+
+    @Test
+    public void test_declaration_int_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/declaration/ko/declaration_int.slip", testFolder.newFile(), false, "syntax::declaration: declaration_int.slip");
     }
 
 

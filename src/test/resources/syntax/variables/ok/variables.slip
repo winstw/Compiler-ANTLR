@@ -1,13 +1,14 @@
 /* My comments */
 
 #import "world.map"
- myVar7 as char[6];
- // enum DAYS = (Saturday, Friday, Monday, Tuesday, Wednesday, Sunday, Thursday);
- const C as char = 'c';
+
+    myVar7 as char[6];
+    enum DAYS = (Saturday, Friday, Monday, Tuesday, Wednesday, Sunday, Thursday);
+    const C as char = 'c';
 
 main as function():void
 do
 
-dig();
+    dig();
 
 end

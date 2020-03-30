@@ -2,6 +2,7 @@
 
 main as function(): void
 do
- letter := 'A';
- dig();
+    letter as char;
+    letter := 'A';
+    dig();
 end

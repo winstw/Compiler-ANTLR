@@ -530,6 +530,17 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
     @Override
     public Types visitAndOrExpr(SlipParser.AndOrExprContext ctx){
+
+        for (SlipParser.ExprDContext expr : ctx.exprD()) {
+            Types type = visit(expr);
+
+            if (type != Types.BOOLEAN) {
+                errorOccuried = true;
+                printError(expr.start, "can only compare expressions of type boolean");
+            }
+
+        }
+
         return Types.BOOLEAN;
     }
 

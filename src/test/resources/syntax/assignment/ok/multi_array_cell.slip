@@ -2,6 +2,7 @@
 
 main as function(): void
 do
- numbers[2, 3] := 4;
- dig();
+    numbers as integer[5, 5];
+    numbers[2, 3] := 4;
+    dig();
 end

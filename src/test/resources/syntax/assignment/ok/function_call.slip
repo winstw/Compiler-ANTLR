@@ -1,7 +1,14 @@
 #import "file.map"
 
+test as function(x, y as integer): integer
+do
+    res as integer;
+    res := x + y;
+end
+
 main as function(): void
 do
- numbers := test(4, 2);
- dig();
+    numbers as integer;
+    numbers := test(4, 2);
+    dig();
 end

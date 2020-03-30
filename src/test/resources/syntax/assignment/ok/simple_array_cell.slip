@@ -1,7 +1,9 @@
 #import "file.map"
 
+numbers as integer[1];
+
 main as function(): void
 do
- numbers[2] := 4;
- dig();
+    numbers[2] := 4;
+    dig();
 end

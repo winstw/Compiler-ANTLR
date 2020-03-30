@@ -28,8 +28,14 @@ public class SlipSyntaxAssignmentTest {
 
     // tests OK
     @Test
-    public void test_record_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/record.slip", testFolder.newFile(), true, "syntax::assignment: record.slip");
+    public void test_simple_array_cell_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/simple_array_cell.slip", testFolder.newFile(), true, "syntax::assignment: simple_array_cell.slip");
+    }
+
+
+    @Test
+    public void test_multi_array_cell_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/multi_array_cell.slip", testFolder.newFile(), true, "syntax::assignment: multi_array_cell.slip");
     }
 
 
@@ -40,20 +46,14 @@ public class SlipSyntaxAssignmentTest {
 
 
     @Test
-    public void test_simple_array_cell_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/simple_array_cell.slip", testFolder.newFile(), true, "syntax::assignment: simple_array_cell.slip");
+    public void test_integer_parens_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/integer_parens.slip", testFolder.newFile(), true, "syntax::assignment: integer_parens.slip");
     }
 
 
     @Test
-    public void test_string_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/string.slip", testFolder.newFile(), true, "syntax::assignment: string.slip");
-    }
-
-
-    @Test
-    public void test_function_call_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/function_call.slip", testFolder.newFile(), true, "syntax::assignment: function_call.slip");
+    public void test_record_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/record.slip", testFolder.newFile(), true, "syntax::assignment: record.slip");
     }
 
 
@@ -64,27 +64,21 @@ public class SlipSyntaxAssignmentTest {
 
 
     @Test
-    public void test_integer_parens_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/integer_parens.slip", testFolder.newFile(), true, "syntax::assignment: integer_parens.slip");
-    }
-
-
-    @Test
-    public void test_multi_array_cell_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/multi_array_cell.slip", testFolder.newFile(), true, "syntax::assignment: multi_array_cell.slip");
+    public void test_function_call_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ok/function_call.slip", testFolder.newFile(), true, "syntax::assignment: function_call.slip");
     }
 
 
     // tests KO
     @Test
-    public void test_equal_symbol_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ko/equal_symbol.slip", testFolder.newFile(), false, "syntax::assignment: equal_symbol.slip");
+    public void test_assign_to_function_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ko/assign_to_function.slip", testFolder.newFile(), false, "syntax::assignment: assign_to_function.slip");
     }
 
 
     @Test
-    public void test_assign_to_function_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/assignment/ko/assign_to_function.slip", testFolder.newFile(), false, "syntax::assignment: assign_to_function.slip");
+    public void test_equal_symbol_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/assignment/ko/equal_symbol.slip", testFolder.newFile(), false, "syntax::assignment: equal_symbol.slip");
     }
 
 

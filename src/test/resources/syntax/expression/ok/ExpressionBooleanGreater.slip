@@ -1,7 +1,8 @@
 #import "world.map"
-alpha as boolean = 3>2;
+
+alpha as boolean = 3 > 2;
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

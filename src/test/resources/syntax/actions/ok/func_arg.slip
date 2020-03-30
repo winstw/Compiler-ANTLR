@@ -1,11 +1,17 @@
 #import "file.map"
 
+func as function(x as integer, c as char): integer
+do
+    result as integer;
+    result := x;
+end
+
 main as function(): void
 do
- left(func(1,'a',"hello"));
- right(func(1,'a',"hello"));
- up(func(1,'a',"hello"));
- down(func(1,'a',"hello"));
- jump(func(1,'a',"hello"));
+ left(func(1,'a'));
+ right(func(1,'a'));
+ up(func(1,'a'));
+ down(func(1,'a'));
+ jump(func(1,'a'));
  dig();
 end

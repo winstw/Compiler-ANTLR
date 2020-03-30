@@ -1,11 +1,12 @@
 /* My comments */
 
 #import "world.map"
+
 alpha as boolean;
 beta as integer;
 epsilon as char;
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

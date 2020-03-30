@@ -35,6 +35,12 @@ public class SlipSyntaxCommentsTest {
 
     // tests KO
     @Test
+    public void test_incomplete_multi_line1_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line1.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line1.slip");
+    }
+
+
+    @Test
     public void test_incomplete_multi_line7_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line7.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line7.slip");
     }
@@ -47,14 +53,14 @@ public class SlipSyntaxCommentsTest {
 
 
     @Test
-    public void test_incomplete_multi_line2_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line2.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line2.slip");
+    public void test_incomplete_single_line1_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line1.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line1.slip");
     }
 
 
     @Test
-    public void test_incomplete_multi_line1_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line1.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line1.slip");
+    public void test_incomplete_single_line2_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line2.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line2.slip");
     }
 
 
@@ -65,8 +71,14 @@ public class SlipSyntaxCommentsTest {
 
 
     @Test
-    public void test_incomplete_single_line2_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line2.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line2.slip");
+    public void test_incomplete_multi_line4_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line4.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line4.slip");
+    }
+
+
+    @Test
+    public void test_incomplete_single_line3_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line3.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line3.slip");
     }
 
 
@@ -83,32 +95,20 @@ public class SlipSyntaxCommentsTest {
 
 
     @Test
-    public void test_incomplete_single_line3_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line3.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line3.slip");
-    }
-
-
-    @Test
-    public void test_incomplete_single_line1_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line1.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line1.slip");
-    }
-
-
-    @Test
     public void test_incomplete_single_line4_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line4.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line4.slip");
     }
 
 
     @Test
-    public void test_incomplete_multi_line4_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line4.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line4.slip");
+    public void test_incomplete_single_line5_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line5.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line5.slip");
     }
 
 
     @Test
-    public void test_incomplete_single_line5_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_single_line5.slip", testFolder.newFile(), false, "syntax::comments: incomplete_single_line5.slip");
+    public void test_incomplete_multi_line2_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/comments/ko/incomplete_multi_line2.slip", testFolder.newFile(), false, "syntax::comments: incomplete_multi_line2.slip");
     }
 
 

@@ -1,7 +1,8 @@
 #import "world.map"
-dzeta as integer[2,2] =((1,2),(3,4));
+
+dzeta as integer[2,2] = ((1,2),(3,4));
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

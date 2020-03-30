@@ -577,5 +577,20 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         return Types.BOOLEAN;
     }
 
+    @Override
+    public Types visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
 
+        Types type = visit(ctx.exprD());
+
+        if (type != Types.BOOLEAN) {
+            errorOccuried = true;
+            printError(ctx.exprD().start, "expression must of type boolean");
+        }
+
+        for (SlipParser.InstructionContext inst : ctx.instruction()) {
+            visit(inst);
+        }
+
+        return  Types.VOID;
+    }
 }

@@ -659,13 +659,17 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     @Override
     public Types visitForInstr(SlipParser.ForInstrContext ctx) {
 
-        for (SlipParser.ExprDContext expr : ctx.exprD()) {
-            Types type = visit(expr);
+        Types initValueType = visit(ctx.exprD(0));
+        Types conditionValueType = visit(ctx.exprD(1));
 
-            if (type != Types.INTEGER) {
-                errorOccuried = true;
-                printError(expr.start, "expression must be of type integer");
-            }
+        if (initValueType != Types.INTEGER) {
+            errorOccuried = true;
+            printError(ctx.exprD(0).start, "expression must be of type integer");
+        }
+
+        if (conditionValueType != Types.BOOLEAN) {
+            errorOccuried = true;
+            printError(ctx.exprD(1).start, "expression must be of type boolean");
         }
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {

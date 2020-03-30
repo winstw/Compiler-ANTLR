@@ -2,6 +2,7 @@
 
 main as function(): void
 do
- result := (2 + 3);
- dig();
+    result as integer;
+    result := (2 + 3);
+    dig();
 end

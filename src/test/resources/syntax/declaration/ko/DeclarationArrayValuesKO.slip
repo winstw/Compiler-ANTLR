@@ -2,6 +2,6 @@
 dzeta as integer[2] =(2,3,3;
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

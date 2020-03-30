@@ -1,7 +1,11 @@
 #import "file.map"
 
+treasure as record
+    found as boolean;
+end;
+
 main as function(): void
 do
- treasure.found := true;
- dig();
+    treasure.found := true;
+    dig();
 end

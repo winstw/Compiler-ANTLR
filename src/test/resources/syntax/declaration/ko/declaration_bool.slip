@@ -2,6 +2,6 @@
 alpha as bool;
 
 main as function(): void
- do
- dig();
+do
+    dig();
 end

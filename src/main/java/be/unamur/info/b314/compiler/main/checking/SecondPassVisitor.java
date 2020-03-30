@@ -663,4 +663,19 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         return Types.VOID;
     }
+
+    @Override
+    public Types visitActionType(SlipParser.ActionTypeContext ctx) {
+
+        if (ctx.exprD() != null) {
+            Types type = visit(ctx.exprD());
+
+            if (type != Types.INTEGER) {
+                errorOccuried = true;
+                printError(ctx.exprD().start, "expression must be of type integer");
+            }
+        }
+
+        return Types.VOID;
+    }
 }

@@ -644,4 +644,23 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         return Types.VOID;
     }
+
+    @Override
+    public Types visitForInstr(SlipParser.ForInstrContext ctx) {
+
+        for (SlipParser.ExprDContext expr : ctx.exprD()) {
+            Types type = visit(expr);
+
+            if (type != Types.INTEGER) {
+                errorOccuried = true;
+                printError(expr.start, "expression must be of type integer");
+            }
+        }
+
+        for (SlipParser.InstructionContext inst : ctx.instruction()) {
+            visit(inst);
+        }
+
+        return Types.VOID;
+    }
 }

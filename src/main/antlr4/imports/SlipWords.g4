@@ -6,8 +6,8 @@ lexer grammar SlipWords;
 // Groups
 LPAR: '(';
 RPAR: ')';
-LSQU: '[';
-RSQU: ']';
+LBRACKET: '[';
+RBRACKET: ']';
 
 // Misc
 COMMA: ',';

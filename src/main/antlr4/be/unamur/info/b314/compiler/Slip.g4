@@ -35,7 +35,7 @@ number : (MINUS)? NAT;
 
 declaration: (varDecl | arrayDecl | structDecl) SEMICOLON;
 varDecl : ID (COMMA ID)* AS scalar (EQUAL exprD)?;
-arrayDecl : ID (COMMA ID)* AS scalar LSQU number (COMMA number)* RSQU (EQUAL initArrays)?;
+arrayDecl : ID (COMMA ID)* AS scalar LBRACKET number (COMMA number)* RBRACKET (EQUAL initArrays)?;
 structDecl : ID (COMMA ID)* AS STRUCT (declaration)+ END;
 
 initVar : exprD
@@ -46,7 +46,7 @@ initArrays : LPAR (initVar (COMMA initVar)*)? RPAR;
 
 constDecl : CONST (constVar | constArray | constStruct) SEMICOLON;
 constVar : ID AS scalar EQUAL exprD;
-constArray : ID AS scalar LSQU number (COMMA number)* RSQU EQUAL initArrays ;
+constArray : ID AS scalar LBRACKET number (COMMA number)* RBRACKET EQUAL initArrays ;
 constStruct : ID AS STRUCT (declaration)+ END;
 
 exprD : STRING                                  # string
@@ -72,7 +72,7 @@ exprD : STRING                                  # string
 
 
 exprG : ID                                      # leftExprID
-      | ID LSQU exprD (COMMA exprD)? RSQU       # leftExprArray
+      | ID LBRACKET exprD (COMMA exprD)? RBRACKET       # leftExprArray
       | exprG DOT ID                            # leftExprRecord
       ;
 

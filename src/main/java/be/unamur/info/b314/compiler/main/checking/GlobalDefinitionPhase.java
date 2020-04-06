@@ -35,14 +35,14 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
 
     private ParseTreeProperty<SlipScope> scopes = new ParseTreeProperty<>();
     private SlipScope currentScope;
-    private boolean errorOccuried = false;
+    private boolean errorOccurred = false;
 
     public ParseTreeProperty<SlipScope> getScopes() {
         return scopes;
     }
 
-    public boolean hasErrorOccuried() {
-        return errorOccuried;
+    public boolean hasErrorOccurred() {
+        return errorOccurred;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
@@ -142,7 +142,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
@@ -177,7 +177,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
@@ -217,7 +217,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
         }
 
@@ -254,7 +254,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.ID().getSymbol(), String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
@@ -284,7 +284,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.start, String.format("cosntant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
         }
 
@@ -312,7 +312,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
         }
 
@@ -335,7 +335,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
         }
 

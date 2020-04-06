@@ -18,7 +18,7 @@ public class SemanticChecker {
         SecondPassVisitor checkPhase = new SecondPassVisitor(definitionPhase.getScopes());
         checkPhase.visit(tree);
 
-        return !(definitionPhase.hasErrorOccuried() || checkPhase.hasErrorOccuried());
+        return !(definitionPhase.hasErrorOccurred() || checkPhase.hasErrorOccurred());
     }
 
     public static SlipSymbol.Types getType(int typeToken) {

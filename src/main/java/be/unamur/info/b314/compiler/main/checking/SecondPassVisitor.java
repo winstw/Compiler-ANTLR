@@ -40,14 +40,14 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
     private ParseTreeProperty<SlipScope> scopes;
     private SlipScope currentScope;
-    private boolean errorOccuried = false;
+    private boolean errorOccurred = false;
 
     public SecondPassVisitor(ParseTreeProperty<SlipScope> scopes){
         this.scopes = scopes;
     }
 
-    public boolean hasErrorOccuried() {
-        return errorOccuried;
+    public boolean hasErrorOccurred() {
+        return errorOccurred;
     }
 
     @Override
@@ -132,7 +132,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             System.out.println("FUNC CALL : " + scopedFunc + " Type : " + scopedFunc.getType());
 
             if (ctx.exprD().size() != scopedFunc.getNumberOfParameters()) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.start, String.format("function %s expects %d argument(s)", scopedFunc.getName(), scopedFunc.getNumberOfParameters()));
                 return scopedFunc.getType();
             }
@@ -144,18 +144,18 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                     Types declaredParam = declaredParams.next();
                     System.out.println("EFFECTIVE : " + effectiveParam + " DECLARED : " + declaredParam);
                     if (effectiveParam != declaredParam){
-                        errorOccuried =  true;
+                        errorOccurred =  true;
                         printError(param.start, String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParam, effectiveParam));
                     }
                 } else {
-                    errorOccuried =  true;
+                    errorOccurred =  true;
                     System.out.println("too many arguments");
                 }
             }
 
             return scopedFunc.getType();
         } catch (SymbolNotFoundException e) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
         }
         return Types.VOID;
@@ -176,7 +176,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccuried = true;
+                    errorOccurred = true;
                     printError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
@@ -187,7 +187,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types initVarType = visit(ctx.exprD());
             System.out.println("in visitVarDECL, init var : " + initVarType);
             if (initVarType != definedVarType) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
             }
         }
@@ -210,7 +210,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccuried = true;
+                    errorOccurred = true;
                     printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
                 }
@@ -223,7 +223,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types initVarType = visit(ctx.initArrays());
             System.out.println("in visitVarDECL, init var : " + initVarType);
             if (initVarType != definedVarType) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
             }
         }
@@ -261,7 +261,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccuried = true;
+                    errorOccurred = true;
                     printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
                 }
 
@@ -280,7 +280,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccuried = true;
+                    errorOccurred = true;
                     printError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
@@ -303,7 +303,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             try {
                 this.currentScope.define(new SlipVariableSymbol(ctx.ID().getText(), definedVarType, false));
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", ctx.ID().getText(), currentScope.getName()));
             }
         }
@@ -313,7 +313,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types initVarType = visit(ctx.exprD());
             System.out.println("in visitVarDECL, init var : " + initVarType);
             if (initVarType != definedVarType) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
             }
         }
@@ -336,7 +336,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.start, String.format("constant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
@@ -348,7 +348,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types initVarType = visit(ctx.initArrays());
             System.out.println("in visitVarDECL, init var : " + initVarType);
             if (initVarType != definedVarType) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
             }
         }
@@ -377,7 +377,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.start, String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
@@ -412,7 +412,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             SlipSymbol declaredId = currentScope.resolve(idName);
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Types.VOID;
@@ -425,7 +425,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             SlipSymbol declaredId = currentScope.resolve(idName);
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Types.VOID;
@@ -437,8 +437,8 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         StructExprGVisitor visitor = new StructExprGVisitor(currentScope);
         Types type = visitor.visit(ctx);
 
-        if (visitor.hasErrorOccuried()) {
-            errorOccuried = true;
+        if (visitor.hasErrorOccurred()) {
+            errorOccurred = true;
         }
 
         return type;
@@ -450,7 +450,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types exprDType = visit(ctx.exprD());
 
         if (exprGType != exprDType) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.start, String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
         }
 
@@ -486,7 +486,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types type = visit(ctx.exprD());
 
         if (type != Types.INTEGER) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, "can only negate integer expression");
         }
 
@@ -499,7 +499,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types type = visit(expr);
 
             if (type != Types.INTEGER) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(expr.start, "can only use '*', '/' and '%' operators on expressions of type integer");
             }
 
@@ -514,7 +514,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types type = visit(expr);
 
             if (type != Types.INTEGER) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(expr.start, "can only use '+' and '-' operators on expressions of type integer");
             }
 
@@ -535,7 +535,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types type = visit(expr);
 
             if (type != Types.BOOLEAN) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(expr.start, "can only compare expressions of type boolean");
             }
 
@@ -556,7 +556,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types rightExprType = visit(ctx.exprD(1));
 
         if (leftExprType != rightExprType) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.start, "can only compare expressions of the same type");
         }
 
@@ -570,7 +570,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types type = visit(expr);
 
             if (type != Types.INTEGER) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(expr.start, "can only compare integer expressions");
             }
 
@@ -582,7 +582,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     @Override
     public Types visitNotExpr(SlipParser.NotExprContext ctx){
         if (visit(ctx.exprD()) != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, String.format("%s must be of boolean type", ctx.exprD().getText()));
         }
         return Types.BOOLEAN;
@@ -594,7 +594,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types type = visit(ctx.exprD());
 
         if (type != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
@@ -611,7 +611,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types type = visit(ctx.exprD());
 
         if (type != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
@@ -628,7 +628,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types type = visit(ctx.exprD());
 
         if (type != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
@@ -645,7 +645,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types type = visit(ctx.exprD());
 
         if (type != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD().start, "expression must be of type boolean");
         }
 
@@ -663,12 +663,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         Types conditionValueType = visit(ctx.exprD(1));
 
         if (initValueType != Types.INTEGER) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD(0).start, "expression must be of type integer");
         }
 
         if (conditionValueType != Types.BOOLEAN) {
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.exprD(1).start, "expression must be of type boolean");
         }
 
@@ -686,7 +686,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             Types type = visit(ctx.exprD());
 
             if (type != Types.INTEGER) {
-                errorOccuried = true;
+                errorOccurred = true;
                 printError(ctx.exprD().start, "expression must be of type integer");
             }
         }

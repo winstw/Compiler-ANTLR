@@ -101,8 +101,8 @@ public class Main {
                     main.compile(); // Call compile method (to be completed)
                     System.err.println("OK"); // Print OK on stderr
                 } catch (Exception e) {
-                    LOG.error("Exception occured during compilation!", e);
-                    System.err.println("KO"); // Print KO on stderr if a problem occured
+                    LOG.error("Exception occurred during compilation!", e);
+                    System.err.println("KO"); // Print KO on stderr if a problem occurred
                 }
             }
         }

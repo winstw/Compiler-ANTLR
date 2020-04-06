@@ -14,15 +14,15 @@ import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printEr
 public class StructExprGVisitor extends SlipBaseVisitor<Types> {
 
     private SlipScope currentScope;
-    private boolean errorOccuried;
+    private boolean errorOccurred;
 
     public StructExprGVisitor(SlipScope currentScope) {
         this.currentScope = currentScope;
-        this.errorOccuried = false;
+        this.errorOccurred = false;
     }
 
-    public boolean hasErrorOccuried() {
-        return errorOccuried;
+    public boolean hasErrorOccurred() {
+        return errorOccurred;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class StructExprGVisitor extends SlipBaseVisitor<Types> {
 
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccuried = true;
+            errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Types.VOID;

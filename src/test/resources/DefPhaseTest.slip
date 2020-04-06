@@ -60,9 +60,10 @@
 
 #import "world.map"
 
-dzeta as integer[2, 3] = ((2,3, 3), (2,3, "hi"));
+dzeta as integer[2, 3] = ((2,3, 3), (2,3, 3));
 
 main as function(): void
 do
+    dzeta := 3;
     dig();
 end

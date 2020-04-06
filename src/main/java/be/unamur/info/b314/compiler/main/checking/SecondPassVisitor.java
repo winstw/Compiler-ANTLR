@@ -451,6 +451,10 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         try {
             SlipSymbol declaredId = currentScope.resolve(idName);
+            if (declaredId instanceof SlipArraySymbol) {
+                errorOccurred = true;
+                printError(ctx.ID().getSymbol(), String.format("assignation to array \"%s\" requires an index between brackets", idName));
+            }
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
             errorOccurred = true;
@@ -469,6 +473,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
+
         return Types.VOID;
     }
 

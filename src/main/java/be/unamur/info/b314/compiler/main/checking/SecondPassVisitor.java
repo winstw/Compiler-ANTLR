@@ -3,6 +3,7 @@ package be.unamur.info.b314.compiler.main.checking;
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
+import be.unamur.info.b314.compiler.exception.ArrayInitException;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
@@ -18,6 +19,7 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
@@ -221,7 +223,28 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         // type check initialisation
         if (ctx.initArrays() != null) {
             Types initVarType = visit(ctx.initArrays());
+
             System.out.println("in visitVarDECL, init var : " + initVarType);
+
+
+//            System.out.println(ctx.number(0).getText() +  ctx.initArrays().initVar().size());
+
+            int expectedFirstDimLength = Integer.parseInt(ctx.number(0).getText());
+            int actualFirstDimLength = ctx.initArrays().initVar().size();
+            if (expectedFirstDimLength != actualFirstDimLength) {
+                errorOccurred = true;
+                printError(ctx.start, "First dimension size does not match between declaration and initialization");
+            }
+
+            if (ctx.number().size() > 1) {
+                int expectedSecondDimLength = Integer.parseInt(ctx.number(1).getText());
+                for (SlipParser.InitVarContext init : ctx.initArrays().initVar()) {
+                    if (init.initArrays().initVar().size() != expectedSecondDimLength) {
+                        errorOccurred = true;
+                        printError(init.start, "Second dimension size does not match between declaration and initialization");
+                    }
+                }
+            }
             if (initVarType != definedVarType) {
                 errorOccurred = true;
                 printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
@@ -236,8 +259,18 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         // TODO
         // Comment faire avec les tableaux de tableaux??
+        Types type = null;
+        for (SlipParser.InitVarContext var : ctx.initVar()) {
+//            System.out.println(visit(var));
+            if (type == null) {
+                type = visit(var);
+            } else if (type != visit(var)) {
+                errorOccurred = true;
+                printError(var.start, "type Array INit error IMPROVE THIS ERROR");
+            }
+        }
 
-        return super.visitInitArrays(ctx);
+        return type;
     }
 
     @Override
@@ -286,6 +319,14 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             }
         }
         return definedVarType;
+    }
+
+    @Override
+    public Types visitInitVar(SlipParser.InitVarContext ctx){
+        if (ctx.exprD() != null) {
+            return visit(ctx.exprD());
+        }
+        else return visit(ctx.initArrays());
     }
 
     @Override
@@ -462,10 +503,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         return visit(ctx.exprD());
     }
 
-    @Override
-    public Types visitInitVar(SlipParser.InitVarContext ctx){
-        return visit(ctx.exprD());
-    }
 
     @Override
     public Types visitString(SlipParser.StringContext ctx){

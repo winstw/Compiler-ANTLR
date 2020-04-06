@@ -1,59 +1,68 @@
-#import "file.map"
+// #import "file.map"
 
-x as integer = 1;
-y as integer = 3;
-z as integer;
-//z := 2;
-const isTrue as boolean = true;
-isFalse as boolean = 2;
-isFalse as boolean = true;
-// add as integer;
+// x as integer = 1;
+// y as integer = 3;
+// z as integer;
+// //z := 2;
+// const isTrue as boolean = true;
+// isFalse as boolean = 2;
+// isFalse as boolean = true;
+// // add as integer;
 
-emil, geoffroy, jb as record
-    age as integer;
-    town as integer;
-    age as char;
-end;
+// emil, geoffroy, jb as record
+//     age as integer;
+//     town as integer;
+//     age as char;
+// end;
 
-add as function(a, b as integer): integer
-do
-    test as record
-        age as integer;
-        town as integer;
-    end;
+// add as function(a, b as integer): integer
+// do
+//     test as record
+//         age as integer;
+//         town as integer;
+//     end;
 
-    result as integer;
-    result := a + b;
-    result as boolean;
-    result := true;
-end
+//     result as integer;
+//     result := a + b;
+//     result as boolean;
+//     result := true;
+// end
 
-fct as function(blabla as integer): void
-do
-    blabla := 4;
-end
+// fct as function(blabla as integer): void
+// do
+//     blabla := 4;
+// end
 
-check as function(a, b as boolean): boolean
-do
-    result as boolean;
-    result := a or b;
-end
+// check as function(a, b as boolean): boolean
+// do
+//     result as boolean;
+//     result := a or b;
+// end
+
+// main as function(): void
+// do
+//     sum as integer = true;
+//     coucou := add(x, y);
+
+//     isFalse := check(x, true);
+
+//     if (not (x + y))
+//     then
+//         x := x;
+//     end
+    
+//     myBool as boolean;
+// //    myBool := check(isTrue, isFalse);
+//     myBool := chock(isTrue, not isFalse);
+
+//     dig();
+// end
+
+#import "world.map"
+
+dzeta as integer[2, 3] = ((2,3, 3), (2,3, "hi"));
 
 main as function(): void
 do
-    sum as integer = true;
-    coucou := add(x, y);
-
-    isFalse := check(x, true);
-
-    if (not (x + y))
-    then
-        x := x;
-    end
-    
-    myBool as boolean;
-//    myBool := check(isTrue, isFalse);
-    myBool := chock(isTrue, not isFalse);
-
     dig();
 end

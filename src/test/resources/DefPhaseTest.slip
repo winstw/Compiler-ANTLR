@@ -58,12 +58,50 @@
 //     dig();
 // end
 
+// #import "world.map"
+
+// dzeta as integer[2, 3] = ((2,3, 3), (2,3, 3));
+
+// main as function(): void
+// do
+//     dzeta := 3;
+//     dig();
+// end
+
 #import "world.map"
 
-dzeta as integer[2, 3] = ((2,3, 3), (2,3, 3));
+    v1 as boolean[1];
+    s as char;
+    v2 as boolean[5,7];
+    v3 as integer[2,3];
+    v4 as integer[5];
+    i as integer;
+    v5 as char[5, 7];
+    b as boolean;
+    v6 as char[5,2];
+    const LightThreshold as integer = 40;
 
-main as function(): void
+     D2 as record
+                a as integer[5];
+                b as char;
+                c as boolean[5,3];
+      end;
+
+     D3 as record
+           a as integer[5];
+           b as char;
+           c as boolean[5,3];
+      end;
+
+main as function():void
 do
-    dzeta := 3;
-    dig();
+
+D2.a[0] := 1;
+D2.b := 'a';
+D2.c[0,1] := true;
+left(D2.a[0]);
+right(3);
+
+dig();
+
 end

@@ -73,7 +73,7 @@ exprD : STRING                                  # string
 
 exprG : ID                                      # leftExprID
       | ID LBRACKET exprD (COMMA exprD)? RBRACKET       # leftExprArray
-      | exprG DOT ID                            # leftExprRecord
+      | exprG DOT exprG                            # leftExprRecord
       ;
 
 instruction : IF LPAR exprD RPAR THEN instruction+ END                      # ifThenInstr

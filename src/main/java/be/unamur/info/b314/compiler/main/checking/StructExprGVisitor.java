@@ -57,9 +57,9 @@ public class StructExprGVisitor extends SlipBaseVisitor<Types> {
     @Override
     public Types visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
-        SlipSymbol.Types type = visit(ctx.exprG());
+        SlipSymbol.Types type = visit(ctx.exprG(0));
 
-        String name = ctx.ID().getText();
+        String name= ctx.exprG(1).getToken(SlipParser.ID, 0).getText();
         try {
             SlipSymbol symbol = currentScope.resolve(name);
             type = symbol.getType();
@@ -69,7 +69,7 @@ public class StructExprGVisitor extends SlipBaseVisitor<Types> {
             System.out.println(symbol);
 
         } catch (SymbolNotFoundException e) {
-            printError(ctx.ID().getSymbol(), String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
+            printError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
         }
 
         return type;

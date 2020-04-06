@@ -67,7 +67,7 @@ RIGHT: 'right';
 UP: 'up';
 DOWN: 'down';
 JUMP: 'jump';
-FIGTH: 'fight';
+FIGHT: 'fight';
 DIG: 'dig';
 
 MAP: 'map';

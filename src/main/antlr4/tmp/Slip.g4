@@ -90,7 +90,7 @@ actionType : LEFT LPAR exprD? RPAR
            | UP LPAR exprD? RPAR
            | DOWN LPAR exprD? RPAR
            | JUMP LPAR exprD? RPAR
-           | FIGTH LPAR RPAR
+           | FIGHT LPAR RPAR
            | dig
            ;
 

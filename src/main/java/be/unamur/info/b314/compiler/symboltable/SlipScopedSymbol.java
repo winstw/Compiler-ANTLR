@@ -2,17 +2,17 @@ package be.unamur.info.b314.compiler.symboltable;
 
 public abstract class SlipScopedSymbol extends SlipBaseScope implements SlipSymbol {
 
-    private Types type;
+    private Type type;
     private boolean isAssignable;
 
-    public SlipScopedSymbol(String name, Types type, SlipScope parentScope, boolean isAssignable) {
+    public SlipScopedSymbol(String name, Type type, SlipScope parentScope, boolean isAssignable) {
         super(name, parentScope);
         this.type = type;
         this.isAssignable = isAssignable;
     }
 
     @Override
-    public Types getType() {
+    public Type getType() {
         return type;
     }
 

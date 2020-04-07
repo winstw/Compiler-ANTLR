@@ -21,18 +21,20 @@ public class SemanticChecker {
         return !(definitionPhase.hasErrorOccurred() || checkPhase.hasErrorOccurred());
     }
 
-    public static SlipSymbol.Types getType(int typeToken) {
+    public static SlipSymbol.Type getType(int typeToken) {
         switch (typeToken) {
-            case SlipParser.VOIDTYPE: return SlipSymbol.Types.VOID;
-            case SlipParser.INTEGERTYPE: return SlipSymbol.Types.INTEGER;
-            case SlipParser.CHARTYPE: return SlipSymbol.Types.CHARACTER;
-            case SlipParser.BOOLEANTYPE: return SlipSymbol.Types.BOOLEAN;
-            default: return SlipSymbol.Types.STRUCT;
+            case SlipParser.VOIDTYPE: return SlipSymbol.Type.VOID;
+            case SlipParser.INTEGERTYPE: return SlipSymbol.Type.INTEGER;
+            case SlipParser.CHARTYPE: return SlipSymbol.Type.CHARACTER;
+            case SlipParser.BOOLEANTYPE: return SlipSymbol.Type.BOOLEAN;
+            default: return SlipSymbol.Type.STRUCT;
         }
     }
 
     public static void printError(Token t, String msg) {
         System.err.printf("line %d:%d %s\n", t.getLine(), t.getCharPositionInLine(), msg);
     }
+
+
 
 }

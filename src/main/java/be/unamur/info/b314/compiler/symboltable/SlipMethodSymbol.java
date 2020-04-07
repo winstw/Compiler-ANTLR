@@ -5,9 +5,9 @@ import java.util.Iterator;
 
 public class SlipMethodSymbol extends SlipScopedSymbol {
 
-    private ArrayList<SlipSymbol.Types> parameterTypes;
+    private ArrayList<Type> parameterTypes;
 
-    public SlipMethodSymbol(String name, Types type, SlipScope parentScope) {
+    public SlipMethodSymbol(String name, Type type, SlipScope parentScope) {
         super(name, type, parentScope, false);
         parameterTypes = new ArrayList<>();
     }
@@ -33,7 +33,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
      * @modifies this
      * @effect add type to parameterTypes
      */
-    public void addParameter(SlipSymbol.Types type) {
+    public void addParameter(Type type) {
         parameterTypes.add(type);
     }
 
@@ -41,7 +41,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         return parameterTypes.size();
     }
 
-    public Iterator<SlipSymbol.Types> getParameterTypes() {
+    public Iterator<Type> getParameterTypes() {
         return this.parameterTypes.iterator();
     }
 }

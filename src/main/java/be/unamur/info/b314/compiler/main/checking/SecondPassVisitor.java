@@ -3,14 +3,14 @@ package be.unamur.info.b314.compiler.main.checking;
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
-import be.unamur.info.b314.compiler.exception.ArrayInitException;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
 import be.unamur.info.b314.compiler.symboltable.*;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Types;
+import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -19,12 +19,11 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class SecondPassVisitor extends SlipBaseVisitor<Types> {
+public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
@@ -49,11 +48,21 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     public boolean hasErrorOccurred() {
-        return errorOccurred;
+        return this.errorOccurred;
+    }
+
+    private <T> boolean checkEqual(T firstValue, T secondValue, Token t, String message){
+        boolean equal = true;
+        if (firstValue != secondValue){
+            equal = false;
+            this.errorOccurred = true;
+            printError(t, message);
+        }
+        return equal;
     }
 
     @Override
-    public Types visitProgram(SlipParser.ProgramContext ctx) {
+    public Type visitProgram(SlipParser.ProgramContext ctx) {
         System.out.println("=== START  SECOND PHASE ===");
 
         if (ctx.prog() != null) {
@@ -62,11 +71,11 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         System.out.println("=== END SECOND PHASE ===");
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitProg(SlipParser.ProgContext ctx){
+    public Type visitProg(SlipParser.ProgContext ctx){
         SlipScope globalScope = scopes.get(ctx);
         this.currentScope = globalScope;
         System.out.println("SCOPE : " + currentScope.getName());
@@ -75,22 +84,22 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         System.out.println(this.currentScope);
         this.currentScope = null;
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitMainDecl(SlipParser.MainDeclContext ctx) {
+    public Type visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = scopes.get(ctx);
 
         visitChildren(ctx);
 
         this.currentScope = this.currentScope.getParentScope();
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitFuncDecl(SlipParser.FuncDeclContext ctx){
+    public Type visitFuncDecl(SlipParser.FuncDeclContext ctx){
         // function inspection
         SlipScope localScope = scopes.get(ctx);
         this.currentScope = localScope;
@@ -106,71 +115,74 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
         System.out.println(currentScope);
         this.currentScope = localScope.getParentScope();
         System.out.println("SCOPE : " + currentScope.getName());
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitArgList(SlipParser.ArgListContext ctx) {
+    public Type visitArgList(SlipParser.ArgListContext ctx) {
 
         for(SlipParser.VarDefContext varDef : ctx.varDef()) {
             visit(varDef);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitInstBlock(SlipParser.InstBlockContext ctx){
+    public Type visitInstBlock(SlipParser.InstBlockContext ctx){
         for (ParseTree child: ctx.children) {
             visit(child);
         }
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitFuncExpr(SlipParser.FuncExprContext ctx) {
+    public Type visitFuncExpr(SlipParser.FuncExprContext ctx) {
         try {
             SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(ctx.ID().getText());
             System.out.println("FUNC CALL : " + scopedFunc + " Type : " + scopedFunc.getType());
 
-            if (ctx.exprD().size() != scopedFunc.getNumberOfParameters()) {
-                errorOccurred = true;
-                printError(ctx.start, String.format("function %s expects %d argument(s)", scopedFunc.getName(), scopedFunc.getNumberOfParameters()));
+            if(!checkEqual(
+                    ctx.exprD().size(),
+                    scopedFunc.getNumberOfParameters(),
+                    ctx.start,
+                    String.format("function %s expects %d argument(s)", scopedFunc.getName(), scopedFunc.getNumberOfParameters())))
+                {
                 return scopedFunc.getType();
             }
 
-            Iterator<Types> declaredParams = scopedFunc.getParameterTypes();
+            Iterator<Type> declaredParamTypes = scopedFunc.getParameterTypes();
             for (SlipParser.ExprDContext param : ctx.exprD()){
-                Types effectiveParam = visit(param);
-                if (declaredParams.hasNext()) {
-                    Types declaredParam = declaredParams.next();
-                    System.out.println("EFFECTIVE : " + effectiveParam + " DECLARED : " + declaredParam);
-                    if (effectiveParam != declaredParam){
-                        errorOccurred =  true;
-                        printError(param.start, String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParam, effectiveParam));
-                    }
+                Type actualParamType = visit(param);
+                if (declaredParamTypes.hasNext()) {
+                    Type declaredParamType = declaredParamTypes.next();
+                    System.out.println("EFFECTIVE : " + actualParamType + " DECLARED : " + declaredParamType);
+                    checkEqual(actualParamType,
+                            declaredParamType,
+                            param.start,
+                            String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParamType, actualParamType));
                 } else {
-                    errorOccurred =  true;
+                    this.errorOccurred =  true;
                     System.out.println("too many arguments");
                 }
             }
 
             return scopedFunc.getType();
         } catch (SymbolNotFoundException e) {
-            errorOccurred = true;
+            this.errorOccurred = true;
             printError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
         }
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitDeclaration(SlipParser.DeclarationContext ctx) {
+    public Type visitDeclaration(SlipParser.DeclarationContext ctx) {
         return visitChildren(ctx);
     }
 
     @Override
-    public Types visitVarDecl(SlipParser.VarDeclContext ctx){
-        Types definedVarType = visit(ctx.scalar());
+    public Type visitVarDecl(SlipParser.VarDeclContext ctx){
+        Type definedVarType = visit(ctx.scalar());
         System.out.println("VAR DECLARATION : " + definedVarType);
 
         if (this.currentScope.getName() != "global") {
@@ -178,7 +190,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccurred = true;
+                    this.errorOccurred = true;
                     printError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
@@ -186,21 +198,21 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         // type check initialisation
         if (ctx.exprD() != null) {
-            Types initVarType = visit(ctx.exprD());
+            Type initVarType = visit(ctx.exprD());
             System.out.println("in visitVarDECL, init var : " + initVarType);
-            if (initVarType != definedVarType) {
-                errorOccurred = true;
-                printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-            }
+            checkEqual(initVarType,
+                               definedVarType,
+                               ctx.exprD().start,
+                               String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         }
 
         return definedVarType;
     }
 
     @Override
-    public Types visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
+    public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
 
-        Types definedVarType = visit(ctx.scalar());
+        Type definedVarType = visit(ctx.scalar());
 
         if (currentScope.getName() != "global") {
             for (TerminalNode node : ctx.ID()) {
@@ -212,7 +224,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccurred = true;
+                    this.errorOccurred = true;
                     printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
                 }
@@ -222,59 +234,53 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         // type check initialisation
         if (ctx.initArrays() != null) {
-            Types initVarType = visit(ctx.initArrays());
+            Type initVarType = visit(ctx.initArrays());
 
             System.out.println("in visitVarDECL, init var : " + initVarType);
 
-
-//            System.out.println(ctx.number(0).getText() +  ctx.initArrays().initVar().size());
-
             int expectedFirstDimLength = Integer.parseInt(ctx.number(0).getText());
             int actualFirstDimLength = ctx.initArrays().initVar().size();
-            if (expectedFirstDimLength != actualFirstDimLength) {
-                errorOccurred = true;
-                printError(ctx.start, "First dimension size does not match between declaration and initialization");
-            }
+            checkEqual(
+                    expectedFirstDimLength,
+                    actualFirstDimLength,
+                    ctx.start,
+                    "First dimension size does not match between declaration and initialization");
 
             if (ctx.number().size() > 1) {
                 int expectedSecondDimLength = Integer.parseInt(ctx.number(1).getText());
                 for (SlipParser.InitVarContext init : ctx.initArrays().initVar()) {
-                    if (init.initArrays().initVar().size() != expectedSecondDimLength) {
-                        errorOccurred = true;
-                        printError(init.start, "Second dimension size does not match between declaration and initialization");
-                    }
+                    checkEqual(init.initArrays().initVar().size(),
+                            expectedSecondDimLength,
+                            init.start,
+                            "Second dimension size does not match between declaration and initialization");
                 }
             }
-            if (initVarType != definedVarType) {
-                errorOccurred = true;
-                printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-            }
+            checkEqual(initVarType,
+                          definedVarType,
+                          ctx.initArrays().start,
+                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         }
 
         return definedVarType;
     }
 
     @Override
-    public Types visitInitArrays(SlipParser.InitArraysContext ctx) {
-
-        // TODO
-        // Comment faire avec les tableaux de tableaux??
-        Types type = null;
+    public Type visitInitArrays(SlipParser.InitArraysContext ctx) {
+        Type type = null;
         for (SlipParser.InitVarContext var : ctx.initVar()) {
-//            System.out.println(visit(var));
             if (type == null) {
                 type = visit(var);
-            } else if (type != visit(var)) {
-                errorOccurred = true;
-                printError(var.start, "type Array INit error IMPROVE THIS ERROR");
-            }
+            } else checkEqual(type,
+                    visit(var),
+                    var.start,
+                    String.format("Array initialized with different types: %s and %s", type, visit(var)));
         }
 
         return type;
     }
 
     @Override
-    public Types visitStructDecl(SlipParser.StructDeclContext ctx) {
+    public Type visitStructDecl(SlipParser.StructDeclContext ctx) {
 
         if (currentScope.getName() != "global") {
             for (TerminalNode node : ctx.ID()) {
@@ -294,26 +300,26 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccurred = true;
+                    this.errorOccurred = true;
                     printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
                 }
 
             }
         }
 
-        return Types.STRUCT;
+        return Type.STRUCT;
     }
 
     @Override
-    public Types visitVarDef(SlipParser.VarDefContext ctx){
-        Types definedVarType = visit(ctx.scalar());
+    public Type visitVarDef(SlipParser.VarDefContext ctx){
+        Type definedVarType = visit(ctx.scalar());
         // add new var definition to the local scope (already done in first pass for global scope)
         if (this.currentScope.getName() != "global") {
             for (TerminalNode id : ctx.ID()) {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
                 } catch (SymbolAlreadyDefinedException e) {
-                    errorOccurred = true;
+                    this.errorOccurred = true;
                     printError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
@@ -322,7 +328,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitInitVar(SlipParser.InitVarContext ctx){
+    public Type visitInitVar(SlipParser.InitVarContext ctx){
         if (ctx.exprD() != null) {
             return visit(ctx.exprD());
         }
@@ -330,33 +336,33 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstDecl(SlipParser.ConstDeclContext ctx) {
+    public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
         return visitChildren(ctx);
     }
 
     @Override
-    public Types visitConstVar(SlipParser.ConstVarContext ctx) {
+    public Type visitConstVar(SlipParser.ConstVarContext ctx) {
 
-        Types definedVarType = visit(ctx.scalar());
+        Type definedVarType = visit(ctx.scalar());
         System.out.println("VAR DECLARATION : " + definedVarType);
 
         if (this.currentScope.getName() != "global") {
             try {
                 this.currentScope.define(new SlipVariableSymbol(ctx.ID().getText(), definedVarType, false));
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
+                this.errorOccurred = true;
                 printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", ctx.ID().getText(), currentScope.getName()));
             }
         }
 
         // type check initialisation
         if (ctx.exprD() != null) {
-            Types initVarType = visit(ctx.exprD());
+            Type initVarType = visit(ctx.exprD());
             System.out.println("in visitVarDECL, init var : " + initVarType);
-            if (initVarType != definedVarType) {
-                errorOccurred = true;
-                printError(ctx.exprD().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-            }
+            checkEqual(initVarType,
+                          definedVarType,
+                          ctx.exprD().start,
+                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         }
 
         return definedVarType;
@@ -364,9 +370,9 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstArray(SlipParser.ConstArrayContext ctx) {
+    public Type visitConstArray(SlipParser.ConstArrayContext ctx) {
 
-        Types definedVarType = visit(ctx.scalar());
+        Type definedVarType = visit(ctx.scalar());
 
         if (currentScope.getName() != "global") {
             String name = ctx.ID().getText();
@@ -377,7 +383,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
+                this.errorOccurred = true;
                 printError(ctx.start, String.format("constant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
@@ -386,12 +392,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
 
         // type check initialisation
         if (ctx.initArrays() != null) {
-            Types initVarType = visit(ctx.initArrays());
+            Type initVarType = visit(ctx.initArrays());
             System.out.println("in visitVarDECL, init var : " + initVarType);
-            if (initVarType != definedVarType) {
-                errorOccurred = true;
-                printError(ctx.initArrays().start, String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-            }
+            checkEqual(initVarType,
+                          definedVarType,
+                          ctx.initArrays().start,
+                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         }
 
         return definedVarType;
@@ -399,7 +405,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstStruct(SlipParser.ConstStructContext ctx) {
+    public Type visitConstStruct(SlipParser.ConstStructContext ctx) {
 
         if (currentScope.getName() != "global") {
             String name = ctx.ID().getText();
@@ -418,321 +424,272 @@ public class SecondPassVisitor extends SlipBaseVisitor<Types> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
+                this.errorOccurred = true;
                 printError(ctx.start, String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
         }
 
-        return Types.STRUCT;
+        return Type.STRUCT;
     }
 
     @Override
-    public Types visitScalar(SlipParser.ScalarContext ctx){
+    public Type visitScalar(SlipParser.ScalarContext ctx){
         if (ctx.BOOLEANTYPE() != null){
-            return Types.BOOLEAN;
+            return Type.BOOLEAN;
         }
         if (ctx.CHARTYPE() != null){
-            return Types.CHARACTER;
+            return Type.CHARACTER;
         }
         else {
-            return Types.INTEGER;
+            return Type.INTEGER;
         }
     }
 
     @Override
-    public Types visitExprGExpr(SlipParser.ExprGExprContext ctx){
+    public Type visitExprGExpr(SlipParser.ExprGExprContext ctx){
         return visit(ctx.exprG());
     }
 
     @Override
-    public Types visitLeftExprID(SlipParser.LeftExprIDContext ctx){
+    public Type visitLeftExprID(SlipParser.LeftExprIDContext ctx){
         String idName = ctx.ID().getText();
 
         try {
             SlipSymbol declaredId = currentScope.resolve(idName);
             if (declaredId instanceof SlipArraySymbol) {
-                errorOccurred = true;
+                this.errorOccurred = true;
                 printError(ctx.ID().getSymbol(), String.format("assignation to array \"%s\" requires an index between brackets", idName));
             }
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccurred = true;
+            this.errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
+    public Type visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
         String idName = ctx.ID().getText();
         try {
             SlipSymbol declaredId = currentScope.resolve(idName);
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccurred = true;
+            this.errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
+    public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
         StructExprGVisitor visitor = new StructExprGVisitor(currentScope);
-        Types type = visitor.visit(ctx);
+        Type type = visitor.visit(ctx);
 
         if (visitor.hasErrorOccurred()) {
-            errorOccurred = true;
+            this.errorOccurred = true;
         }
 
         return type;
     }
 
     @Override
-    public Types visitAssignInstr(SlipParser.AssignInstrContext ctx) {
-        Types exprGType = visit(ctx.exprG());
-        Types exprDType = visit(ctx.exprD());
+    public Type visitAssignInstr(SlipParser.AssignInstrContext ctx) {
+        Type exprGType = visit(ctx.exprG());
+        Type exprDType = visit(ctx.exprD());
 
-        if (exprGType != exprDType) {
-            errorOccurred = true;
-            printError(ctx.start, String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
-        }
+        checkEqual(exprGType,
+                     exprDType,
+                     ctx.start,
+                     String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitParens(SlipParser.ParensContext ctx){
+    public Type visitParens(SlipParser.ParensContext ctx){
         return visit(ctx.exprD());
     }
 
 
     @Override
-    public Types visitString(SlipParser.StringContext ctx){
-        return Types.STRING;
+    public Type visitString(SlipParser.StringContext ctx){
+        return Type.STRING;
     }
 
     @Override
-    public Types visitChar(SlipParser.CharContext ctx) {
-        return Types.CHARACTER;
+    public Type visitChar(SlipParser.CharContext ctx) {
+        return Type.CHARACTER;
     }
 
     @Override
-    public Types visitIntExpr(SlipParser.IntExprContext ctx){
-        return Types.INTEGER;
+    public Type visitIntExpr(SlipParser.IntExprContext ctx){
+        return Type.INTEGER;
     }
     @Override
-    public Types visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
-        Types type = visit(ctx.exprD());
+    public Type visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
+        Type type = visit(ctx.exprD());
 
-        if (type != Types.INTEGER) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, "can only negate integer expression");
-        }
+        checkEqual(type, Type.INTEGER, ctx.exprD().start, "can only negate integer expression");
 
-        return Types.INTEGER;
+        return Type.INTEGER;
     }
     @Override
-    public Types visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
+    public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
 
         for (SlipParser.ExprDContext expr: ctx.exprD()) {
-            Types type = visit(expr);
-
-            if (type != Types.INTEGER) {
-                errorOccurred = true;
-                printError(expr.start, "can only use '*', '/' and '%' operators on expressions of type integer");
-            }
-
+            Type type = visit(expr);
+            checkEqual(type, Type.INTEGER, expr.start, "can only use '*', '/' and '%' operators on expressions of type integer");
         }
 
-        return Types.INTEGER;
+        return Type.INTEGER;
     }
     @Override
-    public Types visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
+    public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
 
         for (SlipParser.ExprDContext expr: ctx.exprD()) {
-            Types type = visit(expr);
-
-            if (type != Types.INTEGER) {
-                errorOccurred = true;
-                printError(expr.start, "can only use '+' and '-' operators on expressions of type integer");
-            }
-
+            Type type = visit(expr);
+            checkEqual(type, Type.INTEGER, expr.start, "can only use '+' and '-' operators on expressions of type integer");
         }
 
-        return Types.INTEGER;
+        return Type.INTEGER;
     }
 
     @Override
-    public Types visitTrueExpr(SlipParser.TrueExprContext ctx){
-        return Types.BOOLEAN;
+    public Type visitTrueExpr(SlipParser.TrueExprContext ctx){
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitAndOrExpr(SlipParser.AndOrExprContext ctx){
+    public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx){
 
         for (SlipParser.ExprDContext expr : ctx.exprD()) {
-            Types type = visit(expr);
-
-            if (type != Types.BOOLEAN) {
-                errorOccurred = true;
-                printError(expr.start, "can only compare expressions of type boolean");
-            }
-
+            Type type = visit(expr);
+            checkEqual(type, Type.BOOLEAN, expr.start, "can only compare expressions of type boolean");
         }
 
-        return Types.BOOLEAN;
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitFalseExpr(SlipParser.FalseExprContext ctx){
-        return Types.BOOLEAN;
+    public Type visitFalseExpr(SlipParser.FalseExprContext ctx){
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitComparExpr(SlipParser.ComparExprContext ctx){
+    public Type visitComparExpr(SlipParser.ComparExprContext ctx){
 
-        Types leftExprType = visit(ctx.exprD(0));
-        Types rightExprType = visit(ctx.exprD(1));
+        Type leftExprType = visit(ctx.exprD(0));
+        Type rightExprType = visit(ctx.exprD(1));
+        checkEqual(leftExprType, rightExprType, ctx.start, "can only compare expressions of the same type");
 
-        if (leftExprType != rightExprType) {
-            errorOccurred = true;
-            printError(ctx.start, "can only compare expressions of the same type");
-        }
-
-        return Types.BOOLEAN;
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
+    public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
 
         for (SlipParser.ExprDContext expr : ctx.exprD()) {
-            Types type = visit(expr);
-
-            if (type != Types.INTEGER) {
-                errorOccurred = true;
-                printError(expr.start, "can only compare integer expressions");
-            }
-
+            Type type = visit(expr);
+            checkEqual(type, Type.INTEGER, expr.start, "can only compare integer expressions");
         }
 
-        return Types.BOOLEAN;
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitNotExpr(SlipParser.NotExprContext ctx){
-        if (visit(ctx.exprD()) != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, String.format("%s must be of boolean type", ctx.exprD().getText()));
-        }
-        return Types.BOOLEAN;
+    public Type visitNotExpr(SlipParser.NotExprContext ctx){
+        checkEqual(visit(ctx.exprD()),
+                     Type.BOOLEAN,
+                     ctx.exprD().start,
+                     String.format("%s must be of boolean type", ctx.exprD().getText()));
+        return Type.BOOLEAN;
     }
 
     @Override
-    public Types visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
+    public Type visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
 
-        Types type = visit(ctx.exprD());
-
-        if (type != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, "expression must be of type boolean");
-        }
+        Type type = visit(ctx.exprD());
+        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
-        
-        Types type = visit(ctx.exprD());
+    public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
 
-        if (type != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, "expression must be of type boolean");
-        }
+        Type type = visit(ctx.exprD());
+
+        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitWhileInstr(SlipParser.WhileInstrContext ctx) {
+    public Type visitWhileInstr(SlipParser.WhileInstrContext ctx) {
 
-        Types type = visit(ctx.exprD());
+        Type type = visit(ctx.exprD());
 
-        if (type != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, "expression must be of type boolean");
-        }
+        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitUntilInstr(SlipParser.UntilInstrContext ctx) {
+    public Type visitUntilInstr(SlipParser.UntilInstrContext ctx) {
 
-        Types type = visit(ctx.exprD());
+        Type type = visit(ctx.exprD());
 
-        if (type != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD().start, "expression must be of type boolean");
-        }
+        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitForInstr(SlipParser.ForInstrContext ctx) {
+    public Type visitForInstr(SlipParser.ForInstrContext ctx) {
 
-        Types initValueType = visit(ctx.exprD(0));
-        Types conditionValueType = visit(ctx.exprD(1));
+        Type initValueType = visit(ctx.exprD(0));
+        Type conditionValueType = visit(ctx.exprD(1));
 
-        if (initValueType != Types.INTEGER) {
-            errorOccurred = true;
-            printError(ctx.exprD(0).start, "expression must be of type integer");
-        }
+        checkEqual(initValueType, Type.INTEGER, ctx.exprD(0).start, "expression must be of type integer");
 
-        if (conditionValueType != Types.BOOLEAN) {
-            errorOccurred = true;
-            printError(ctx.exprD(1).start, "expression must be of type boolean");
-        }
+        checkEqual(conditionValueType, Type.BOOLEAN, ctx.exprD(1).start, "expression must be of type boolean");
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitActionType(SlipParser.ActionTypeContext ctx) {
+    public Type visitActionType(SlipParser.ActionTypeContext ctx) {
 
         if (ctx.exprD() != null) {
-            Types type = visit(ctx.exprD());
+            Type type = visit(ctx.exprD());
 
-            if (type != Types.INTEGER) {
-                errorOccurred = true;
-                printError(ctx.exprD().start, "expression must be of type integer");
-            }
+            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
         }
 
-        return Types.VOID;
+        return Type.VOID;
     }
 }

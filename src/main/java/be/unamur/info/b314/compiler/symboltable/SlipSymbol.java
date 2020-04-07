@@ -9,12 +9,12 @@ package be.unamur.info.b314.compiler.symboltable;
  * @specfield assignable: boolean // is the symbol assignable or just initialisable
  */
 public interface SlipSymbol {
-    enum Types {
+    enum Type {
         INTEGER("integer"), CHARACTER("char"), BOOLEAN("boolean"), VOID("void"), STRUCT("record"), STRING("string");
 
         private String name;
 
-        Types(String name) {
+        Type(String name) {
             this.name = name;
         }
 
@@ -32,7 +32,7 @@ public interface SlipSymbol {
     /**
      * @return type
      */
-    Types getType();
+    Type getType();
 
     /**
      * @return assignable

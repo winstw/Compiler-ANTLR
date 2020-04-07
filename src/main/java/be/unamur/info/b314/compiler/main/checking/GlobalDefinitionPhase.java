@@ -6,7 +6,7 @@ import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
 import be.unamur.info.b314.compiler.symboltable.*;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Types;
+import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
+public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
@@ -46,7 +46,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitProgram(SlipParser.ProgramContext ctx) {
+    public Type visitProgram(SlipParser.ProgramContext ctx) {
         System.out.println("=== START ===");
 
         if (ctx.prog() != null) {
@@ -61,7 +61,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitProg(SlipParser.ProgContext ctx) {
+    public Type visitProg(SlipParser.ProgContext ctx) {
         currentScope = new SlipGlobalScope();
         scopes.put(ctx, currentScope);
 
@@ -74,12 +74,12 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitDeclaration(SlipParser.DeclarationContext ctx) {
+    public Type visitDeclaration(SlipParser.DeclarationContext ctx) {
         return visitChildren(ctx);
     }
 
     @Override
-    public Types visitVarDecl(SlipParser.VarDeclContext ctx) {
+    public Type visitVarDecl(SlipParser.VarDeclContext ctx) {
 
         defineVariable(ctx);
 
@@ -91,7 +91,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
      * @effect add ctx to currentScope if it doesn't contain it, else print an error
      */
     private void defineVariable(SlipParser.VarDeclContext ctx) {
-        Types type = visit(ctx.scalar());
+        Type type = visit(ctx.scalar());
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
@@ -112,7 +112,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitStructDecl(SlipParser.StructDeclContext ctx) {
+    public Type visitStructDecl(SlipParser.StructDeclContext ctx) {
 
         defineStructure(ctx);
 
@@ -156,7 +156,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
+    public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
 
         defineArray(ctx);
 
@@ -169,7 +169,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
      */
     private void defineArray(SlipParser.ArrayDeclContext ctx) {
 
-        Types type = visit(ctx.scalar());
+        Type type = visit(ctx.scalar());
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
@@ -190,7 +190,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstDecl(SlipParser.ConstDeclContext ctx) {
+    public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
 
         visit(ctx.getChild(0));
 
@@ -198,7 +198,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstVar(SlipParser.ConstVarContext ctx) {
+    public Type visitConstVar(SlipParser.ConstVarContext ctx) {
 
         defineConstant(ctx);
 
@@ -211,7 +211,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
      */
     private void defineConstant(SlipParser.ConstVarContext ctx) {
 
-        Types type = visit(ctx.scalar());
+        Type type = visit(ctx.scalar());
         String name = ctx.ID().getText();
         SlipSymbol symbol = new SlipVariableSymbol(name, type, false);
 
@@ -227,7 +227,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstStruct(SlipParser.ConstStructContext ctx) {
+    public Type visitConstStruct(SlipParser.ConstStructContext ctx) {
 
         defineConstantStructure(ctx);
 
@@ -264,7 +264,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitConstArray(SlipParser.ConstArrayContext ctx) {
+    public Type visitConstArray(SlipParser.ConstArrayContext ctx) {
 
         defineConstantArray(ctx);
 
@@ -277,7 +277,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
      */
     private void defineConstantArray(SlipParser.ConstArrayContext ctx) {
 
-        Types type = visit(ctx.scalar());
+        Type type = visit(ctx.scalar());
 
         String name = ctx.ID().getText();
         SlipSymbol symbol = new SlipArraySymbol(name, type, true);
@@ -294,9 +294,9 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitFuncDecl(SlipParser.FuncDeclContext ctx) {
+    public Type visitFuncDecl(SlipParser.FuncDeclContext ctx) {
         defineFunction(ctx);
-        return Types.VOID;
+        return Type.VOID;
     }
 
     /**
@@ -306,7 +306,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
      */
     private void defineFunction(SlipParser.FuncDeclContext ctx) {
         String name = ctx.ID().getText();
-        SlipSymbol.Types type = getType(ctx.funcType().start.getType());
+        Type type = getType(ctx.funcType().start.getType());
         SlipMethodSymbol symbol = new SlipMethodSymbol(name, type, currentScope);
         scopes.put(ctx, symbol);
 
@@ -330,8 +330,8 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visitMainDecl(SlipParser.MainDeclContext ctx) {
-        SlipMethodSymbol symbol = new SlipMethodSymbol("main", SlipSymbol.Types.VOID, currentScope);
+    public Type visitMainDecl(SlipParser.MainDeclContext ctx) {
+        SlipMethodSymbol symbol = new SlipMethodSymbol("main", Type.VOID, currentScope);
 
         try {
             currentScope.define(symbol);
@@ -344,12 +344,12 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
 
         scopes.put(ctx, symbol);
 
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitScalar(SlipParser.ScalarContext ctx) {
-        Types type = getType(ctx.start.getType());
+    public Type visitScalar(SlipParser.ScalarContext ctx) {
+        Type type = getType(ctx.start.getType());
         return type;
     }
 

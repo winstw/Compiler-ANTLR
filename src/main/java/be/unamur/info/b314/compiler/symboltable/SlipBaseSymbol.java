@@ -3,10 +3,10 @@ package be.unamur.info.b314.compiler.symboltable;
 public abstract class SlipBaseSymbol implements SlipSymbol {
 
     private String name;
-    private SlipSymbol.Types type;
+    private Type type;
     private boolean isAssignable;
 
-    public SlipBaseSymbol(String name, Types type, boolean isAssignable) {
+    public SlipBaseSymbol(String name, Type type, boolean isAssignable) {
         this.name = name;
         this.type = type;
         this.isAssignable = isAssignable;
@@ -18,7 +18,7 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
     }
 
     @Override
-    public Types getType() {
+    public Type getType() {
         return type;
     }
 

@@ -5,7 +5,7 @@ import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 public class SlipStructureSymbol extends SlipScopedSymbol {
 
     public SlipStructureSymbol(String name, SlipScope parentScope, boolean isAssignable) {
-        super(name, Types.STRUCT, parentScope, isAssignable);
+        super(name, Type.STRUCT, parentScope, isAssignable);
     }
 
     @Override

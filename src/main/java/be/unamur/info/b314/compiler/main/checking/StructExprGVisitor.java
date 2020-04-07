@@ -6,12 +6,12 @@ import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.symboltable.SlipScope;
 import be.unamur.info.b314.compiler.symboltable.SlipStructureSymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Types;
+import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class StructExprGVisitor extends SlipBaseVisitor<Types> {
+public class StructExprGVisitor extends SlipBaseVisitor<Type> {
 
     private SlipScope currentScope;
     private boolean errorOccurred;
@@ -26,23 +26,23 @@ public class StructExprGVisitor extends SlipBaseVisitor<Types> {
     }
 
     @Override
-    public Types visit(ParseTree tree) {
+    public Type visit(ParseTree tree) {
         if (tree instanceof SlipParser.LeftExprIDContext || tree instanceof SlipParser.LeftExprRecordContext) {
             return super.visit(tree);
         } else {
             System.out.println("SOMETHING WENT WRONG BE CAREFULL");
-            return Types.VOID;
+            return Type.VOID;
         }
     }
 
     @Override
-    public Types visitLeftExprID(SlipParser.LeftExprIDContext ctx){
+    public Type visitLeftExprID(SlipParser.LeftExprIDContext ctx){
         String idName = ctx.ID().getText();
 
         try {
             SlipSymbol declaredId = currentScope.resolve(idName);
 
-            if (declaredId.getType() == SlipSymbol.Types.STRUCT) {
+            if (declaredId.getType() == Type.STRUCT) {
                 this.currentScope = (SlipStructureSymbol) declaredId;
             }
 
@@ -51,19 +51,19 @@ public class StructExprGVisitor extends SlipBaseVisitor<Types> {
             errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
-        return Types.VOID;
+        return Type.VOID;
     }
 
     @Override
-    public Types visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
+    public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
-        SlipSymbol.Types type = visit(ctx.exprG(0));
+        Type type = visit(ctx.exprG(0));
 
         String name= ctx.exprG(1).getToken(SlipParser.ID, 0).getText();
         try {
             SlipSymbol symbol = currentScope.resolve(name);
             type = symbol.getType();
-            if (type == SlipSymbol.Types.STRUCT) {
+            if (type == Type.STRUCT) {
                 currentScope = (SlipStructureSymbol) symbol;
             }
             System.out.println(symbol);

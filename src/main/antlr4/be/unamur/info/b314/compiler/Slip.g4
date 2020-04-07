@@ -44,10 +44,7 @@ initVar : exprD
 
 initArrays : LPAR (initVar (COMMA initVar)*)? RPAR;
 
-constDecl : CONST (constVar | constArray | constStruct) SEMICOLON;
-constVar : ID AS scalar EQUAL exprD;
-constArray : ID AS scalar LBRACKET number (COMMA number)* RBRACKET EQUAL initArrays ;
-constStruct : ID AS STRUCT (declaration)+ END;
+constDecl : CONST (varDecl | arrayDecl | structDecl) SEMICOLON;
 
 exprD : STRING                                  # string
       | CHAR                                    # char

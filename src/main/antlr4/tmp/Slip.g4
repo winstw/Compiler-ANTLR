@@ -5,9 +5,9 @@ import SlipWords;
 
 program : (prog | map) EOF;
 
-map : MAP COLON NAT NAT line+;
+map : MAP COLON NAT NAT map_char+;
 
-line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
+map_char : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q');
 
 prog : impDecl (declaration | funcDecl | constDecl | enumDecl)* mainDecl;
 
@@ -44,10 +44,7 @@ initVar : exprD
 
 initArrays : LPAR (initVar (COMMA initVar)*)? RPAR;
 
-constDecl : CONST (constVar | constArray | constStruct) SEMICOLON;
-constVar : ID AS scalar EQUAL exprD;
-constArray : ID AS scalar LBRACKET number (COMMA number)* RBRACKET EQUAL initArrays ;
-constStruct : ID AS STRUCT (declaration)+ END;
+constDecl : CONST (varDecl | arrayDecl | structDecl) SEMICOLON;
 
 exprD : STRING                                  # string
       | CHAR                                    # char

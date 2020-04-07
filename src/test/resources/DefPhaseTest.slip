@@ -1,3 +1,36 @@
+#import "world.map"
+
+    f1 as integer;
+
+ fct1 as function():integer
+    do
+     f1 := 42;
+     fct1 := f1;
+    end
+
+main as function():void
+do
+   if(fct1() <> 42) then
+   	 left();
+   end
+   dig();
+end
+
+// #import "world.map"
+// const a as integer;
+// const dzeta as integer[2, 3];
+// beta as integer[2, 3];
+
+// main as function(): void
+// do
+//     a := 3;
+//     dzeta[2] := 3;
+//     beta[2, 2] := 3;
+//     dig();
+// end
+
+
+
 // #import "file.map"
 
 // x as integer = 1;
@@ -58,15 +91,6 @@
 //     dig();
 // end
 
-// #import "world.map"
-
-// dzeta as integer[2, 3] = ((2,3, 3), (2,3, 3));
-
-// main as function(): void
-// do
-//     dzeta := 3;
-//     dig();
-// end
 
 // #import "world.map"
 
@@ -106,7 +130,7 @@
 
 // end
 
-map: 5 3
- A P G G _
- G G G B G
- A G G G G
+// map: 5 3
+//  A P G G _
+//  G G G B G
+//  A G G G G

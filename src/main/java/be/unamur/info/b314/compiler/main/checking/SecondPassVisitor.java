@@ -42,6 +42,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     private ParseTreeProperty<SlipScope> scopes;
     private SlipScope currentScope;
     private boolean errorOccurred = false;
+    private boolean assignationContext = false;
 
     public SecondPassVisitor(ParseTreeProperty<SlipScope> scopes){
         this.scopes = scopes;
@@ -68,9 +69,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         if (ctx.prog() != null) {
             visit(ctx.prog());
         }
-
         System.out.println("=== END SECOND PHASE ===");
-
         return Type.VOID;
     }
 
@@ -182,13 +181,16 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitVarDecl(SlipParser.VarDeclContext ctx){
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
+
+
         Type definedVarType = visit(ctx.scalar());
         System.out.println("VAR DECLARATION : " + definedVarType);
 
         if (this.currentScope.getName() != "global") {
             for (TerminalNode id : ctx.ID()) {
                 try {
-                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
+                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
                 } catch (SymbolAlreadyDefinedException e) {
                     this.errorOccurred = true;
                     printError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
@@ -204,6 +206,9 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                                definedVarType,
                                ctx.exprD().start,
                                String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+        } else if (isConst) {
+            this.errorOccurred = true;
+            printError(ctx.start,String.format("const var not initialized: %s", ctx.ID(0).getText()));
         }
 
         return definedVarType;
@@ -211,13 +216,13 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
-
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
         Type definedVarType = visit(ctx.scalar());
 
         if (currentScope.getName() != "global") {
             for (TerminalNode node : ctx.ID()) {
                 String name = node.getText();
-                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, true);
+                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, !isConst);
 
                 try {
                     currentScope.define(symbol);
@@ -259,8 +264,10 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                           definedVarType,
                           ctx.initArrays().start,
                           String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+        } else if (isConst) {
+            this.errorOccurred = true;
+            printError(ctx.start,String.format("const array not initialized: %s", ctx.ID(0).getText()));
         }
-
         return definedVarType;
     }
 
@@ -312,12 +319,14 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitVarDef(SlipParser.VarDefContext ctx){
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
+
         Type definedVarType = visit(ctx.scalar());
         // add new var definition to the local scope (already done in first pass for global scope)
         if (this.currentScope.getName() != "global") {
             for (TerminalNode id : ctx.ID()) {
                 try {
-                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, true));
+                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
                 } catch (SymbolAlreadyDefinedException e) {
                     this.errorOccurred = true;
                     printError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
@@ -338,99 +347,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     @Override
     public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
         return visitChildren(ctx);
-    }
-
-    @Override
-    public Type visitConstVar(SlipParser.ConstVarContext ctx) {
-
-        Type definedVarType = visit(ctx.scalar());
-        System.out.println("VAR DECLARATION : " + definedVarType);
-
-        if (this.currentScope.getName() != "global") {
-            try {
-                this.currentScope.define(new SlipVariableSymbol(ctx.ID().getText(), definedVarType, false));
-            } catch (SymbolAlreadyDefinedException e) {
-                this.errorOccurred = true;
-                printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", ctx.ID().getText(), currentScope.getName()));
-            }
-        }
-
-        // type check initialisation
-        if (ctx.exprD() != null) {
-            Type initVarType = visit(ctx.exprD());
-            System.out.println("in visitVarDECL, init var : " + initVarType);
-            checkEqual(initVarType,
-                          definedVarType,
-                          ctx.exprD().start,
-                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-        }
-
-        return definedVarType;
-
-    }
-
-    @Override
-    public Type visitConstArray(SlipParser.ConstArrayContext ctx) {
-
-        Type definedVarType = visit(ctx.scalar());
-
-        if (currentScope.getName() != "global") {
-            String name = ctx.ID().getText();
-            SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, false);
-
-            try {
-                currentScope.define(symbol);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                this.errorOccurred = true;
-                printError(ctx.start, String.format("constant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-
-            }
-
-        }
-
-        // type check initialisation
-        if (ctx.initArrays() != null) {
-            Type initVarType = visit(ctx.initArrays());
-            System.out.println("in visitVarDECL, init var : " + initVarType);
-            checkEqual(initVarType,
-                          definedVarType,
-                          ctx.initArrays().start,
-                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
-        }
-
-        return definedVarType;
-
-    }
-
-    @Override
-    public Type visitConstStruct(SlipParser.ConstStructContext ctx) {
-
-        if (currentScope.getName() != "global") {
-            String name = ctx.ID().getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, false);
-
-            try {
-                currentScope.define(symbol);
-                currentScope = symbol;
-
-                for (SlipParser.DeclarationContext var : ctx.declaration()) {
-                    visit(var);
-                }
-
-                currentScope = currentScope.getParentScope();
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                this.errorOccurred = true;
-                printError(ctx.start, String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-            }
-
-        }
-
-        return Type.STRUCT;
     }
 
     @Override
@@ -456,12 +372,27 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         String idName = ctx.ID().getText();
 
         try {
-            SlipSymbol declaredId = currentScope.resolve(idName);
-            if (declaredId instanceof SlipArraySymbol) {
-                this.errorOccurred = true;
-                printError(ctx.ID().getSymbol(), String.format("assignation to array \"%s\" requires an index between brackets", idName));
+            SlipSymbol symbol = currentScope.resolve(idName);
+
+            if (this.assignationContext) {
+                String errorMessage = null;
+
+                // if we get an array in the table while in this rule, we are facing an array without bracket
+                if (symbol instanceof SlipArraySymbol) {
+                    errorMessage = String.format("assignation to array \"%s\" requires an index between brackets", idName);
+                }
+
+                // check if assignable in assignation context
+                if (!symbol.isAssignable()) {
+                    errorMessage = String.format("cannot assign to const variable \"%s\"", idName);
+                }
+
+                if (errorMessage != null) {
+                    this.errorOccurred = true;
+                    printError(ctx.ID().getSymbol(), errorMessage);
+                }
             }
-            return declaredId.getType();
+            return symbol.getType();
         } catch (SymbolNotFoundException e){
             this.errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
@@ -473,8 +404,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     public Type visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
         String idName = ctx.ID().getText();
         try {
-            SlipSymbol declaredId = currentScope.resolve(idName);
-            return declaredId.getType();
+            SlipSymbol symbol = currentScope.resolve(idName);
+            if (this.assignationContext && !symbol.isAssignable()) {
+                    this.errorOccurred = true;
+                    printError(ctx.ID().getSymbol(), String.format("cannot assign to const array \"%s\"", idName));
+            }
+                return symbol.getType();
         } catch (SymbolNotFoundException e){
             this.errorOccurred = true;
             printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
@@ -498,6 +433,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitAssignInstr(SlipParser.AssignInstrContext ctx) {
+        this.assignationContext = true;
         Type exprGType = visit(ctx.exprG());
         Type exprDType = visit(ctx.exprD());
 
@@ -506,6 +442,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                      ctx.start,
                      String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
 
+        this.assignationContext = false;
         return Type.VOID;
     }
 

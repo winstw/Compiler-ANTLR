@@ -1,3 +1,4 @@
+
 package be.unamur.info.b314.compiler.main.checking;
 
 import be.unamur.info.b314.compiler.SlipBaseVisitor;

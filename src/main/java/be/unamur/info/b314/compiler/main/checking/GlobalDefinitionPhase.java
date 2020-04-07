@@ -57,6 +57,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
         }
 
         System.out.println("=== STOP ===");
+
         return null;
     }
 
@@ -91,11 +92,13 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
      * @effect add ctx to currentScope if it doesn't contain it, else print an error
      */
     private void defineVariable(SlipParser.VarDeclContext ctx) {
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
+
         Type type = visit(ctx.scalar());
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipSymbol symbol = new SlipVariableSymbol(name, type, true);
+            SlipSymbol symbol = new SlipVariableSymbol(name, type, !isConst);
 
             try {
                 currentScope.define(symbol);
@@ -104,11 +107,8 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
             } catch (SymbolAlreadyDefinedException e) {
                 errorOccurred = true;
                 printError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-
             }
-
         }
-
     }
 
     @Override
@@ -124,12 +124,13 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
      * @effect add ctx to currentScope if it doesn't contain it, else print an error
      */
     private void defineStructure(SlipParser.StructDeclContext ctx) {
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
         System.out.println("=== START STRUCT DECL ===");
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, true);
+            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, !isConst);
 
             try {
                 currentScope.define(symbol);
@@ -157,7 +158,6 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
-
         defineArray(ctx);
 
         return null;
@@ -168,12 +168,13 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
      * @effect add ctx to currentScope if it doesn't contain it, else print an error
      */
     private void defineArray(SlipParser.ArrayDeclContext ctx) {
-
+        boolean isConst = ctx.getParent().getStart().getText().equals("const");
+        System.out.println("CONST : " + isConst);
         Type type = visit(ctx.scalar());
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipSymbol symbol = new SlipArraySymbol(name, type, true);
+            SlipSymbol symbol = new SlipArraySymbol(name, type, !isConst);
 
             try {
                 currentScope.define(symbol);
@@ -191,107 +192,12 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
 
     @Override
     public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
-
-        visit(ctx.getChild(0));
-
-        return null;
-    }
-
-    @Override
-    public Type visitConstVar(SlipParser.ConstVarContext ctx) {
-
-        defineConstant(ctx);
+        System.out.println("IN visitCONST"+ ctx.getChild(0).getText());
+        visit(ctx.getChild(1));
 
         return null;
     }
 
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineConstant(SlipParser.ConstVarContext ctx) {
-
-        Type type = visit(ctx.scalar());
-        String name = ctx.ID().getText();
-        SlipSymbol symbol = new SlipVariableSymbol(name, type, false);
-
-        try {
-            currentScope.define(symbol);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (SymbolAlreadyDefinedException e) {
-            errorOccurred = true;
-            printError(ctx.ID().getSymbol(), String.format("constant symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-        }
-
-    }
-
-    @Override
-    public Type visitConstStruct(SlipParser.ConstStructContext ctx) {
-
-        defineConstantStructure(ctx);
-
-        return null;
-    }
-
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineConstantStructure(SlipParser.ConstStructContext ctx) {
-
-            String name = ctx.ID().getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, false);
-
-            try {
-                currentScope.define(symbol);
-
-                currentScope = symbol;
-
-                for (SlipParser.DeclarationContext var : ctx.declaration()) {
-                    visit(var);
-                }
-
-                currentScope = currentScope.getParentScope();
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
-                printError(ctx.ID().getSymbol(), String.format("constant structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-            }
-
-    }
-
-    @Override
-    public Type visitConstArray(SlipParser.ConstArrayContext ctx) {
-
-        defineConstantArray(ctx);
-
-        return null;
-    }
-
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineConstantArray(SlipParser.ConstArrayContext ctx) {
-
-        Type type = visit(ctx.scalar());
-
-        String name = ctx.ID().getText();
-        SlipSymbol symbol = new SlipArraySymbol(name, type, true);
-
-        try {
-            currentScope.define(symbol);
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } catch (SymbolAlreadyDefinedException e) {
-            errorOccurred = true;
-            printError(ctx.start, String.format("cosntant array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-        }
-
-    }
 
     @Override
     public Type visitFuncDecl(SlipParser.FuncDeclContext ctx) {
@@ -312,6 +218,8 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
 
         try {
             currentScope.define(symbol);
+            SlipSymbol returnVar = new SlipVariableSymbol(name, type, true);
+            symbol.define(returnVar);
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
@@ -353,5 +261,5 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
         return type;
     }
 
-
 }
+

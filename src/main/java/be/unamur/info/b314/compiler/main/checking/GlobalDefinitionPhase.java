@@ -51,6 +51,9 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
 
         if (ctx.prog() != null) {
             visit(ctx.prog());
+        } else if (ctx.map() != null) {
+            MapVisitor mapVisitor = new MapVisitor();
+            this.errorOccurred = mapVisitor.visit(ctx.map());
         }
 
         System.out.println("=== STOP ===");

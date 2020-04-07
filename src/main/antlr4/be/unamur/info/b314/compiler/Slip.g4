@@ -5,9 +5,9 @@ import SlipWords;
 
 program : (prog | map) EOF;
 
-map : MAP COLON NAT NAT line+;
+map : MAP COLON NAT NAT map_char+;
 
-line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
+map_char : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q');
 
 prog : impDecl (declaration | funcDecl | constDecl | enumDecl)* mainDecl;
 

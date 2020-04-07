@@ -1,6 +1,6 @@
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
+import be.unamur.info.b314.compiler.SlipParserBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
+public class GlobalDefinitionPhase extends SlipParserBaseVisitor<Types> {
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
@@ -51,6 +51,9 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Types> {
 
         if (ctx.prog() != null) {
             visit(ctx.prog());
+        } else if (ctx.map() != null) {
+            MapVisitor mapVisitor = new MapVisitor();
+            mapVisitor.visit(ctx.map());
         }
 
         System.out.println("=== STOP ===");

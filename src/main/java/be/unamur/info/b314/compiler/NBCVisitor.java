@@ -1,6 +1,8 @@
 package be.unamur.info.b314.compiler;
 
 import be.unamur.info.b314.compiler.NBCPrinter.NBCCodeTypes;
+import be.unamur.info.b314.compiler.PlayPlusBaseVisitor;
+import be.unamur.info.b314.compiler.PlayPlusParser;
 
 import java.util.Map;
 

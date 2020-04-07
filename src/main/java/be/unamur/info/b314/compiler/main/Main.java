@@ -4,13 +4,11 @@ package be.unamur.info.b314.compiler.main;
 
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
-import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
 
 
 import be.unamur.info.b314.compiler.NBCPrinter;
 import be.unamur.info.b314.compiler.NBCVisitor;
 import be.unamur.info.b314.compiler.SymTableFiller;
-import be.unamur.info.b314.compiler.exception.ParsingException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import java.io.File;
@@ -22,13 +20,11 @@ import java.util.Map;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-import be.unamur.info.b314.compiler.SymTableFiller;
 import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

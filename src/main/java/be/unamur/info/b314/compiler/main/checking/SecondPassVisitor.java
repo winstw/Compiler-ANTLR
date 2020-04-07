@@ -1,9 +1,9 @@
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
-import be.unamur.info.b314.compiler.exception.ArrayInitException;
+import be.unamur.info.b314.compiler.SlipParserBaseVisitor;
+
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
@@ -19,12 +19,11 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class SecondPassVisitor extends SlipBaseVisitor<Types> {
+public class SecondPassVisitor extends SlipParserBaseVisitor<Types> {
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");

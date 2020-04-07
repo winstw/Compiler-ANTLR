@@ -70,7 +70,7 @@ JUMP: 'jump';
 FIGHT: 'fight';
 DIG: 'dig';
 
-MAP: 'map';
+MAP: 'map' -> pushMode(ISLAND);
 FUNCTION: 'function';
 MAIN: 'main';
 AS: 'as';
@@ -96,3 +96,10 @@ WS : [ \t\n]+ -> skip;
 FILENAME : '"'ID'.map''"';
 
 STRING : '"'(~[\\,\r\n])+'"';
+
+mode ISLAND;
+NEWLINE : [\n];
+LINE: '@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q';
+SPACE: [ ] -> skip;
+ANAT: DIGIT+;
+COLOON: ':';

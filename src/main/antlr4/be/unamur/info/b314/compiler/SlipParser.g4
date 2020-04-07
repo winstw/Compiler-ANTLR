@@ -1,13 +1,15 @@
-grammar Slip;
-
-import SlipWords;
+parser grammar SlipParser;
+options {
+tokenVocab = SlipLexer;
+}
+//import SlipWords;
 
 
 program : (prog | map) EOF;
 
-map : MAP COLON NAT NAT line+;
+map : MAP COLON NAT NAT NEWLINE line+ NEWLINE*;
 
-line : ('@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q')+;
+line : MAP_CHAR+ NEWLINE;
 
 prog : impDecl (declaration | funcDecl | constDecl | enumDecl)* mainDecl;
 

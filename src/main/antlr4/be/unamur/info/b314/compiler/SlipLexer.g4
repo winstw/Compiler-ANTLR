@@ -1,5 +1,5 @@
 // lexer grammar SlipWords;
-lexer grammar SlipWords;
+lexer grammar SlipLexer;
 
 //--------Words---------
 
@@ -99,7 +99,8 @@ STRING : '"'(~[\\,\r\n])+'"';
 
 mode ISLAND;
 NEWLINE : [\n];
-LINE: '@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q';
-SPACE: [ ] -> skip;
-ANAT: DIGIT+;
-COLOON: ':';
+MAP_CHAR: '@' | 'X' | 'G' | 'P' | 'A' | 'B' | 'T' | 'S' | '_' | 'Q';
+SPACE: [ \t] -> skip;
+MAP_NAT: NAT -> type(NAT);
+MAP_COLON: COLON -> type(COLON);
+MAP_COMMENT: COMMENT -> skip;

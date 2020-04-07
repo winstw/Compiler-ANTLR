@@ -1,6 +1,6 @@
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
+import be.unamur.info.b314.compiler.SlipParserBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.symboltable.SlipScope;
@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class StructExprGVisitor extends SlipBaseVisitor<Types> {
+public class StructExprGVisitor extends SlipParserBaseVisitor<Types> {
 
     private SlipScope currentScope;
     private boolean errorOccurred;

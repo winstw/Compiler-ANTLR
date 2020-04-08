@@ -198,7 +198,7 @@ public class Main {
         LOG.debug("Building symbol table");
         //Map<String, Integer> symTable = fillSymTable(tree);
         if (!SemanticChecker.run(tree)) {
-            throw new RuntimeException("there is semantic error");
+            throw new RuntimeException("there are semantic error");
         }
         LOG.debug("Building symbol table: done");
         // Print NBC Code

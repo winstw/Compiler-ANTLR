@@ -1,7 +1,6 @@
 
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.symboltable.SlipScope;
@@ -10,20 +9,13 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
-
-public class StructExprGVisitor extends SlipBaseVisitor<Type> {
+public class StructExprGVisitor extends CheckSlipVisitor<Type> {
 
     private SlipScope currentScope;
-    private boolean errorOccurred;
 
-    public StructExprGVisitor(SlipScope currentScope) {
+    public StructExprGVisitor(SlipScope currentScope, ErrorHandler e) {
+        super(e);
         this.currentScope = currentScope;
-        this.errorOccurred = false;
-    }
-
-    public boolean hasErrorOccurred() {
-        return errorOccurred;
     }
 
     @Override
@@ -31,7 +23,7 @@ public class StructExprGVisitor extends SlipBaseVisitor<Type> {
         if (tree instanceof SlipParser.LeftExprIDContext || tree instanceof SlipParser.LeftExprRecordContext) {
             return super.visit(tree);
         } else {
-            System.out.println("SOMETHING WENT WRONG BE CAREFULL");
+            System.out.println("SOMETHING WENT WRONG BE CAREFUL");
             return Type.VOID;
         }
     }
@@ -49,8 +41,7 @@ public class StructExprGVisitor extends SlipBaseVisitor<Type> {
 
             return declaredId.getType();
         } catch (SymbolNotFoundException e){
-            errorOccurred = true;
-            printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Type.VOID;
     }
@@ -67,10 +58,9 @@ public class StructExprGVisitor extends SlipBaseVisitor<Type> {
             if (type == Type.STRUCT) {
                 currentScope = (SlipStructureSymbol) symbol;
             }
-            System.out.println(symbol);
 
         } catch (SymbolNotFoundException e) {
-            printError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
+            signalError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
         }
 
         return type;

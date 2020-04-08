@@ -1,6 +1,5 @@
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
@@ -17,32 +16,28 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
-import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
-
+public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
+    GlobalDefinitionPhase(ErrorHandler e) {
+        super(e);
+    }
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
         SlipLexer lexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(input)));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SlipParser parser = new SlipParser(tokens);
         parser.setErrorHandler(new SlipErrorStrategy());
-
+        ErrorHandler errorHandler = new ErrorHandler();
         SlipParser.ProgramContext tree = parser.program();
-        GlobalDefinitionPhase visitor = new GlobalDefinitionPhase();
+        GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
         visitor.visit(tree);
     }
 
     private ParseTreeProperty<SlipScope> scopes = new ParseTreeProperty<>();
     private SlipScope currentScope;
-    private boolean errorOccurred = false;
 
     public ParseTreeProperty<SlipScope> getScopes() {
         return scopes;
-    }
-
-    public boolean hasErrorOccurred() {
-        return errorOccurred;
     }
 
     @Override
@@ -52,8 +47,8 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
         if (ctx.prog() != null) {
             visit(ctx.prog());
         } else if (ctx.map() != null) {
-            MapVisitor mapVisitor = new MapVisitor();
-            this.errorOccurred = mapVisitor.visit(ctx.map());
+            MapVisitor mapVisitor = new MapVisitor(this.errorHandler);
+            mapVisitor.visit(ctx.map());
         }
 
         System.out.println("=== STOP ===");
@@ -105,8 +100,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
-                printError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
         }
     }
@@ -146,8 +140,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
-                printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
         }
@@ -181,8 +174,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                errorOccurred = true;
-                printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
 
@@ -223,8 +215,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccurred = true;
-            printError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
+            signalError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
         }
 
         if (ctx.argList() != null) {
@@ -234,7 +225,6 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
                 }
             }
         }
-
     }
 
     @Override
@@ -246,8 +236,7 @@ public class GlobalDefinitionPhase extends SlipBaseVisitor<Type> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorOccurred = true;
-            printError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
+            errorHandler.signalError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
         }
 
         scopes.put(ctx, symbol);

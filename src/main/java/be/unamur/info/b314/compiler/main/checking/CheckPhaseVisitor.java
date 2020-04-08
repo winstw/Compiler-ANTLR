@@ -1,6 +1,5 @@
 package be.unamur.info.b314.compiler.main.checking;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
@@ -22,9 +21,13 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
-public class SecondPassVisitor extends SlipBaseVisitor<Type> {
+public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
+
+    CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e) {
+        super(e);
+        this.scopes = scopes;
+    }
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
@@ -34,34 +37,16 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         parser.setErrorHandler(new SlipErrorStrategy());
 
         SlipParser.ProgramContext tree = parser.program();
-        GlobalDefinitionPhase visitor = new GlobalDefinitionPhase();
+        ErrorHandler errorHandler = new ErrorHandler();
+        GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
         visitor.visit(tree);
-        SecondPassVisitor second = new SecondPassVisitor(visitor.getScopes());
+        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
     }
 
     private ParseTreeProperty<SlipScope> scopes;
     private SlipScope currentScope;
-    private boolean errorOccurred = false;
     private boolean assignationContext = false;
-
-    public SecondPassVisitor(ParseTreeProperty<SlipScope> scopes){
-        this.scopes = scopes;
-    }
-
-    public boolean hasErrorOccurred() {
-        return this.errorOccurred;
-    }
-
-    private <T> boolean checkEqual(T firstValue, T secondValue, Token t, String message){
-        boolean equal = true;
-        if (firstValue != secondValue){
-            equal = false;
-            this.errorOccurred = true;
-            printError(t, message);
-        }
-        return equal;
-    }
 
     @Override
     public Type visitProgram(SlipParser.ProgramContext ctx) {
@@ -124,7 +109,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         for(SlipParser.VarDefContext varDef : ctx.varDef()) {
             visit(varDef);
         }
-
         return Type.VOID;
     }
 
@@ -139,15 +123,15 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     @Override
     public Type visitFuncExpr(SlipParser.FuncExprContext ctx) {
         try {
-            SlipSymbol symbol = this.currentScope.resolve(ctx.ID().getText());
-
+            String funcName = ctx.ID().getText();
+            SlipSymbol symbol = this.currentScope.resolve(funcName);
 
             SlipMethodSymbol scopedFunc;
             if (symbol instanceof SlipMethodSymbol) {
                 scopedFunc = (SlipMethodSymbol) symbol;
             } else {
                 // in case of recursive call we try to get the Method symbol of the same name out of the function's scope
-                SlipSymbol sameNameSymbol = this.currentScope.getParentScope().resolve(ctx.ID().getText());
+                SlipSymbol sameNameSymbol = this.currentScope.getParentScope().resolve(funcName);
                 if (sameNameSymbol instanceof SlipMethodSymbol){
                     scopedFunc = (SlipMethodSymbol) sameNameSymbol;
                 } else throw new SymbolNotFoundException();
@@ -159,8 +143,8 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                     ctx.exprD().size(),
                     scopedFunc.getNumberOfParameters(),
                     ctx.start,
-                    String.format("function %s expects %d argument(s)", scopedFunc.getName(), scopedFunc.getNumberOfParameters())))
-                {
+                    String.format("function %s expects %d argument(s)", funcName, scopedFunc.getNumberOfParameters()))
+               ){
                 return scopedFunc.getType();
             }
 
@@ -170,20 +154,15 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 if (declaredParamTypes.hasNext()) {
                     Type declaredParamType = declaredParamTypes.next();
                     System.out.println("EFFECTIVE : " + actualParamType + " DECLARED : " + declaredParamType);
-                    checkEqual(actualParamType,
-                            declaredParamType,
-                            param.start,
-                            String.format("parameter %s should be of type %s instead of %s", param.getText(), declaredParamType, actualParamType));
-                } else {
-                    this.errorOccurred =  true;
-                    System.out.println("too many arguments");
+                    checkEqual(actualParamType, declaredParamType, param.start,
+                               String.format("parameter %s of %s should be of type %s instead of %s",
+                                             param.getText(), funcName ,declaredParamType, actualParamType));
                 }
             }
 
             return scopedFunc.getType();
         } catch (SymbolNotFoundException e) {
-            this.errorOccurred = true;
-            printError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
+            signalError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
         }
         return Type.VOID;
     }
@@ -197,7 +176,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     public Type visitVarDecl(SlipParser.VarDeclContext ctx){
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
-
         Type definedVarType = visit(ctx.scalar());
         System.out.println("VAR DECLARATION : " + definedVarType);
 
@@ -206,8 +184,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
                 } catch (SymbolAlreadyDefinedException e) {
-                    this.errorOccurred = true;
-                    printError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
+                    signalError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
         }
@@ -221,8 +198,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                                ctx.exprD().start,
                                String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         } else if (isConst) {
-            this.errorOccurred = true;
-            printError(ctx.start,String.format("const var not initialized: %s", ctx.ID(0).getText()));
+            signalError(ctx.start,String.format("const var not initialized: %s", ctx.ID(0).getText()));
         }
 
         return definedVarType;
@@ -243,8 +219,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    this.errorOccurred = true;
-                    printError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                    signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
                 }
 
@@ -279,8 +254,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                           ctx.initArrays().start,
                           String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
         } else if (isConst) {
-            this.errorOccurred = true;
-            printError(ctx.start,String.format("const array not initialized: %s", ctx.ID(0).getText()));
+            signalError(ctx.start,String.format("const array not initialized: %s", ctx.ID(0).getText()));
         }
         return definedVarType;
     }
@@ -321,10 +295,8 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 } catch (NullPointerException e) {
                     e.printStackTrace();
                 } catch (SymbolAlreadyDefinedException e) {
-                    this.errorOccurred = true;
-                    printError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                    signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
                 }
-
             }
         }
 
@@ -342,8 +314,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 try {
                     this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
                 } catch (SymbolAlreadyDefinedException e) {
-                    this.errorOccurred = true;
-                    printError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
+                    signalError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
                 }
             }
         }
@@ -402,14 +373,12 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
                 }
 
                 if (errorMessage != null) {
-                    this.errorOccurred = true;
-                    printError(ctx.ID().getSymbol(), errorMessage);
+                    signalError(ctx.ID().getSymbol(), errorMessage);
                 }
             }
             return symbol.getType();
         } catch (SymbolNotFoundException e){
-            this.errorOccurred = true;
-            printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
         return Type.VOID;
     }
@@ -420,13 +389,11 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         try {
             SlipSymbol symbol = currentScope.resolve(idName);
             if (this.assignationContext && !symbol.isAssignable()) {
-                    this.errorOccurred = true;
-                    printError(ctx.ID().getSymbol(), String.format("cannot assign to const array \"%s\"", idName));
+                    signalError(ctx.ID().getSymbol(), String.format("cannot assign to const array \"%s\"", idName));
             }
                 return symbol.getType();
         } catch (SymbolNotFoundException e){
-            this.errorOccurred = true;
-            printError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
         }
 
         return Type.VOID;
@@ -435,12 +402,8 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     @Override
     public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
-        StructExprGVisitor visitor = new StructExprGVisitor(currentScope);
+        StructExprGVisitor visitor = new StructExprGVisitor(currentScope, this.errorHandler);
         Type type = visitor.visit(ctx);
-
-        if (visitor.hasErrorOccurred()) {
-            this.errorOccurred = true;
-        }
 
         return type;
     }
@@ -465,7 +428,6 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         return visit(ctx.exprD());
     }
 
-
     @Override
     public Type visitString(SlipParser.StringContext ctx){
         return Type.STRING;
@@ -480,6 +442,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     public Type visitIntExpr(SlipParser.IntExprContext ctx){
         return Type.INTEGER;
     }
+
     @Override
     public Type visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
         Type type = visit(ctx.exprD());

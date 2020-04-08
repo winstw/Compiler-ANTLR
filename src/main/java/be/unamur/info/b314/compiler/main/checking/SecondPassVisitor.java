@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.printError;
 
@@ -487,40 +488,40 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
 
         return Type.INTEGER;
     }
+
+    private void checkAndVisitExprD(Type requiredType, String errorMessage, List<SlipParser.ExprDContext> exprDContexts){
+        for (SlipParser.ExprDContext expr: exprDContexts) {
+            Type type = visit(expr);
+            checkEqual(type, requiredType, expr.start, errorMessage);
+        }
+    }
+
     @Override
     public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
-
-        for (SlipParser.ExprDContext expr: ctx.exprD()) {
-            Type type = visit(expr);
-            checkEqual(type, Type.INTEGER, expr.start, "can only use '*', '/' and '%' operators on expressions of type integer");
-        }
-
+        checkAndVisitExprD(Type.INTEGER, "can only use '*', '/' and '%' operators on expressions of type integer", ctx.exprD());
         return Type.INTEGER;
     }
+
     @Override
     public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
-
-        for (SlipParser.ExprDContext expr: ctx.exprD()) {
-            Type type = visit(expr);
-            checkEqual(type, Type.INTEGER, expr.start, "can only use '+' and '-' operators on expressions of type integer");
-        }
-
+        checkAndVisitExprD(Type.INTEGER, "can only use '+' and '-' operators on expressions of type integer", ctx.exprD());
         return Type.INTEGER;
     }
 
     @Override
-    public Type visitTrueExpr(SlipParser.TrueExprContext ctx){
+    public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
+        checkAndVisitExprD(Type.INTEGER, "can only compare integer expressions", ctx.exprD());
         return Type.BOOLEAN;
     }
 
     @Override
     public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx){
+        checkAndVisitExprD(Type.BOOLEAN, "can only use 'AND' & 'OR' on expressions of type boolean", ctx.exprD());
+        return Type.BOOLEAN;
+    }
 
-        for (SlipParser.ExprDContext expr : ctx.exprD()) {
-            Type type = visit(expr);
-            checkEqual(type, Type.BOOLEAN, expr.start, "can only compare expressions of type boolean");
-        }
-
+    @Override
+    public Type visitTrueExpr(SlipParser.TrueExprContext ctx){
         return Type.BOOLEAN;
     }
 
@@ -539,16 +540,7 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         return Type.BOOLEAN;
     }
 
-    @Override
-    public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
 
-        for (SlipParser.ExprDContext expr : ctx.exprD()) {
-            Type type = visit(expr);
-            checkEqual(type, Type.INTEGER, expr.start, "can only compare integer expressions");
-        }
-
-        return Type.BOOLEAN;
-    }
 
     @Override
     public Type visitNotExpr(SlipParser.NotExprContext ctx){
@@ -559,59 +551,32 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
         return Type.BOOLEAN;
     }
 
-    @Override
-    public Type visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
-
-        Type type = visit(ctx.exprD());
-        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
-
-        for (SlipParser.InstructionContext inst : ctx.instruction()) {
-            visit(inst);
+    private Type checkGuardAndVisitInstr(Type actualType, Token errorToken, List<SlipParser.InstructionContext> toVisitContexts){
+        checkEqual(actualType, Type.BOOLEAN, errorToken, "expression must be of type boolean");
+        for (SlipParser.InstructionContext ctx : toVisitContexts) {
+            visit(ctx);
         }
-
         return Type.VOID;
     }
 
     @Override
-    public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
-
-        Type type = visit(ctx.exprD());
-
-        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
-
-        for (SlipParser.InstructionContext inst : ctx.instruction()) {
-            visit(inst);
-        }
-
-        return Type.VOID;
+    public Type visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
+        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
     @Override
     public Type visitWhileInstr(SlipParser.WhileInstrContext ctx) {
+        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
+    }
 
-        Type type = visit(ctx.exprD());
-
-        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
-
-        for (SlipParser.InstructionContext inst : ctx.instruction()) {
-            visit(inst);
-        }
-
-        return Type.VOID;
+    @Override
+    public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
+        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
     @Override
     public Type visitUntilInstr(SlipParser.UntilInstrContext ctx) {
-
-        Type type = visit(ctx.exprD());
-
-        checkEqual(type, Type.BOOLEAN, ctx.exprD().start, "expression must be of type boolean");
-
-        for (SlipParser.InstructionContext inst : ctx.instruction()) {
-            visit(inst);
-        }
-
-        return Type.VOID;
+        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
     @Override

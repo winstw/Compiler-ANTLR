@@ -138,7 +138,20 @@ public class SecondPassVisitor extends SlipBaseVisitor<Type> {
     @Override
     public Type visitFuncExpr(SlipParser.FuncExprContext ctx) {
         try {
-            SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(ctx.ID().getText());
+            SlipSymbol symbol = this.currentScope.resolve(ctx.ID().getText());
+
+
+            SlipMethodSymbol scopedFunc;
+            if (symbol instanceof SlipMethodSymbol) {
+                scopedFunc = (SlipMethodSymbol) symbol;
+            } else {
+                // in case of recursive call we try to get the Method symbol of the same name out of the function's scope
+                SlipSymbol sameNameSymbol = this.currentScope.getParentScope().resolve(ctx.ID().getText());
+                if (sameNameSymbol instanceof SlipMethodSymbol){
+                    scopedFunc = (SlipMethodSymbol) sameNameSymbol;
+                } else throw new SymbolNotFoundException();
+            }
+
             System.out.println("FUNC CALL : " + scopedFunc + " Type : " + scopedFunc.getType());
 
             if(!checkEqual(

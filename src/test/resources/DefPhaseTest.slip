@@ -1,20 +1,51 @@
 #import "world.map"
 
-    f1 as integer;
+    z as integer;
+    f as integer;
 
- fct1 as function():integer
-    do
-     f1 := 42;
-     fct1 := f1;
-    end
+facto as function(x as integer):integer
+do
+
+ if((x < 0) or (x = 0)) then
+   facto := 1;
+  else
+   facto := x * facto(x - 1);
+  end
+
+end
+
+x as integer;
 
 main as function():void
 do
-   if(fct1() <> 42) then
-   	 left();
+   x := 5;
+   z := facto(x);
+
+   if (not(z = (5*4*3*2*1))) then
+       right(5);
    end
+
    dig();
-end
+
+ end
+
+// #import "world.map"
+
+// f1 as integer;
+
+//  fct1 as function():integer
+//     do
+//      f1 := 42;
+//      fct1 := f1;
+//     end
+
+// main as function():void
+// do
+//    if(fct1() <> 42) then
+//    	 left();
+//    end
+//    dig();
+// end
 
 // #import "world.map"
 // const a as integer;

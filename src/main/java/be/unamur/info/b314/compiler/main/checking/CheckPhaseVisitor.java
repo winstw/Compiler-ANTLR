@@ -413,6 +413,7 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     public Type visitAssignInstr(SlipParser.AssignInstrContext ctx) {
         this.assignationContext = true;
         Type exprGType = visit(ctx.exprG());
+        this.assignationContext = false;
         Type exprDType = visit(ctx.exprD());
 
         checkEqual(exprGType,
@@ -420,7 +421,7 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
                      ctx.start,
                      String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
 
-        this.assignationContext = false;
+
         return Type.VOID;
     }
 

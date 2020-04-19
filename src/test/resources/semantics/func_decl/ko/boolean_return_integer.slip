@@ -1,0 +1,15 @@
+#import "map.map"
+
+i as integer;
+
+fun as function(): boolean
+do
+  fun := 4;
+end
+
+main as function(): void
+do
+  i := fun();
+  right(i);
+  dig();
+end

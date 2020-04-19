@@ -27,5 +27,17 @@ public class SlipSyntaxScoped_DeclTest {
     };
 
     // tests OK
+    @Test
+    public void test_var_in_fun_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/scoped_decl/ok/var_in_fun.slip", testFolder.newFile(), true, "syntax::scoped_decl: var_in_fun.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_var_end_fun_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/scoped_decl/ko/var_end_fun.slip", testFolder.newFile(), false, "syntax::scoped_decl: var_end_fun.slip");
+    }
+
+
 }

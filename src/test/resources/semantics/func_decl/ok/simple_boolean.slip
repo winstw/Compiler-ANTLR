@@ -1,0 +1,14 @@
+#import "map.map"
+
+i as boolean;
+
+fun as function(): boolean
+do
+  fun := true;
+end
+
+main as function(): void
+do
+  i := fun();
+  dig();
+end

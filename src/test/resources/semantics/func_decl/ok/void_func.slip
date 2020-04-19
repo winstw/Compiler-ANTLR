@@ -1,0 +1,11 @@
+#import "map.map"
+
+fun as function(): void
+do
+  right(2);
+end
+
+main as function(): void
+do
+  dig();
+end

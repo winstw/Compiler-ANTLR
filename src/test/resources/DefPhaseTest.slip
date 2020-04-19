@@ -1,20 +1,37 @@
-/* Test */
+#import "file.map"
 
-#import "world.map"
+ok as boolean = true;
+const ko as boolean = false;
+test as boolean;
 
-    v1 as boolean;
-    i as integer;
-    s as char;
-
-main as function():void
+main as function(): void
 do
-i := 5;
-down(5);
-fight();
 
-dig();
+    test := ok;
+    test := ko;
+
+    dig();
 
 end
+
+
+# /* Test */
+
+# #import "world.map"
+
+#     v1 as boolean;
+#     i as integer;
+#     s as char;
+
+# main as function():void
+# do
+# i := 5;
+# down(5);
+# fight();
+
+# dig();
+
+# end
 
 // #import "world.map"
 

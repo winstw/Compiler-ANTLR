@@ -27,5 +27,23 @@ public class SlipSyntaxFunc_DeclTest {
     };
 
     // tests OK
+    @Test
+    public void test_simple_func_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ok/simple_func.slip", testFolder.newFile(), true, "syntax::func_decl: simple_func.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_no_instruction_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ko/no_instruction.slip", testFolder.newFile(), false, "syntax::func_decl: no_instruction.slip");
+    }
+
+
+    @Test
+    public void test_no_return_type_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ko/no_return_type.slip", testFolder.newFile(), false, "syntax::func_decl: no_return_type.slip");
+    }
+
+
 }

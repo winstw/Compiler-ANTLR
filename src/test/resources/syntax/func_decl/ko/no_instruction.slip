@@ -1,0 +1,10 @@
+#import "map.map"
+
+fun as function(): void
+do
+end
+
+main as function(): void
+do
+  dig();
+end

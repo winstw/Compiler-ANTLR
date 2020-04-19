@@ -1,16 +1,11 @@
 package be.unamur.info.b314.compiler.main;
 
-
-
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
-import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
-
 
 import be.unamur.info.b314.compiler.NBCPrinter;
 import be.unamur.info.b314.compiler.NBCVisitor;
 import be.unamur.info.b314.compiler.SymTableFiller;
-import be.unamur.info.b314.compiler.exception.ParsingException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import java.io.File;
@@ -22,13 +17,11 @@ import java.util.Map;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-import be.unamur.info.b314.compiler.SymTableFiller;
 import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -62,25 +55,19 @@ public class Main {
 
         // Print the tested file
         String filename = args[1];
-
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))){
             String line = "";
-            BufferedReader br = new BufferedReader(new FileReader(filename));
             LOG.debug("-- Printing file content --");
 
             while ((line = br.readLine()) != null) {
                 LOG.debug(line);
             }
-
             LOG.debug("-- End of file content --");
         } catch (FileNotFoundException e) {
             LOG.error("File not found");
         } catch (IOException e) {
             LOG.error("Unable to read the file.");
         }
-
-
-
         Main main = new Main();
         CommandLineParser parser = new DefaultParser();
         CommandLine line = null;

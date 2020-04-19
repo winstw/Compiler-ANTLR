@@ -87,6 +87,7 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     public Type visitFuncDecl(SlipParser.FuncDeclContext ctx){
         // function inspection
         SlipScope localScope = scopes.get(ctx);
+
         this.currentScope = localScope;
         System.out.println("SCOPE : " + currentScope.getName());
 

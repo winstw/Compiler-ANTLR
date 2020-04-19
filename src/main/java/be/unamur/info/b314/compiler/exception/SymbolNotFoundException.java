@@ -1,8 +1,6 @@
 package be.unamur.info.b314.compiler.exception;
 
 
-
-
 /**
  *
  * @author James Ortiz - james.ortizvega@unamur.be

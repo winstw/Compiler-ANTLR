@@ -18,9 +18,11 @@ import java.io.IOException;
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
+
     GlobalDefinitionPhase(ErrorHandler e) {
         super(e);
     }
+
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
         SlipLexer lexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(input)));

@@ -5,7 +5,7 @@ import be.unamur.info.b314.compiler.NBCPrinter.NBCCodeTypes;
 import java.util.Map;
 
 /**
- * Print PCode for a given tree using provided symbol table and printer. This 
+ * Print PCode for a given tree using provided symbol table and printer. This
  * class uses ANTLR visitor mechanism.
  */
 public class NBCVisitor extends PlayPlusBaseVisitor<Object> {

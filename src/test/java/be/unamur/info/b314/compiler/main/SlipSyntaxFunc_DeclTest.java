@@ -46,4 +46,10 @@ public class SlipSyntaxFunc_DeclTest {
     }
 
 
+    @Test
+    public void test_fun_name_already_defined_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ko/fun_name_already_defined.slip", testFolder.newFile(), false, "syntax::func_decl: fun_name_already_defined.slip");
+    }
+
+
 }

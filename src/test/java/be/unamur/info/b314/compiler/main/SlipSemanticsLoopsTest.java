@@ -27,16 +27,22 @@ public class SlipSemanticsLoopsTest {
     };
 
     // tests OK
+    @Test
+    public void test_nested_loops_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/loops/ok/nested_loops.slip", testFolder.newFile(), true, "semantics::loops: nested_loops.slip");
+    }
+
+
     // tests KO
     @Test
-    public void test_repeat_no_boolean_until_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/loops/ko/repeat_no_boolean_until.slip", testFolder.newFile(), false, "semantics::loops: repeat_no_boolean_until.slip");
+    public void test_while_wrong_guard_type_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/loops/ko/while_wrong_guard_type.slip", testFolder.newFile(), false, "semantics::loops: while_wrong_guard_type.slip");
     }
 
 
     @Test
-    public void test_repeat_no_until_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/loops/ko/repeat_no_until.slip", testFolder.newFile(), false, "semantics::loops: repeat_no_until.slip");
+    public void test_repeat_no_boolean_until_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/loops/ko/repeat_no_boolean_until.slip", testFolder.newFile(), false, "semantics::loops: repeat_no_boolean_until.slip");
     }
 
 

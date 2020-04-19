@@ -1,0 +1,11 @@
+#import "what.map"
+
+main as function(): void
+do
+
+  while(2)
+  do
+    left();
+  end
+  dig();
+end

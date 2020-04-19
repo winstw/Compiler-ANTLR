@@ -10,9 +10,9 @@ import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SlipSemanticsIfTest {
+public class SlipSemanticsMapTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SlipSemanticsIfTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SlipSemanticsMapTest.class);
 
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder(); // Create a temporary folder for outputs deleted after tests
@@ -27,5 +27,17 @@ public class SlipSemanticsIfTest {
     };
 
     // tests OK
+    @Test
+    public void test_map_one_line_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/map/ok/map_one_line.slip", testFolder.newFile(), true, "semantics::map: map_one_line.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_map_wrong_size_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/map/ko/map_wrong_size.slip", testFolder.newFile(), false, "semantics::map: map_wrong_size.slip");
+    }
+
+
 }

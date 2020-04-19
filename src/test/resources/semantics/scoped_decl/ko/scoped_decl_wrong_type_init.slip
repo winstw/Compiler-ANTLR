@@ -2,10 +2,7 @@
 
 fun as function(): void
 do
-  bools as boolean[1] = (true);
-  numbers as integer[5, 5];
-  numbers[2, 3] := 4;
-  a as integer;
+  a as boolean = 2;
   right();
 end
 

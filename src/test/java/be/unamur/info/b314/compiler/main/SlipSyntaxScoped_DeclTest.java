@@ -35,6 +35,12 @@ public class SlipSyntaxScoped_DeclTest {
 
     // tests KO
     @Test
+    public void test_var_wrong_scope_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/scoped_decl/ko/var_wrong_scope.slip", testFolder.newFile(), false, "syntax::scoped_decl: var_wrong_scope.slip");
+    }
+
+
+    @Test
     public void test_var_end_fun_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/scoped_decl/ko/var_end_fun.slip", testFolder.newFile(), false, "syntax::scoped_decl: var_end_fun.slip");
     }

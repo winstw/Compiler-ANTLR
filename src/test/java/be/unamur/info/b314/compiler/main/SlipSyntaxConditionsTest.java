@@ -28,8 +28,14 @@ public class SlipSyntaxConditionsTest {
 
     // tests OK
     @Test
-    public void test_simple_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/conditions/ok/simple.slip", testFolder.newFile(), true, "syntax::conditions: simple.slip");
+    public void test_simple_if_then_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/conditions/ok/simple_if_then.slip", testFolder.newFile(), true, "syntax::conditions: simple_if_then.slip");
+    }
+
+
+    @Test
+    public void test_simple_if_then_else_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/conditions/ok/simple_if_then_else.slip", testFolder.newFile(), true, "syntax::conditions: simple_if_then_else.slip");
     }
 
 

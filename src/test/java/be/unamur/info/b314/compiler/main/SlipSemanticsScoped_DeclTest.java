@@ -27,5 +27,17 @@ public class SlipSemanticsScoped_DeclTest {
     };
 
     // tests OK
+    @Test
+    public void test_mixed_decl_inside_fn_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/scoped_decl/ok/mixed_decl_inside_fn.slip", testFolder.newFile(), true, "semantics::scoped_decl: mixed_decl_inside_fn.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_scoped_decl_wrong_type_init_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/scoped_decl/ko/scoped_decl_wrong_type_init.slip", testFolder.newFile(), false, "semantics::scoped_decl: scoped_decl_wrong_type_init.slip");
+    }
+
+
 }

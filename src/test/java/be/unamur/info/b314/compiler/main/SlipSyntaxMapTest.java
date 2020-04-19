@@ -10,9 +10,9 @@ import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SlipSemanticsImportTest {
+public class SlipSyntaxMapTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SlipSemanticsImportTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SlipSyntaxMapTest.class);
 
     @Rule
     public TemporaryFolder testFolder = new TemporaryFolder(); // Create a temporary folder for outputs deleted after tests
@@ -27,5 +27,11 @@ public class SlipSemanticsImportTest {
     };
 
     // tests OK
+    @Test
+    public void test_simple_map_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/map/ok/simple_map.slip", testFolder.newFile(), true, "syntax::map: simple_map.slip");
+    }
+
+
     // tests KO
 }

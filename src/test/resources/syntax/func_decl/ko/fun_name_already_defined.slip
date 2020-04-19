@@ -1,0 +1,12 @@
+#import "map.map"
+fun as integer;
+
+fun as function(): void
+do
+  fight();
+end
+
+main as function(): void
+do
+  dig();
+end

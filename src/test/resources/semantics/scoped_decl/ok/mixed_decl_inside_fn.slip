@@ -1,0 +1,15 @@
+#import "map.map"
+
+fun as function(): void
+do
+  a as boolean = true;
+  b as boolean;
+  const i as integer = 3;
+  j as integer;
+  right(i);
+end
+
+main as function(): void
+do
+  dig();
+end

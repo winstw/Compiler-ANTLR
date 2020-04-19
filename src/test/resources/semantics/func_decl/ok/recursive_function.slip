@@ -1,0 +1,15 @@
+#import "recur.map"
+
+add as function(a as integer, b as integer): integer
+do
+  if (b = 0) then
+    add := a;
+  else
+    add := add(a + 1, b - 1);
+  end
+end
+
+main as function(): void
+do
+  dig();
+end

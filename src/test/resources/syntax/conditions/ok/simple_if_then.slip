@@ -1,0 +1,9 @@
+#import "what.map"
+
+main as function(): void
+do
+  if (2 > 1) then
+     right();
+  end
+  dig();
+end

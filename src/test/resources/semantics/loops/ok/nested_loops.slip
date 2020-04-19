@@ -1,0 +1,24 @@
+#import "what.map"
+
+main as function(): void
+do
+  i as integer;
+  j as integer;
+  k as integer = 0;
+
+  repeat
+    while(i < 3)
+    do
+      for j:= 1 to (j < 5)
+        do
+          right();
+        end
+      left();
+      i := i + 1;
+      k := k + i;
+    end
+    until (k < 30)
+  end
+
+  dig();
+end

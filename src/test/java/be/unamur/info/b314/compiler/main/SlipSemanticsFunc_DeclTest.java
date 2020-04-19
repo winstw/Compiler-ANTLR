@@ -34,6 +34,12 @@ public class SlipSemanticsFunc_DeclTest {
 
 
     @Test
+    public void test_recursive_function_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/recursive_function.slip", testFolder.newFile(), true, "semantics::func_decl: recursive_function.slip");
+    }
+
+
+    @Test
     public void test_one_param_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/one_param.slip", testFolder.newFile(), true, "semantics::func_decl: one_param.slip");
     }

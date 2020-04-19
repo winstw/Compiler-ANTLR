@@ -1,0 +1,12 @@
+#import "file.map"
+
+number as integer;
+
+main as function(): void
+do
+
+    number := true;
+
+    dig();
+
+end

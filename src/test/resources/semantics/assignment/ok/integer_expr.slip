@@ -1,0 +1,16 @@
+#import "file.map"
+
+number as integer;
+
+main as function(): void
+do
+
+    number := 1 + 9;
+    number := 11 - 1;
+    number := 2 * 5;
+    number := 30 / 3;
+    number := 21 % 11;
+
+    dig();
+
+end

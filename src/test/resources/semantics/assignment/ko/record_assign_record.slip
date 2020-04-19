@@ -1,0 +1,18 @@
+#import "file.map"
+
+struct1 as record
+    x as integer = 2;
+end;
+
+struct2 as record
+    ok as boolean = true;
+end;
+
+main as function(): void
+do
+
+    struct1 := struct2;
+
+    dig();
+
+end

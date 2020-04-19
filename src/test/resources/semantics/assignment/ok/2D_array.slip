@@ -1,0 +1,16 @@
+#import "file.map"
+
+intArray as integer[5, 5];
+boolArray as boolean[5, 5];
+charArray as char[5, 5];
+
+main as function(): void
+do
+
+    intArray[2, 1] := 5;
+    boolArray[2, 1] := true;
+    charArray[2, 1] := 'c';
+
+    dig();
+
+end

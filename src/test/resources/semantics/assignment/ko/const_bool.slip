@@ -1,0 +1,12 @@
+#import "file.map"
+
+const ok as boolean = true;
+
+main as function(): void
+do
+
+    ok := false;
+
+    dig();
+
+end

@@ -5,7 +5,6 @@ import be.unamur.info.b314.compiler.SlipParser;
 
 import be.unamur.info.b314.compiler.NBCPrinter;
 import be.unamur.info.b314.compiler.NBCVisitor;
-import be.unamur.info.b314.compiler.SymTableFiller;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import java.io.File;
@@ -183,7 +182,6 @@ public class Main {
         LOG.debug("AST is {}", tree.toStringTree(parser));
         // Build symbol table
         LOG.debug("Building symbol table");
-        //Map<String, Integer> symTable = fillSymTable(tree);
         if (!SemanticChecker.run(tree)) {
             throw new RuntimeException("there are semantic error");
         }
@@ -219,16 +217,6 @@ public class Main {
             throw new IllegalArgumentException("Error while parsing input!");
         }
         return tree;
-    }
-
-    /**
-     * Builds symbol table from AST.
-     */
-    private Map<String, Integer> fillSymTable(SlipParser.ProgramContext tree) {
-        SymTableFiller filler = new SymTableFiller();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(filler, tree);
-        return filler.getSymTable();
     }
 
 

@@ -3,9 +3,6 @@ package be.unamur.info.b314.compiler.main;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 
-import be.unamur.info.b314.compiler.NBCPrinter;
-import be.unamur.info.b314.compiler.NBCVisitor;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import java.io.File;
 import java.io.FileInputStream;
@@ -220,13 +217,13 @@ public class Main {
     }
 
 
-    private void printNBCCode(SlipParser.ProgramContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
-
-        NBCPrinter printer = new NBCPrinter("nbcCode.nbc");
-        NBCVisitor visitor = new NBCVisitor(symTable, printer);
-        tree.accept(visitor);
-        printer.flush();
-        printer.close();
-    }
-
+//    private void printNBCCode(SlipParser.ProgramContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
+//
+//        NBCPrinter printer = new NBCPrinter("nbcCode.nbc");
+//        NBCVisitor visitor = new NBCVisitor(symTable, printer);
+//        tree.accept(visitor);
+//        printer.flush();
+//        printer.close();
+//    }
+//
 }

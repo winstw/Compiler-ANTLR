@@ -1,0 +1,8 @@
+#import "what.map"
+
+const hello as integer;
+
+main as function(): void
+do
+  dig();
+end

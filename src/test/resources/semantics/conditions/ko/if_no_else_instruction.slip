@@ -1,0 +1,10 @@
+#import "what.map"
+
+main as function(): void
+do
+  if (true) then
+      left();
+  else
+  end
+  dig();
+end

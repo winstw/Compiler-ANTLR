@@ -1,0 +1,13 @@
+#import "what.map"
+
+b as boolean;
+
+main as function(): void
+do
+  if (b) then
+    right();
+  else
+    left();
+  end
+  dig();
+end

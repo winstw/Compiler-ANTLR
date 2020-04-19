@@ -1,18 +1,44 @@
-#import "file.map"
+#import "what.map"
 
-ok as boolean = true;
-const ko as boolean = false;
-test as boolean;
+b as boolean = true;
 
 main as function(): void
 do
-
-    test := ok;
-    test := ko;
-
-    dig();
-
+  if (true) then
+    do
+      right();
+    end
+  else
+  do
+    left();
+  end
+  dig();
 end
+
+# #import "what.map"
+
+# const hello as integer := 3;
+
+# main as function(): void
+# do
+#   dig();
+# end
+
+# #import "file.map"
+
+# ok as boolean = true;
+# const ko as boolean = false;
+# test as boolean;
+
+# main as function(): void
+# do
+
+#     test := ok;
+#     test := ko;
+
+#     dig();
+
+# end
 
 
 # /* Test */

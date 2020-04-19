@@ -59,8 +59,8 @@ public class SlipSyntaxLoopsTest {
 
 
     @Test
-    public void test_repeat_no_until_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/loops/ko/repeat_no_until.slip", testFolder.newFile(), false, "syntax::loops: repeat_no_until.slip");
+    public void test_repeat_do_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/loops/ko/repeat_do.slip", testFolder.newFile(), false, "syntax::loops: repeat_do.slip");
     }
 
 

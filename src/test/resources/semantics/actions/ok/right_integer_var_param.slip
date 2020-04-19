@@ -1,0 +1,9 @@
+#import "file.map"
+
+a as integer = 2;
+
+main as function(): void
+do
+ right(a);
+ dig();
+end

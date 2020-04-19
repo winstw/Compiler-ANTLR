@@ -27,5 +27,17 @@ public class SlipSemanticsActionsTest {
     };
 
     // tests OK
+    @Test
+    public void test_right_integer_var_param_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/actions/ok/right_integer_var_param.slip", testFolder.newFile(), true, "semantics::actions: right_integer_var_param.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_right_boolean_arg_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/actions/ko/right_boolean_arg.slip", testFolder.newFile(), false, "semantics::actions: right_boolean_arg.slip");
+    }
+
+
 }

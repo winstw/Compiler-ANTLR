@@ -28,14 +28,14 @@ public class SlipSemanticsFunc_DeclTest {
 
     // tests OK
     @Test
-    public void test_param_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/param.slip", testFolder.newFile(), true, "semantics::func_decl: param.slip");
+    public void test_simple_boolean_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/simple_boolean.slip", testFolder.newFile(), true, "semantics::func_decl: simple_boolean.slip");
     }
 
 
     @Test
-    public void test_simple_boolean_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/simple_boolean.slip", testFolder.newFile(), true, "semantics::func_decl: simple_boolean.slip");
+    public void test_one_param_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/func_decl/ok/one_param.slip", testFolder.newFile(), true, "semantics::func_decl: one_param.slip");
     }
 
 
@@ -65,6 +65,12 @@ public class SlipSemanticsFunc_DeclTest {
 
 
     @Test
+    public void test_wrong_param_order_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/func_decl/ko/wrong_param_order.slip", testFolder.newFile(), false, "semantics::func_decl: wrong_param_order.slip");
+    }
+
+
+    @Test
     public void test_call_with_wrong_param_type_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/semantics/func_decl/ko/call_with_wrong_param_type.slip", testFolder.newFile(), false, "semantics::func_decl: call_with_wrong_param_type.slip");
     }
@@ -77,8 +83,8 @@ public class SlipSemanticsFunc_DeclTest {
 
 
     @Test
-    public void test_wrong_type_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/func_decl/ko/wrong_type.slip", testFolder.newFile(), false, "semantics::func_decl: wrong_type.slip");
+    public void test_wrong_param_type_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/func_decl/ko/wrong_param_type.slip", testFolder.newFile(), false, "semantics::func_decl: wrong_param_type.slip");
     }
 
 

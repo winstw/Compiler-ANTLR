@@ -35,8 +35,8 @@ public class SlipSyntaxConditionsTest {
 
     // tests KO
     @Test
-    public void test_if_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/conditions/ko/if.slip", testFolder.newFile(), false, "syntax::conditions: if.slip");
+    public void test_if_do_block_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/conditions/ko/if_do_block.slip", testFolder.newFile(), false, "syntax::conditions: if_do_block.slip");
     }
 
 

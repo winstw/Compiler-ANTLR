@@ -2,10 +2,10 @@
 
 main as function(): void
 do
-  if (true) then
+  if (1) then
     do
-     right();
-     end
+      right();
+    end
   else
     left();
   end

@@ -34,4 +34,10 @@ public class SlipSemanticsLoopsTest {
     }
 
 
+    @Test
+    public void test_repeat_no_until_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/loops/ko/repeat_no_until.slip", testFolder.newFile(), false, "semantics::loops: repeat_no_until.slip");
+    }
+
+
 }

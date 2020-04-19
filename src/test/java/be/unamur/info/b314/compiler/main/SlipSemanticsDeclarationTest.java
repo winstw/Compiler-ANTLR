@@ -27,5 +27,29 @@ public class SlipSemanticsDeclarationTest {
     };
 
     // tests OK
+    @Test
+    public void test_boolean_decl_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/declaration/ok/boolean_decl.slip", testFolder.newFile(), true, "semantics::declaration: boolean_decl.slip");
+    }
+
+
+    @Test
+    public void test_const_init_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/declaration/ok/const_init.slip", testFolder.newFile(), true, "semantics::declaration: const_init.slip");
+    }
+
+
     // tests KO
+    @Test
+    public void test_const_without_init_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/declaration/ko/const_without_init.slip", testFolder.newFile(), false, "semantics::declaration: const_without_init.slip");
+    }
+
+
+    @Test
+    public void test_boolean_integer_init_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/declaration/ko/boolean_integer_init.slip", testFolder.newFile(), false, "semantics::declaration: boolean_integer_init.slip");
+    }
+
+
 }

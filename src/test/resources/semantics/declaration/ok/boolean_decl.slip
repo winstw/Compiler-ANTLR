@@ -1,0 +1,8 @@
+#import "what.map"
+
+const b as boolean = true;
+
+main as function(): void
+do
+  dig();
+end

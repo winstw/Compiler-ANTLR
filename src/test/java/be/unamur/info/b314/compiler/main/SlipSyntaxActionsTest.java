@@ -28,8 +28,20 @@ public class SlipSyntaxActionsTest {
 
     // tests OK
     @Test
+    public void test_right_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/right.slip", testFolder.newFile(), true, "syntax::actions: right.slip");
+    }
+
+
+    @Test
     public void test_left_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/actions/ok/left.slip", testFolder.newFile(), true, "syntax::actions: left.slip");
+    }
+
+
+    @Test
+    public void test_exprg_arg_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/actions/ok/exprg_arg.slip", testFolder.newFile(), true, "syntax::actions: exprg_arg.slip");
     }
 
 
@@ -42,18 +54,6 @@ public class SlipSyntaxActionsTest {
     @Test
     public void test_no_arg_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/actions/ok/no_arg.slip", testFolder.newFile(), true, "syntax::actions: no_arg.slip");
-    }
-
-
-    @Test
-    public void test_right_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/right.slip", testFolder.newFile(), true, "syntax::actions: right.slip");
-    }
-
-
-    @Test
-    public void test_exprg_arg_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/actions/ok/exprg_arg.slip", testFolder.newFile(), true, "syntax::actions: exprg_arg.slip");
     }
 
 

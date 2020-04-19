@@ -1,0 +1,12 @@
+#import "what.map"
+
+j as integer;
+
+main as function(): void
+do
+  repeat
+    j := j + 1;
+    until (j < 20)
+  end
+  dig();
+end

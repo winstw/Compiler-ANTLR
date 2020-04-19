@@ -1,0 +1,11 @@
+#import "what.map"
+i as integer;
+
+main as function(): void
+do
+  for i:= 1 to (i < 5)
+  do
+    right();
+  end
+  dig();
+end

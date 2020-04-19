@@ -3,7 +3,7 @@ package be.unamur.info.b314.compiler.main.checking;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
-import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
+import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
 import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -28,7 +28,6 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         SlipLexer lexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(input)));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SlipParser parser = new SlipParser(tokens);
-        parser.setErrorHandler(new SlipErrorStrategy());
         ErrorHandler errorHandler = new ErrorHandler();
         SlipParser.ProgramContext tree = parser.program();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);

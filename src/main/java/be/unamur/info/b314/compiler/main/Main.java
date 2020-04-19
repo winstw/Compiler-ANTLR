@@ -201,8 +201,7 @@ public class Main {
         // Set error listener to adoc implementation
         parser.removeErrorListeners();
         MyConsoleErrorListener errorListener = new MyConsoleErrorListener();
-        // parser.addErrorListener(errorListener);
-        parser.setErrorHandler(new SlipErrorStrategy());
+        parser.addErrorListener(errorListener);
         // Launch parsing
         SlipParser.ProgramContext tree;
         try {

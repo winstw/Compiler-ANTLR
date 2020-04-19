@@ -4,7 +4,7 @@ import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
-import be.unamur.info.b314.compiler.main.SlipErrorStrategy;
+import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
 import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -34,8 +34,6 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
         SlipLexer lexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(input)));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         SlipParser parser = new SlipParser(tokens);
-        parser.setErrorHandler(new SlipErrorStrategy());
-
         SlipParser.ProgramContext tree = parser.program();
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);

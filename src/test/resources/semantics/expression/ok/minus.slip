@@ -1,0 +1,22 @@
+#import "file.map"
+
+add as function(variable as integer): integer
+do
+    add := 5;
+end
+
+x as integer = 5;
+
+main as function(): void
+do
+
+    result as integer;
+    result := -5;
+    result := -add(5);
+    result := - (5 + x);
+    result := -result;
+    result := -x;
+
+    dig();
+
+end

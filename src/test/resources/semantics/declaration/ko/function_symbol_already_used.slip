@@ -1,0 +1,18 @@
+#import "file.map"
+
+doublon as function(): integer
+do
+    doublon := 5;
+end
+
+doublon as function(): boolean
+do
+    doublon := true;
+end
+
+main as function(): void
+do
+
+    dig();
+
+end

@@ -1,0 +1,11 @@
+#import "file.map"
+
+doublon as integer;
+doublon as boolean;
+
+main as function(): void
+do
+
+    dig();
+
+end

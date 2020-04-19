@@ -1,0 +1,21 @@
+#import "file.map"
+
+add as function(variable as integer): integer
+do
+    add := 5;
+end
+
+x as integer = 5;
+
+main as function(): void
+do
+
+    result as boolean;
+    result := (5 >= 3) or true;
+    result := (x >= add(5)) or true;
+    result := (100 >= (5 + x)) or true;
+    result := (100 >= x) or true;
+
+    dig();
+
+end

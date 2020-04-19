@@ -1,0 +1,15 @@
+#import "file.map"
+
+add as function(variable as integer): integer
+do
+    add := 5;
+end
+
+main as function(): void
+do
+
+    test as integer = variable;
+
+    dig();
+
+end

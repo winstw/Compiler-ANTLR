@@ -1,0 +1,10 @@
+#import "file.map"
+
+main as function(): void
+do
+
+    result as integer = func();
+
+    dig();
+
+end

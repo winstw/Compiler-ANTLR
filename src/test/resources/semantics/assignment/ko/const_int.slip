@@ -1,0 +1,12 @@
+#import "file.map"
+
+const number as boolean = 42;
+
+main as function(): void
+do
+
+    number := 0;
+
+    dig();
+
+end

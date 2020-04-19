@@ -1,0 +1,14 @@
+#import "file.map"
+
+number as integer;
+
+main as function(): void
+do
+
+    number := 0;
+    number := 9;
+    number := 123839937950238940293;
+
+    dig();
+
+end

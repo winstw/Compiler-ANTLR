@@ -1,0 +1,29 @@
+#import "file.map"
+
+struct as record
+    x as integer;
+    c as char;
+    ok as boolean;
+    array as integer[3, 2];
+    imbrStruct as record
+        x as integer;
+        c as char;
+        ok as boolean;
+    end;
+end;
+
+
+main as function(): void
+do
+
+    struct.x := 5;
+    struct.c := 'c';
+    struct.ok := true;
+    struct.array[2, 1] := 3;
+    struct.imbrStruct.x := 5;
+    struct.imbrStruct.c := 'c';
+    struct.imbrStruct.ok := true;
+
+    dig();
+
+end

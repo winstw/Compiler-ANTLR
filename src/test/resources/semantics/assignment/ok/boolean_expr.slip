@@ -1,0 +1,21 @@
+#import "file.map"
+
+ok as boolean;
+
+main as function(): void
+do
+
+    ok := true and true;
+    ok := false or true;
+    ok := not false;
+    ok := 4 < 12;
+    ok := 12 > 4;
+    ok := 4 = 4;
+    ok := 4 <= 4;
+    ok := 4 >= 4;
+    ok := 4 <> 12;
+    ok := (true and (4 > 12)) or false;
+
+    dig();
+
+end

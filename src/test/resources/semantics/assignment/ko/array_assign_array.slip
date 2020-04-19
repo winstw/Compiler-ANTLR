@@ -1,0 +1,13 @@
+#import "file.map"
+
+array1 as integer[5];
+array2 as integer[5] = (1, 2, 3, 4, 5);
+
+main as function(): void
+do
+
+    array1 := array2;
+
+    dig();
+
+end

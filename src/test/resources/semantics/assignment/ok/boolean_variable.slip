@@ -1,0 +1,15 @@
+#import "file.map"
+
+ok as boolean = true;
+const ko as boolean = false;
+test as boolean;
+
+main as function(): void
+do
+
+    test := ok;
+    test := ko;
+
+    dig();
+
+end

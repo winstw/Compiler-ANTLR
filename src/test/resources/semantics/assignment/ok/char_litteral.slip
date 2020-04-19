@@ -1,0 +1,18 @@
+#import "file.map"
+
+c as char;
+
+main as function(): void
+do
+
+    c := '2';
+    c := 'c';
+    c := ':';
+    c := '&';
+    c := '/';
+    c := '\\';
+    c := ';';
+
+    dig();
+
+end

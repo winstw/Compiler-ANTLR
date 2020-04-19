@@ -1,0 +1,13 @@
+#import "file.map"
+
+ok as boolean;
+ko as boolean;
+
+main as function(): void
+do
+
+    ok := true;
+    ko := false;
+    dig();
+
+end

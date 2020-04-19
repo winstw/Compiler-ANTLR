@@ -1,0 +1,15 @@
+#import "file.map"
+
+number as integer;
+x as integer = 4;
+const y as integer = 9;
+
+main as function(): void
+do
+
+    number := x;
+    number := y;
+
+    dig();
+
+end

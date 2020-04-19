@@ -1,0 +1,16 @@
+#import "file.map"
+
+negate as function(val as boolean): boolean
+do
+    negate := not val;
+end
+
+main as function(): void
+do
+
+    test as boolean;
+    test := negate(true);
+
+    dig();
+
+end

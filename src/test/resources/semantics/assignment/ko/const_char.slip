@@ -1,0 +1,12 @@
+#import "file.map"
+
+const c as char = 'c';
+
+main as function(): void
+do
+
+    c := 'x';
+
+    dig();
+
+end

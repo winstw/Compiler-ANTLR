@@ -1,6 +1,7 @@
 package be.unamur.info.b314.compiler.symboltable;
 
 public class SlipArraySymbol extends SlipBaseSymbol {
+    private String[] value = {};
 
     public SlipArraySymbol(String name, Type type, boolean isAssignable) {
         super(name, type, isAssignable);

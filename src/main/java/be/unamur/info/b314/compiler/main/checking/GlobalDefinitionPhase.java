@@ -19,7 +19,7 @@ import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
-    GlobalDefinitionPhase(ErrorHandler e) {
+    public GlobalDefinitionPhase(ErrorHandler e) {
         super(e);
     }
 
@@ -103,6 +103,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
             } catch (SymbolAlreadyDefinedException e) {
                 signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
+
         }
     }
 

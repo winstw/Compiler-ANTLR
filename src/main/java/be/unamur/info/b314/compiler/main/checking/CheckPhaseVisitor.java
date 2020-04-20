@@ -4,7 +4,7 @@ import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
-import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
+
 import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
 
-    CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e) {
+    public CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e) {
         super(e);
         this.scopes = scopes;
     }
@@ -45,6 +45,10 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     private ParseTreeProperty<SlipScope> scopes;
     private SlipScope currentScope;
     private boolean assignationContext = false;
+
+    public ParseTreeProperty<SlipScope> getScopes(){
+        return this.scopes;
+    }
 
     @Override
     public Type visitProgram(SlipParser.ProgramContext ctx) {

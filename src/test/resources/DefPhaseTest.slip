@@ -1,80 +1,82 @@
+#import "file.map"
 
-#import "recur.map"
-
-add as function(a as integer, b as integer): integer
-do
-  if (b = 0) then
-    add := a;
-  else
-    add := add(a + 1, b - 1)
-  end
-end
+ok as boolean = true;
+ const ko as boolean = false;
+ test as boolean = true and true;
+ // test := true and false;
+ min as boolean;
 
 main as function(): void
 do
-  dig();
+    test := true and false;
+
+    // test := ko;
+    min := true;
+    // dig();
+
 end
 
-# #import "what.map"
 
-# b as boolean = true;
+// #import "recur.map"
 
-# main as function(): void
-# do
-#   if (true) then
-#     do
-#       right();
-#     end
-#   else
-#   do
-#     left();
-#   end
-#   dig();
-# end
+// add as function(a as integer, b as integer): integer
+// do
+//   if (b = 0) then
+//     add := a;
+//   else
+//     add := add(a + 1, b - 1)
+//   end
+// end
 
-# # #import "what.map"
+// main as function(): void
+// do
+//   dig();
+// end
 
-# const hello as integer := 3;
+// #import "what.map"
 
-# main as function(): void
-# do
-#   dig();
-# end
+// b as boolean = true;
 
-# #import "file.map"
+// main as function(): void
+// do
+//   if (true) then
+//     do
+//       right();
+//     end
+//   else
+//   do
+//     left();
+//   end
+//   dig();
+// end
 
-# ok as boolean = true;
-# const ko as boolean = false;
-# test as boolean;
+// // #import "what.map"
 
-# main as function(): void
-# do
+// const hello as integer := 3;
 
-#     test := ok;
-#     test := ko;
-
-#     dig();
-
-# end
+// main as function(): void
+// do
+//   dig();
+// end
 
 
-# /* Test */
+// /* Test */
 
-# #import "world.map"
+// #import "world.map"
 
-#     v1 as boolean;
-#     i as integer;
-#     s as char;
+//     v1 as boolean;
+//     i as integer;
+//     s as char;
 
-# main as function():void
-# do
-# i := 5;
-# down(5);
-# fight();
+// main as function():void
+// do
+// i := 5;
+// down(5);
+// fight();
 
-# dig();
+// dig();
 
-# end
+// end
 g
 // #import "world.map"
 

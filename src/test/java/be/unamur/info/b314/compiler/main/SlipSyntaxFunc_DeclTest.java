@@ -33,6 +33,18 @@ public class SlipSyntaxFunc_DeclTest {
     }
 
 
+    @Test
+    public void test_fun_name_already_defined_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ok/fun_name_already_defined.slip", testFolder.newFile(), true, "syntax::func_decl: fun_name_already_defined.slip");
+    }
+
+
+    @Test
+    public void test_record_in_func_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/syntax/func_decl/ok/record_in_func.slip", testFolder.newFile(), true, "syntax::func_decl: record_in_func.slip");
+    }
+
+
     // tests KO
     @Test
     public void test_no_instruction_ko() throws Exception{
@@ -43,12 +55,6 @@ public class SlipSyntaxFunc_DeclTest {
     @Test
     public void test_no_return_type_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/syntax/func_decl/ko/no_return_type.slip", testFolder.newFile(), false, "syntax::func_decl: no_return_type.slip");
-    }
-
-
-    @Test
-    public void test_fun_name_already_defined_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/syntax/func_decl/ko/fun_name_already_defined.slip", testFolder.newFile(), false, "syntax::func_decl: fun_name_already_defined.slip");
     }
 
 

@@ -41,12 +41,6 @@ public class SlipSemanticsDeclarationTest {
 
     // tests KO
     @Test
-    public void test_boolean_integer_init_ko() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/declaration/ko/boolean_integer_init.slip", testFolder.newFile(), false, "semantics::declaration: boolean_integer_init.slip");
-    }
-
-
-    @Test
     public void test_variable_symbol_already_used_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/semantics/declaration/ko/variable_symbol_already_used.slip", testFolder.newFile(), false, "semantics::declaration: variable_symbol_already_used.slip");
     }
@@ -55,6 +49,12 @@ public class SlipSemanticsDeclarationTest {
     @Test
     public void test_const_without_init_ko() throws Exception{
         CompilerTestHelper.launchCompilation("/semantics/declaration/ko/const_without_init.slip", testFolder.newFile(), false, "semantics::declaration: const_without_init.slip");
+    }
+
+
+    @Test
+    public void test_boolean_integer_init_ko() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/declaration/ko/boolean_integer_init.slip", testFolder.newFile(), false, "semantics::declaration: boolean_integer_init.slip");
     }
 
 

@@ -55,8 +55,8 @@ exprD : STRING                                  # string
       // exprEnt copied here to avoid indirect recursion
       | number                                  # intExpr
       | MINUS exprD                             # unaryMinusExpr
-      | exprD (TIMES | DIVIDE | MODULO) exprD   # timesDivideExpr
-      | exprD (PLUS | MINUS) exprD              # plusMinusExpr
+      | exprD op=(TIMES | DIVIDE | MODULO) exprD   # timesDivideExpr
+      | exprD op=(PLUS | MINUS) exprD              # plusMinusExpr
 
       // exprBool copied here to avoid indirect recursion
       | TRUE                                    # trueExpr
@@ -73,8 +73,10 @@ exprG : ID                                      # leftExprID
       | exprG DOT exprG                            # leftExprRecord
       ;
 
+guardedBlock: instruction+;
+
 instruction : IF LPAR exprD RPAR THEN instruction+ END                      # ifThenInstr
-            | IF LPAR exprD RPAR THEN instruction+ ELSE instruction+ END    # ifThenElseInstr
+            | IF LPAR exprD RPAR THEN guardedBlock ELSE guardedBlock END    # ifThenElseInstr
             | WHILE LPAR exprD RPAR DO instruction+ END                     # whileInstr
             | REPEAT instruction+ UNTIL LPAR exprD RPAR END                 # untilInstr
             | FOR ID AFFECT exprD TO exprD DO instruction+ END              # forInstr

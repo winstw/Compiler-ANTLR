@@ -20,6 +20,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
@@ -127,18 +129,18 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     public Type visitFuncExpr(SlipParser.FuncExprContext ctx) {
         try {
             String funcName = ctx.ID().getText();
-            SlipSymbol symbol = this.currentScope.resolve(funcName);
+            SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(funcName + "_fn");
 
-            SlipMethodSymbol scopedFunc;
-            if (symbol instanceof SlipMethodSymbol) {
-                scopedFunc = (SlipMethodSymbol) symbol;
-            } else {
-                // in case of recursive call we try to get the Method symbol of the same name out of the function's scope
-                SlipSymbol sameNameSymbol = this.currentScope.getParentScope().resolve(funcName);
-                if (sameNameSymbol instanceof SlipMethodSymbol){
-                    scopedFunc = (SlipMethodSymbol) sameNameSymbol;
-                } else throw new SymbolNotFoundException();
-            }
+//            SlipMethodSymbol scopedFunc;
+//            if (symbol instanceof SlipMethodSymbol) {
+//                scopedFunc = (SlipMethodSymbol) symbol;
+//            } else {
+//                // in case of recursive call we try to get the Method symbol of the same name out of the function's scope
+//                SlipSymbol sameNameSymbol = this.currentScope.getParentScope().resolve(funcName);
+//                if (sameNameSymbol instanceof SlipMethodSymbol){
+//                    scopedFunc = (SlipMethodSymbol) sameNameSymbol;
+//                } else throw new SymbolNotFoundException();
+//            }
 
             System.out.println("FUNC CALL : " + scopedFunc + " Type : " + scopedFunc.getType());
 
@@ -151,11 +153,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
                 return scopedFunc.getType();
             }
 
-            Iterator<Type> declaredParamTypes = scopedFunc.getParameterTypes();
+            Iterator<SlipBaseSymbol> declaredParamTypes = scopedFunc.getParameters();
             for (SlipParser.ExprDContext param : ctx.exprD()){
                 Type actualParamType = visit(param);
                 if (declaredParamTypes.hasNext()) {
-                    Type declaredParamType = declaredParamTypes.next();
+                    Type declaredParamType = declaredParamTypes.next().getType();
                     System.out.println("EFFECTIVE : " + actualParamType + " DECLARED : " + declaredParamType);
                     checkEqual(actualParamType, declaredParamType, param.start,
                                String.format("parameter %s of %s should be of type %s instead of %s",
@@ -538,7 +540,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
 
     @Override
     public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
-        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
+        return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start,
+        ctx.guardedBlock().stream().flatMap(block -> block.instruction().stream()).collect(Collectors.toList())
+                );
     }
 
     @Override

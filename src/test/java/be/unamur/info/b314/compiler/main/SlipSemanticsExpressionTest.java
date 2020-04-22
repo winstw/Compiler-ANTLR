@@ -28,14 +28,32 @@ public class SlipSemanticsExpressionTest {
 
     // tests OK
     @Test
-    public void test_equals_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/equals.slip", testFolder.newFile(), true, "semantics::expression: equals.slip");
+    public void test_multiplication_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/multiplication.slip", testFolder.newFile(), true, "semantics::expression: multiplication.slip");
     }
 
 
     @Test
-    public void test_and_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/and.slip", testFolder.newFile(), true, "semantics::expression: and.slip");
+    public void test_or_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/or.slip", testFolder.newFile(), true, "semantics::expression: or.slip");
+    }
+
+
+    @Test
+    public void test_less_than_or_equal_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/less_than_or_equal.slip", testFolder.newFile(), true, "semantics::expression: less_than_or_equal.slip");
+    }
+
+
+    @Test
+    public void test_addition_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/addition.slip", testFolder.newFile(), true, "semantics::expression: addition.slip");
+    }
+
+
+    @Test
+    public void test_minus_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/minus.slip", testFolder.newFile(), true, "semantics::expression: minus.slip");
     }
 
 
@@ -52,8 +70,20 @@ public class SlipSemanticsExpressionTest {
 
 
     @Test
-    public void test_or_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/or.slip", testFolder.newFile(), true, "semantics::expression: or.slip");
+    public void test_not_equals_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/not_equals.slip", testFolder.newFile(), true, "semantics::expression: not_equals.slip");
+    }
+
+
+    @Test
+    public void test_equals_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/equals.slip", testFolder.newFile(), true, "semantics::expression: equals.slip");
+    }
+
+
+    @Test
+    public void test_and_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/and.slip", testFolder.newFile(), true, "semantics::expression: and.slip");
     }
 
 
@@ -64,8 +94,8 @@ public class SlipSemanticsExpressionTest {
 
 
     @Test
-    public void test_greater_than_or_equal_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/greater_than_or_equal.slip", testFolder.newFile(), true, "semantics::expression: greater_than_or_equal.slip");
+    public void test_modulo_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/modulo.slip", testFolder.newFile(), true, "semantics::expression: modulo.slip");
     }
 
 
@@ -76,44 +106,14 @@ public class SlipSemanticsExpressionTest {
 
 
     @Test
-    public void test_minus_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/minus.slip", testFolder.newFile(), true, "semantics::expression: minus.slip");
-    }
-
-
-    @Test
-    public void test_less_than_or_equal_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/less_than_or_equal.slip", testFolder.newFile(), true, "semantics::expression: less_than_or_equal.slip");
+    public void test_greater_than_or_equal_ok() throws Exception{
+        CompilerTestHelper.launchCompilation("/semantics/expression/ok/greater_than_or_equal.slip", testFolder.newFile(), true, "semantics::expression: greater_than_or_equal.slip");
     }
 
 
     @Test
     public void test_not_ok() throws Exception{
         CompilerTestHelper.launchCompilation("/semantics/expression/ok/not.slip", testFolder.newFile(), true, "semantics::expression: not.slip");
-    }
-
-
-    @Test
-    public void test_multiplication_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/multiplication.slip", testFolder.newFile(), true, "semantics::expression: multiplication.slip");
-    }
-
-
-    @Test
-    public void test_addition_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/addition.slip", testFolder.newFile(), true, "semantics::expression: addition.slip");
-    }
-
-
-    @Test
-    public void test_not_equals_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/not_equals.slip", testFolder.newFile(), true, "semantics::expression: not_equals.slip");
-    }
-
-
-    @Test
-    public void test_modulo_ok() throws Exception{
-        CompilerTestHelper.launchCompilation("/semantics/expression/ok/modulo.slip", testFolder.newFile(), true, "semantics::expression: modulo.slip");
     }
 
 

@@ -13,7 +13,9 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
     }
 
     public void setValue(Object value) {
-        this.value = value.toString();
+        if (value != null) {
+            this.value = value.toString();
+        }
     }
 
     public Object getValue(){

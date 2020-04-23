@@ -1,15 +1,18 @@
 package be.unamur.info.b314.compiler.symboltable;
 
+import be.unamur.info.b314.compiler.SlipParser;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class SlipMethodSymbol extends SlipScopedSymbol {
 
-    private ArrayList<Type> parameterTypes;
-
+    private ArrayList<SlipBaseSymbol> parameters;
+    private List<SlipParser.InstBlockContext> body;
     public SlipMethodSymbol(String name, Type type, SlipScope parentScope) {
         super(name, type, parentScope, false);
-        parameterTypes = new ArrayList<>();
+        parameters = new ArrayList<SlipBaseSymbol>();
     }
 
     @Override
@@ -33,15 +36,23 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
      * @modifies this
      * @effect add type to parameterTypes
      */
-    public void addParameter(Type type) {
-        parameterTypes.add(type);
+    public void addParameter(SlipBaseSymbol symbol) {
+        parameters.add(symbol);
+    }
+
+    public void setBody(List<SlipParser.InstBlockContext> body){
+        this.body = body;
+    }
+    public List<SlipParser.InstBlockContext> getBody(){
+        return this.body;
     }
 
     public int getNumberOfParameters() {
-        return parameterTypes.size();
+        return parameters.size();
     }
 
-    public Iterator<Type> getParameterTypes() {
-        return this.parameterTypes.iterator();
+    public Iterator<SlipBaseSymbol> getParameters() {
+        return this.parameters.iterator();
     }
+
 }

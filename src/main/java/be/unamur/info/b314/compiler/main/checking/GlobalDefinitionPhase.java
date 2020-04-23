@@ -19,7 +19,7 @@ import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
-    GlobalDefinitionPhase(ErrorHandler e) {
+    public GlobalDefinitionPhase(ErrorHandler e) {
         super(e);
     }
 
@@ -103,6 +103,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
             } catch (SymbolAlreadyDefinedException e) {
                 signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
+
         }
     }
 
@@ -206,7 +207,8 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
     private void defineFunction(SlipParser.FuncDeclContext ctx) {
         String name = ctx.ID().getText();
         Type type = getType(ctx.funcType().start.getType());
-        SlipMethodSymbol symbol = new SlipMethodSymbol(name, type, currentScope);
+        SlipMethodSymbol symbol = new SlipMethodSymbol(name + "_fn", type, currentScope);
+        symbol.setBody(ctx.instBlock());
         scopes.put(ctx, symbol);
 
         try {
@@ -222,7 +224,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         if (ctx.argList() != null) {
             for (SlipParser.VarDefContext var : ctx.argList().varDef()) {
                 for (TerminalNode node : var.ID()) {
-                    symbol.addParameter(visit(var.scalar()));
+                    symbol.addParameter(new SlipVariableSymbol(node.getText(), visit(var.scalar()), true));
                 }
             }
         }

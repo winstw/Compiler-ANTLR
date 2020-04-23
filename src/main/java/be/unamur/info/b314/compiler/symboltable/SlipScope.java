@@ -33,6 +33,7 @@ public interface SlipScope {
      */
     SlipSymbol resolve(String name) throws SymbolNotFoundException;
 
+
     /**
      * @return parentScope || null if this is the root scope
      */

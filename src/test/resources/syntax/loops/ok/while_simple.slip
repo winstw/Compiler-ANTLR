@@ -3,10 +3,12 @@
 main as function(): void
 do
 
-  while(true)
+  i as integer = 0;
+  while(i < 2)
   do
      right();
     left();
+    i := i + 1;
   end
   dig();
 end

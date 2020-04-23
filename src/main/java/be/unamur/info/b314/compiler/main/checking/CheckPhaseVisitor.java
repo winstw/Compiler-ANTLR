@@ -44,7 +44,6 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
         second.visitProgram(tree);
     }
 
-    private ParseTreeProperty<SlipScope> scopes;
     private SlipScope currentScope;
     private boolean assignationContext = false;
 

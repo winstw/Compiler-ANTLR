@@ -7,7 +7,7 @@ do
 
     number := 0;
     number := 9;
-    number := 123839937950238940293;
+    number := 123839;
 
     dig();
 

@@ -4,6 +4,7 @@ b as boolean;
 
 main as function(): void
 do
+  b := true;
   if (b) then
     right();
   else

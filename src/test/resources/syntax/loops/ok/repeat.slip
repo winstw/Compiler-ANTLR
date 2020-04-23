@@ -4,6 +4,7 @@ j as integer;
 
 main as function(): void
 do
+  j := 0;
   repeat
     j := j + 1;
     until (j < 20)

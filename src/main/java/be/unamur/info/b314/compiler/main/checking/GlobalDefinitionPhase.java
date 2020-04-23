@@ -21,6 +21,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
     public GlobalDefinitionPhase(ErrorHandler e) {
         super(e);
+        this.scopes = new ParseTreeProperty<>();
     }
 
     public static void main(String[] args) throws IOException {
@@ -34,12 +35,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         visitor.visit(tree);
     }
 
-    private ParseTreeProperty<SlipScope> scopes = new ParseTreeProperty<>();
     private SlipScope currentScope;
-
-    public ParseTreeProperty<SlipScope> getScopes() {
-        return scopes;
-    }
 
     @Override
     public Type visitProgram(SlipParser.ProgramContext ctx) {

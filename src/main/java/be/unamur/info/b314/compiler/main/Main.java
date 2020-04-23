@@ -13,7 +13,9 @@ import java.util.Map;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
+import be.unamur.info.b314.compiler.main.nbc.Evaluator;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;

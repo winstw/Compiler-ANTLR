@@ -7,6 +7,7 @@ do
   k as integer = 0;
 
   repeat
+    i := 0;
     while(i < 3)
     do
       for j:= 1 to (j < 5)

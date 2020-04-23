@@ -16,6 +16,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.atn.SemanticContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+import org.antlr.v4.runtime.tree.xpath.XPath;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -86,9 +88,15 @@ public class Evaluator extends CheckSlipVisitor<Object> {
 
     @Override
     public Object visitProg(SlipParser.ProgContext ctx){
-        this.loadMapFile(ctx.impDecl());
+        if (this.currentPath != null) {
+            this.loadMapFile(ctx.impDecl());
+        }
+
 
         this.currentScope = this.scopes.get(ctx);
+        // obligé de visiter les déclarations pour initialiser les valeurs des variables le cas échéant
+        ctx.declaration().forEach(decl -> decl.accept(this));
+
         ctx.mainDecl().accept(this);
         this.currentScope = this.currentScope.getParentScope();
         return null;
@@ -116,11 +124,10 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     @Override
     public Object visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = this.scopes.get(ctx);
-        System.out.println(ctx.instruction().size());
-        for (SlipParser.InstructionContext inst: ctx.instruction()) {
-            System.out.println(inst.getText());
-            inst.accept(this);
-        }
+        ctx.children.stream()
+                .filter(child -> !(child instanceof TerminalNodeImpl)) // keep only statement children
+                .forEach(child -> child.accept(this));
+
         this.currentScope = this.currentScope.getParentScope();
         return null;
     }
@@ -193,8 +200,13 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         return null;
     }
 
+    @Override
     public String visitString(SlipParser.StringContext ctx){
         return ctx.STRING().getText();
+    }
+    @Override
+    public Character visitChar(SlipParser.CharContext ctx){
+        return ctx.CHAR().getText().charAt(0);
     }
 
     @Override
@@ -202,6 +214,11 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         System.out.println("in visit int" +  Integer.parseInt(ctx.number().getText()));
         return Integer.parseInt(ctx.number().getText());
     }
+    @Override
+    public Object visitParens(SlipParser.ParensContext ctx){
+        return ctx.exprD().accept(this);
+    }
+
 
     @Override
     public Integer visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
@@ -211,10 +228,18 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     @Override
     public Integer visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
         Integer left = (Integer) ctx.exprD(0).accept(this);
-        Integer right = (Integer) ctx.exprD(0).accept(this);
-
-        if (ctx.TIMES() != null) return  left * right;
-        else return left / right;
+        Integer right = (Integer) ctx.exprD(1).accept(this);
+        switch (ctx.op.getType()) {
+            case SlipParser.TIMES:
+                return left * right;
+            case SlipParser.DIVIDE:
+                // TODO CATCH DIVIDE BY 0
+                return left / right;
+            case SlipParser.MODULO:
+                return left % right;
+            default:
+                return null;
+        }
     }
 
     @Override
@@ -263,6 +288,53 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         // TODO check if == ok here
         if(ctx.op.getType() == SlipParser.EQUAL) return left == right;
         else return left != right;
+    }
+    public Boolean visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
+        Integer left = (Integer) ctx.exprD(0).accept(this);
+        Integer right = (Integer) ctx.exprD(1).accept(this);
+
+        switch (ctx.op.getType()) {
+            case SlipParser.LT:
+                return left < right;
+            case SlipParser.LTOE:
+                return left <= right;
+            case SlipParser.GT:
+                return left > right;
+            case SlipParser.GTOE:
+                return left >= right;
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public Void visitUntilInstr(SlipParser.UntilInstrContext ctx){
+        do {
+            ctx.instruction().forEach(instruction -> instruction.accept(this));
+        } while((Boolean) ctx.exprD().accept(this));
+        return null;
+    }
+
+    @Override
+    public Void visitWhileInstr(SlipParser.WhileInstrContext ctx){
+        while ((Boolean) ctx.exprD().accept(this)) {
+            ctx.instruction().forEach(instruction -> instruction.accept(this));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitForInstr(SlipParser.ForInstrContext ctx){
+        //    FOR ID AFFECT exprD TO exprD DO instruction+ END
+
+        SlipBaseSymbol counter = (SlipBaseSymbol) currentScope.resolve(ctx.ID().getText());
+        counter.setValue(ctx.exprD(0).accept(this));
+
+        while((Boolean) ctx.exprD(1).accept(this)) {
+            ctx.instruction().forEach(instruction -> instruction.accept(this));
+            counter.setValue((Integer) counter.getValue() + 1);
+        }
+        return null;
     }
 
     public Object visitFuncExpr(SlipParser.FuncExprContext ctx) {
@@ -322,18 +394,17 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     public Void visitVarDecl(SlipParser.VarDeclContext ctx) {
         if (ctx.exprD() != null) {
             Object value = ctx.exprD().accept(this);
-            for (ParseTree var : ctx.ID()) {
+            ctx.ID().forEach(var -> {
                 SlipBaseSymbol symbol = (SlipBaseSymbol) this.currentScope.resolve(var.getText());
                 if (symbol != null) {
                     symbol.setValue(value);
-                }
-                else {
-                   System.out.print("error no var with name " +  var.getText());
-                    System.out.println("in scope " +  this.currentScope.getName());
+                } else {
+                    System.out.print("error no var with name " + var.getText());
+                    System.out.println("in scope " + this.currentScope.getName());
                 }
 
                 System.out.println(String.format("INITIALIZATION SYMBOL:  %s VALUE: %s", symbol, symbol.getValue()));
-            }
+            });
         }
         return null;
     }

@@ -5,22 +5,28 @@ import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.main.checking.CheckPhaseVisitor;
+import be.unamur.info.b314.compiler.main.checking.CheckSlipVisitor;
 import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
+import be.unamur.info.b314.compiler.main.checking.MapVisitor;
 import be.unamur.info.b314.compiler.symboltable.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.atn.SemanticContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-public class Evaluator extends SlipBaseVisitor<Object> {
+public class Evaluator extends CheckSlipVisitor<Object> {
+    String[][] map = null;
+    String currentPath = "";
     private ParseTreeProperty<SlipScope> scopes;
     SlipScope currentScope;
     static public void main(String[] args) throws IOException {
@@ -31,16 +37,17 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         SlipParser.ProgramContext tree = parser.program();
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
-        visitor.visit(tree);
+        tree.accept(visitor);
         CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
-        Evaluator evaluator = new Evaluator(second.getScopes());
+        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/");
         evaluator.visitProgram(tree);
     }
 
-    String[][] map = null;
-    public Evaluator(ParseTreeProperty<SlipScope> scopes){
+    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath){
+        super(e);
         this.scopes = scopes;
+        this.currentPath = currentPath;
     }
 
     @Override
@@ -51,20 +58,58 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
-    private String[][] createMap(String filename) {
+    private String[][] loadMapFile(SlipParser.ImpDeclContext ctx) {
         // populate map field from file
-        return new String[1][1];
+        String filename = ctx.FILENAME().getText().replace("\"", "");
+        String filePath = this.currentPath + filename;
+        try {
+            SlipLexer mapLexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(filePath)));
+            CommonTokenStream tokens = new CommonTokenStream(mapLexer);
+            SlipParser parser = new SlipParser(tokens);
+            SlipParser.MapContext tree = parser.map();
+            boolean isValidMap = new MapVisitor(this.errorHandler).visit(tree);
+            if (isValidMap){
+                this.visit(tree);
+            }
+        } catch (FileNotFoundException e) {
+            signalError(ctx.start , String.format("Cannot load map file %s", filePath));
+            e.printStackTrace();
+        } catch (RecognitionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public Object visitProg(SlipParser.ProgContext ctx){
-        this.map = createMap(ctx.impDecl().FILENAME().getText());
+        this.loadMapFile(ctx.impDecl());
+
         this.currentScope = this.scopes.get(ctx);
-//        for (ParseTree child : ctx.children) {
-//            visit(child);
-//        }
         ctx.mainDecl().accept(this);
         this.currentScope = this.currentScope.getParentScope();
+        return null;
+    }
+
+
+    public Void visitMap(SlipParser.MapContext ctx) {
+        System.out.println("=== MAP EVAL ===");
+        int nbLines = Integer.parseInt(ctx.NAT(0).getText());
+        int nbColumns = Integer.parseInt(ctx.NAT(1).getText());
+        this.map = new String[nbLines][nbColumns];
+        for (int line = 0; line < nbLines; line++) {
+            for (int col = 0; col < nbColumns; col++) {
+                int index = line * nbColumns + col;
+                map[line][col] = ctx.map_char(index).getText();
+                System.out.print(map[line][col]);
+            }
+            System.out.println();
+        }
+        System.out.println("=== MAP EVAL ===");
+
         return null;
     }
 
@@ -98,15 +143,15 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
-    @Override
-    public Void visitFuncDecl(SlipParser.FuncDeclContext ctx){
-        this.currentScope = this.scopes.get(ctx);
+    // @Override
+    // public Void visitFuncDecl(SlipParser.FuncDeclContext ctx){
+    //     this.currentScope = this.scopes.get(ctx);
 
-        ctx.instBlock().forEach(instruction -> instruction.accept(this));
+    //     ctx.instBlock().forEach(instruction -> instruction.accept(this));
 
-        this.currentScope = this.currentScope.getParentScope();
-        return null;
-    }
+    //     this.currentScope = this.currentScope.getParentScope();
+    //     return null;
+    // }
 
     @Override
     public Void visitDeclaration(SlipParser.DeclarationContext ctx){
@@ -229,7 +274,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         // we have already collected all functions declarations in the previous phases
         SlipScope funcCallScope = new SlipBaseScope("aname", this.currentScope, scopedFunc);
 
-         // assign each param in the m
+         // assign each param in the method call scope
          Iterator<SlipBaseSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
          List<SlipParser.ExprDContext> args = ctx.exprD(); // args to the function call
         System.out.println("ARGS LIST SIZE IN FUNCTION CALL : " + ctx.exprD().size());

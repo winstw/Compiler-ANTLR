@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 public abstract class CheckSlipVisitor<T> extends SlipBaseVisitor<T> {
     protected ErrorHandler errorHandler;
 
-    CheckSlipVisitor(ErrorHandler errorHandler) {
+    public CheckSlipVisitor(ErrorHandler errorHandler) {
         super();
         this.errorHandler = errorHandler;
     }

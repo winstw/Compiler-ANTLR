@@ -330,17 +330,32 @@ public class Evaluator extends CheckSlipVisitor<Object> {
 
     @Override
     public Void visitUntilInstr(SlipParser.UntilInstrContext ctx){
+        int iterations = 0;
         do {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
-        } while((Boolean) ctx.exprD().accept(this));
+            iterations++;
+        } while((Boolean) ctx.exprD().accept(this) && iterations < 1000);
+
+        if (iterations == 1000) {
+            signalError(ctx.start, "INFINITE LOOP");
+        }
+
         return null;
     }
 
     @Override
     public Void visitWhileInstr(SlipParser.WhileInstrContext ctx){
-        while ((Boolean) ctx.exprD().accept(this)) {
+        int iterations = 0;
+        while ((Boolean) ctx.exprD().accept(this)  && iterations < 1000) {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
+            iterations ++;
         }
+
+
+        if (iterations == 1000) {
+            signalError(ctx.start, "INFINITE LOOP");
+        }
+
         return null;
     }
 
@@ -350,11 +365,18 @@ public class Evaluator extends CheckSlipVisitor<Object> {
 
         SlipVariableSymbol counter = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
         counter.setValue(ctx.exprD(0).accept(this));
+        int iterations = 0;
 
-        while((Boolean) ctx.exprD(1).accept(this)) {
+        while((Boolean) ctx.exprD(1).accept(this) && iterations < 1000) {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
-            counter.setValue((Integer) counter.getValue() + 1);
+            iterations++;
         }
+
+
+        if (iterations == 1000) {
+            signalError(ctx.start, "INFINITE LOOP");
+        }
+
         return null;
     }
 

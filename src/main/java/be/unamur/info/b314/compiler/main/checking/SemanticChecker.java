@@ -19,7 +19,7 @@ public class SemanticChecker {
         checkPhase.visit(tree);
         if (!errorHandler.isErrorOccurred()){
             Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, null);
-            //eval.visit(tree);
+            eval.visit(tree);
         }
         return !errorHandler.isErrorOccurred();
     }

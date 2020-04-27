@@ -411,9 +411,10 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
         StructExprGVisitor visitor = new StructExprGVisitor(currentScope, this.errorHandler);
-        Type type = visitor.visit(ctx);
 
-        return type;
+        SlipSymbol symbol = visitor.visit(ctx);
+
+        return symbol.getType();
     }
 
     @Override

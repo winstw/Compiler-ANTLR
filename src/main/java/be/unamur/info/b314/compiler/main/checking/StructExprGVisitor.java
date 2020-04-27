@@ -9,7 +9,7 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-public class StructExprGVisitor extends CheckSlipVisitor<Type> {
+public class StructExprGVisitor extends CheckSlipVisitor<SlipSymbol> {
 
     private SlipScope currentScope;
 
@@ -19,17 +19,17 @@ public class StructExprGVisitor extends CheckSlipVisitor<Type> {
     }
 
     @Override
-    public Type visit(ParseTree tree) {
+    public SlipSymbol visit(ParseTree tree) {
         if (tree instanceof SlipParser.LeftExprIDContext || tree instanceof SlipParser.LeftExprRecordContext) {
             return super.visit(tree);
         } else {
             System.out.println("SOMETHING WENT WRONG BE CAREFUL");
-            return Type.VOID;
+            return null;
         }
     }
 
     @Override
-    public Type visitLeftExprID(SlipParser.LeftExprIDContext ctx){
+    public SlipSymbol visitLeftExprID(SlipParser.LeftExprIDContext ctx){
         String idName = ctx.ID().getText();
 
         try {
@@ -39,30 +39,29 @@ public class StructExprGVisitor extends CheckSlipVisitor<Type> {
                 this.currentScope = (SlipStructureSymbol) declaredId;
             }
 
-            return declaredId.getType();
+            return declaredId;
         } catch (SymbolNotFoundException e){
             signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            return null;
         }
-        return Type.VOID;
     }
 
     @Override
-    public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
+    public SlipSymbol visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
 
-        Type type = visit(ctx.exprG(0));
+        SlipSymbol leftSymbol = visit(ctx.exprG(0));
 
         String name= ctx.exprG(1).getToken(SlipParser.ID, 0).getText();
         try {
-            SlipSymbol symbol = currentScope.resolve(name);
-            type = symbol.getType();
+            SlipSymbol rightSymbol = currentScope.resolve(name);
+            Type type = rightSymbol.getType();
             if (type == Type.STRUCT) {
-                currentScope = (SlipStructureSymbol) symbol;
+                currentScope = (SlipStructureSymbol) rightSymbol;
             }
-
+            return rightSymbol;
         } catch (SymbolNotFoundException e) {
             signalError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
+            return leftSymbol;
         }
-
-        return type;
     }
 }

@@ -12,6 +12,19 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
         this.isAssignable = isAssignable;
     }
 
+
+    protected String getInitValue(){
+        switch(this.type){
+            case CHARACTER:
+                return "\000";
+            case INTEGER:
+                return "0";
+            case BOOLEAN:
+                return "false";
+        }
+        return null;
+    }
+
     protected Object switchValue(String value){
         switch (this.type) {
         case BOOLEAN:

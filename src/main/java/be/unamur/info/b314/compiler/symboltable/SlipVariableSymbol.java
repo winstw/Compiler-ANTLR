@@ -3,8 +3,11 @@ package be.unamur.info.b314.compiler.symboltable;
 public class SlipVariableSymbol extends SlipBaseSymbol {
 
     public SlipVariableSymbol(String name, Type type, boolean isAssignable) {
+
         super(name, type, isAssignable);
+        this.setValue(getInitValue());
     }
+
 
     @Override
     public String toString() {

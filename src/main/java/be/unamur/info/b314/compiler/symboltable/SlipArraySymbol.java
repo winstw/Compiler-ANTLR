@@ -1,6 +1,7 @@
 package be.unamur.info.b314.compiler.symboltable;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SlipArraySymbol extends SlipBaseSymbol {
@@ -8,8 +9,17 @@ public class SlipArraySymbol extends SlipBaseSymbol {
 
     public SlipArraySymbol(String name, Type type, boolean isAssignable, List<Integer> sizes) {
         super(name, type, isAssignable);
-        System.out.println("ARRAY SIZES :" + sizes);
-        this.value = new String[sizes.get(0)][sizes.size() > 1 ? sizes.get(1) : 1];
+
+        int first_dim = sizes.get(0);
+        int second_dim = sizes.size() > 1 ? sizes.get(1) : 1;
+
+        this.value = new String[first_dim][second_dim];
+
+        for (int i = 0; i < first_dim; i++){
+            for (int j = 0; j < second_dim; j++){
+                this.value[i][j] = this.getInitValue();
+            }
+        }
     }
 
     public void setValue(List<Integer> indexes, Object value) {

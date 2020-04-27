@@ -25,6 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class Evaluator extends CheckSlipVisitor<Object> {
     String[][] map = null;
@@ -185,13 +187,32 @@ public class Evaluator extends CheckSlipVisitor<Object> {
 //        return visitChildren(ctx);
 //    }
 
+    private List<Integer> findIndexes(SlipParser.ExprGContext ctx){
+        List<Integer> indexes = ctx.getRuleContexts(SlipParser.ExprDContext.class)// get all "index expressions"
+                .stream()
+                .map(nbContext -> (Integer) nbContext.accept(this))
+                .collect(Collectors.toList());
+        return indexes;
+    }
+
     public Void visitAssignInstr(SlipParser.AssignInstrContext ctx) {
         String varName = ctx.exprG().getToken(SlipParser.ID, 0).getText();
-        SlipBaseSymbol symbol = (SlipBaseSymbol) this.currentScope.resolve(varName);
+        SlipSymbol symbol = this.currentScope.resolve(varName);
+
         if (symbol != null) {
             if (ctx.exprD() != null) {
-                symbol.setValue(visit(ctx.exprD()));
-                System.out.println(String.format("ASSIGNATION SYMBOL:  %s VALUE: %s", symbol, symbol.getValue()));
+                Object value = visit(ctx.exprD());
+                if (!symbol.isArray()) {
+                    SlipVariableSymbol varSymbol = (SlipVariableSymbol) symbol;
+                    varSymbol.setValue(value);
+                    System.out.println(String.format("ASSIGNATION SYMBOL:  %s VALUE: %s", varSymbol, varSymbol.getValue()));
+                } else {
+                    SlipArraySymbol arraySymbol = (SlipArraySymbol) symbol;
+
+                    List<Integer> indexes = this.findIndexes(ctx.exprG());
+                    arraySymbol.setValue(indexes, value);
+                    System.out.println(String.format("ASSIGNATION SYMBOL:  %s%s VALUE: %s", varName, indexes, value));
+                }
             }
         } else {
             System.out.print("error no var with name " +  varName);
@@ -206,7 +227,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
     @Override
     public Character visitChar(SlipParser.CharContext ctx){
-        return ctx.CHAR().getText().charAt(0);
+        return ctx.CHAR().getText().charAt(1);
     }
 
     @Override
@@ -327,7 +348,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     public Void visitForInstr(SlipParser.ForInstrContext ctx){
         //    FOR ID AFFECT exprD TO exprD DO instruction+ END
 
-        SlipBaseSymbol counter = (SlipBaseSymbol) currentScope.resolve(ctx.ID().getText());
+        SlipVariableSymbol counter = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
         counter.setValue(ctx.exprD(0).accept(this));
 
         while((Boolean) ctx.exprD(1).accept(this)) {
@@ -347,22 +368,22 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         SlipScope funcCallScope = new SlipBaseScope("aname", this.currentScope, scopedFunc);
 
          // assign each param in the method call scope
-         Iterator<SlipBaseSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
+         Iterator<SlipVariableSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
          List<SlipParser.ExprDContext> args = ctx.exprD(); // args to the function call
         System.out.println("ARGS LIST SIZE IN FUNCTION CALL : " + ctx.exprD().size());
          int i = 0;
          while (paramIter.hasNext() && i < args.size()){
              // get param from method definition
-             SlipBaseSymbol param = paramIter.next();
+             SlipVariableSymbol param = paramIter.next();
              System.out.println("PARAM : " + param.getName());
              // assign value from function call to param
-             SlipBaseSymbol paramInScope = (SlipBaseSymbol) funcCallScope.resolve(param.getName());
+             SlipVariableSymbol paramInScope = (SlipVariableSymbol) funcCallScope.resolve(param.getName());
              System.out.println("PARAM IN ScOPE : " + paramInScope.getName() + ctx.exprD(i).getText());
 
              System.out.println("Get arg value " + ctx.exprD(i).accept(this));
 
              paramInScope.setValue(ctx.exprD(i).accept(this));
-             System.out.println(String.format("set param %s : %s",  paramInScope.getName(),paramInScope.getValue()));
+             System.out.println(String.format("set param %s : %s", paramInScope.getName(), paramInScope.getValue()));
              i++;
          }
 
@@ -373,7 +394,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         scopedFunc.getBody().forEach(instBlock -> instBlock.accept(this));
 
         // return method return value (variable with same name as method which should be declared in scope)
-        SlipBaseSymbol returnSymbol = (SlipBaseSymbol) this.currentScope.resolve(funcName);
+        SlipVariableSymbol returnSymbol = (SlipVariableSymbol) this.currentScope.resolve(funcName);
 
         this.currentScope = this.currentScope.getParentScope();
 
@@ -384,10 +405,23 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
     @Override
+    public Object visitLeftExprArray(SlipParser.LeftExprArrayContext ctx) {
+        System.out.println("in left expression Array" +  ctx.ID().getText());
+
+        SlipArraySymbol array = (SlipArraySymbol) currentScope.resolve(ctx.ID().getText());
+
+        List<Integer> indexes = findIndexes(ctx);
+        System.out.println("INDEXES : " + indexes);
+        System.out.println("in left expression array" +  array.getValue(indexes));
+        return array.getValue(indexes);
+    }
+
+
+    @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
         System.out.println("in left expression ID" +  ctx.ID().getText());
 
-        SlipBaseSymbol variable = (SlipBaseSymbol) currentScope.resolve(ctx.ID().getText());
+        SlipVariableSymbol variable = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
         System.out.println("in left expression variable" +  variable.getValue());
         return variable.getValue();
     }
@@ -395,7 +429,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         if (ctx.exprD() != null) {
             Object value = ctx.exprD().accept(this);
             ctx.ID().forEach(var -> {
-                SlipBaseSymbol symbol = (SlipBaseSymbol) this.currentScope.resolve(var.getText());
+                SlipVariableSymbol symbol = (SlipVariableSymbol) this.currentScope.resolve(var.getText());
                 if (symbol != null) {
                     symbol.setValue(value);
                 } else {

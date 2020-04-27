@@ -8,11 +8,11 @@ import java.util.List;
 
 public class SlipMethodSymbol extends SlipScopedSymbol {
 
-    private ArrayList<SlipBaseSymbol> parameters;
+    private ArrayList<SlipVariableSymbol> parameters;
     private List<SlipParser.InstBlockContext> body;
     public SlipMethodSymbol(String name, Type type, SlipScope parentScope) {
         super(name, type, parentScope, false);
-        parameters = new ArrayList<SlipBaseSymbol>();
+        parameters = new ArrayList<SlipVariableSymbol>();
     }
 
     @Override
@@ -36,7 +36,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
      * @modifies this
      * @effect add type to parameterTypes
      */
-    public void addParameter(SlipBaseSymbol symbol) {
+    public void addParameter(SlipVariableSymbol symbol) {
         parameters.add(symbol);
     }
 
@@ -51,7 +51,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         return parameters.size();
     }
 
-    public Iterator<SlipBaseSymbol> getParameters() {
+    public Iterator<SlipVariableSymbol> getParameters() {
         return this.parameters.iterator();
     }
 

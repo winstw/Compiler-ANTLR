@@ -15,4 +15,19 @@ public class SlipVariableSymbol extends SlipBaseSymbol {
         sb.append("\n");
         return sb.toString();
     }
+
+
+    public Object getValue(){
+        if (this.value == null){
+            return null;
+        }
+        return switchValue(this.value);
+    }
+
+    public void setValue(Object value) {
+        if (value != null) {
+            this.value = value.toString();
+        }
+    }
+
 }

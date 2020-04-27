@@ -14,6 +14,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
 
@@ -165,7 +168,11 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            SlipSymbol symbol = new SlipArraySymbol(name, type, !isConst);
+            List<Integer> arraySizes = ctx.number()
+                    .stream()
+                    .map(numCtx -> Integer.parseInt(numCtx.getText()))
+                    .collect(Collectors.toList());
+            SlipSymbol symbol = new SlipArraySymbol(name, type, !isConst, arraySizes);
 
             try {
                 currentScope.define(symbol);

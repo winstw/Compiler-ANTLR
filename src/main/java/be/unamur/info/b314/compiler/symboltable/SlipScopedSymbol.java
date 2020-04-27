@@ -21,4 +21,9 @@ public abstract class SlipScopedSymbol extends SlipBaseScope implements SlipSymb
         return isAssignable;
     }
 
+    @Override
+    public boolean isArray() {
+        return false;
+    }
+
 }

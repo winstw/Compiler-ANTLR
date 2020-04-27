@@ -1,9 +1,9 @@
 package be.unamur.info.b314.compiler.symboltable;
 
 public abstract class SlipBaseSymbol implements SlipSymbol {
-    private String value = null;
+    protected String value = null;
     private String name;
-    private Type type;
+    protected Type type;
     private boolean isAssignable;
 
     public SlipBaseSymbol(String name, Type type, boolean isAssignable) {
@@ -12,26 +12,22 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
         this.isAssignable = isAssignable;
     }
 
-    public void setValue(Object value) {
-        if (value != null) {
-            this.value = value.toString();
+    protected Object switchValue(String value){
+        switch (this.type) {
+        case BOOLEAN:
+            return Boolean.parseBoolean(value);
+        case CHARACTER:
+            return value.charAt(0);
+        case INTEGER:
+            return Integer.parseInt(value);
+        default:
+            return value;
         }
     }
 
-    public Object getValue(){
-        if (this.value == null){
-            return null;
-        }
-        switch (this.type) {
-            case BOOLEAN:
-                return Boolean.parseBoolean(this.value);
-            case CHARACTER:
-                return this.value.charAt(0);
-            case INTEGER:
-                return Integer.parseInt(this.value);
-            default:
-                return this.value;
-        }
+
+    public boolean isArray() {
+        return false;
     }
 
     @Override

@@ -98,9 +98,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
             visit(ctx.argList());
         }
 
-        for (SlipParser.InstBlockContext inst: ctx.instBlock()){
-            visit(inst);
-        }
+        ctx.instBlock().forEach(inst -> inst.accept(this));
+
         System.out.println(currentScope);
         this.currentScope = localScope.getParentScope();
         System.out.println("SCOPE : " + currentScope.getName());
@@ -572,14 +571,41 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
     }
 
     @Override
-    public Type visitActionType(SlipParser.ActionTypeContext ctx) {
-
-        if (ctx.exprD() != null) {
+    public Type visitLeftAction(SlipParser.LeftActionContext ctx){
+        if (ctx.getChild (SlipParser.ExprDContext.class, 0) != null) {
             Type type = visit(ctx.exprD());
-
             checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
         }
-
         return Type.VOID;
     }
+    public Type visitRightAction(SlipParser.RightActionContext ctx){
+        if (ctx.exprD() != null) {
+            Type type = visit(ctx.exprD());
+            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
+        }
+        return Type.VOID;
+    }
+    public Type visitUpAction(SlipParser.UpActionContext ctx){
+        if (ctx.exprD() != null) {
+            Type type = visit(ctx.exprD());
+            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
+        }
+        return Type.VOID;
+    }
+    public Type visitDownAction(SlipParser.DownActionContext ctx){
+        if (ctx.exprD() != null) {
+            Type type = visit(ctx.exprD());
+            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
+        }
+        return Type.VOID;
+    }
+    public Type visitJumpAction(SlipParser.JumpActionContext ctx){
+        if (ctx.exprD() != null) {
+            Type type = visit(ctx.exprD());
+            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
+        }
+        return Type.VOID;
+    }
+
+
 }

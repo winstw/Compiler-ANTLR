@@ -84,13 +84,13 @@ instruction : IF LPAR exprD RPAR THEN instruction+ END                      # if
             | actionType SEMICOLON                                          # actionInstr
             ;
 
-actionType : LEFT LPAR exprD? RPAR
-           | RIGHT LPAR exprD? RPAR
-           | UP LPAR exprD? RPAR
-           | DOWN LPAR exprD? RPAR
-           | JUMP LPAR exprD? RPAR
-           | FIGHT LPAR RPAR
-           | dig
+actionType : LEFT LPAR exprD? RPAR  # leftAction
+           | RIGHT LPAR exprD? RPAR # rightAction
+           | UP LPAR exprD? RPAR    # upAction
+           | DOWN LPAR exprD? RPAR  # downAction
+           | JUMP LPAR exprD? RPAR  # jumpAction
+           | FIGHT LPAR RPAR        # fightAction
+           | dig                    # digAction
            ;
 
 dig : DIG LPAR RPAR;

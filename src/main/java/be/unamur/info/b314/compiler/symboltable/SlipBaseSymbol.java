@@ -12,6 +12,8 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
         this.isAssignable = isAssignable;
     }
 
+    @Override
+    public abstract SlipSymbol clone();
 
     protected String getInitValue(){
         switch(this.type){

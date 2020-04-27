@@ -3,13 +3,15 @@ package be.unamur.info.b314.compiler.symboltable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SlipArraySymbol extends SlipBaseSymbol {
     private String[][] value;
+    List<Integer> sizes;
 
     public SlipArraySymbol(String name, Type type, boolean isAssignable, List<Integer> sizes) {
         super(name, type, isAssignable);
-
+        this.sizes = sizes;
         int first_dim = sizes.get(0);
         int second_dim = sizes.size() > 1 ? sizes.get(1) : 1;
 
@@ -22,6 +24,11 @@ public class SlipArraySymbol extends SlipBaseSymbol {
         }
     }
 
+    public SlipSymbol clone(){
+        return new SlipArraySymbol(this.getName(), this.getType(), this.isAssignable(),
+                this.sizes.stream().collect(Collectors.toList()) // clone sizes
+        );
+    }
     public void setValue(List<Integer> indexes, Object value) {
         if (value != null) {
             this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0] = value.toString();

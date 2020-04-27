@@ -29,8 +29,8 @@ public class SlipBaseScope implements SlipScope{
     protected Map<String, SlipSymbol> cloneSymbols(){
         Map<String, SlipSymbol> map = new HashMap<>();
         this.symbols.forEach((key, symbol) -> {
-            SlipSymbol symbolCopy = new SlipVariableSymbol(symbol.getName(), symbol.getType(), symbol.isAssignable());
-            map.put(key, symbolCopy);
+            SlipSymbol copy = ((SlipBaseSymbol) symbol).clone();
+            map.put(key, copy);
                 });
         return map;
     }
@@ -70,6 +70,7 @@ public class SlipBaseScope implements SlipScope{
         return symbol;
 
     }
+
 
     @Override
     public SlipScope getParentScope() {

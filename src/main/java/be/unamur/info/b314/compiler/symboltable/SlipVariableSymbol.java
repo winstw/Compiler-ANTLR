@@ -8,6 +8,10 @@ public class SlipVariableSymbol extends SlipBaseSymbol {
         this.setValue(getInitValue());
     }
 
+    @Override
+    public SlipSymbol clone(){
+        return new SlipVariableSymbol(this.getName(), this.getType(), this.isAssignable());
+    }
 
     @Override
     public String toString() {

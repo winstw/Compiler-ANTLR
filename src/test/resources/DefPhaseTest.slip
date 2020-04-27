@@ -1,28 +1,68 @@
 #import "file.map"
 
+intArray as integer[5, 5];
+boolArray as boolean[5, 5];
+charArray as char[5, 5];
+b as boolean;
 main as function(): void
 do
-  i as integer;
-  j as integer;
-  k as integer = 0;
 
-  repeat
-     i:= 0;
-    while(i < 3)
-    do
-      for j := 1 to (j < 5)
-        do
-          right();
-        end
-      left();
-      i := i + 1;
-      k := k + i;
-    end
-    until (k < 30)
-  end
+    intArray[2, 1] := 5;
+    boolArray[4, 3] := true;
+    charArray[2, 1] := 'c';
+    b := boolArray[4, 4];
+    dig();
 
-  dig();
 end
+
+// #import "file.map"
+
+// intArray as integer[5];
+// boolArray as boolean[5];
+// charArray as char[5];
+// b as boolean;
+
+// fun as function(): integer
+// do
+//   fun := 3;
+// end
+
+// main as function(): void
+// do
+
+//     intArray[fun()] := 5;
+//     boolArray[2 + 2] := true;
+//     b := boolArray[4];
+//     charArray[2] := 'c';
+//     dig();
+
+// end
+
+// #import "file.map"
+
+// main as function(): void
+// do
+//   i as integer;
+//   j as integer;
+//   k as integer = 0;
+
+//   repeat
+//      i:= 0;
+//     while(i < 3)
+//     do
+//       for j := 1 to (j < 5)
+//         do
+//           right();
+//         end
+//       left();
+//       i := i + 1;
+//       k := k + i;
+//     end
+//     until (k < 30)
+//   end
+
+//   dig();
+// end
 
 
 // #import "file.map"

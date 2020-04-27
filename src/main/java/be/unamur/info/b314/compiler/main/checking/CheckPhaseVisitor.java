@@ -152,7 +152,7 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
                 return scopedFunc.getType();
             }
 
-            Iterator<SlipBaseSymbol> declaredParamTypes = scopedFunc.getParameters();
+            Iterator<SlipVariableSymbol> declaredParamTypes = scopedFunc.getParameters();
             for (SlipParser.ExprDContext param : ctx.exprD()){
                 Type actualParamType = visit(param);
                 if (declaredParamTypes.hasNext()) {
@@ -216,7 +216,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
         if (currentScope.getName() != "global") {
             for (TerminalNode node : ctx.ID()) {
                 String name = node.getText();
-                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, !isConst);
+                List<Integer> arraySizes = ctx.number()
+                        .stream()
+                        .map(numCtx -> Integer.parseInt(numCtx.getText()))
+                        .collect(Collectors.toList());
+                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, !isConst, arraySizes);
 
                 try {
                     currentScope.define(symbol);

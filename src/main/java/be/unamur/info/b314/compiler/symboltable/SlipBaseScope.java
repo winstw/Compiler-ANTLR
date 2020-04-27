@@ -59,7 +59,6 @@ public class SlipBaseScope implements SlipScope{
     public SlipSymbol resolve(String name) throws SymbolNotFoundException {
 
         SlipSymbol symbol = symbols.get(name);
-
         if (parentScope != null && symbol == null) {
             symbol = parentScope.resolve(name);
         }

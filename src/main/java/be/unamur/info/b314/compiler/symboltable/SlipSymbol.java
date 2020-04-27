@@ -38,5 +38,6 @@ public interface SlipSymbol {
      * @return assignable
      */
     boolean isAssignable();
+    boolean isArray();
 
 }

@@ -33,6 +33,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     String currentPath = "";
     private ParseTreeProperty<SlipScope> scopes;
     SlipScope currentScope;
+    NbcCompiler compiler;
     static public void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.dir") + "/src/test/resources/DefPhaseTest.slip");
         SlipLexer lexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(input)));
@@ -44,14 +45,18 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         tree.accept(visitor);
         CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
-        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/");
+        NbcCompiler compiler = new NbcCompiler();
+        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/", compiler);
         evaluator.visitProgram(tree);
+        System.out.println(compiler);
+
     }
 
-    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath){
+    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath, NbcCompiler compiler){
         super(e);
         this.scopes = scopes;
         this.currentPath = currentPath;
+        this.compiler = compiler;
     }
 
     @Override
@@ -439,11 +444,17 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
 
+    public Object visitLeftExprRecord(SlipParser.LeftExprIDContext ctx) {
+        return null;
+    }
+
     @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
         System.out.println("in left expression ID" +  ctx.ID().getText());
 
+        // TODO handle struct case
         SlipVariableSymbol variable = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
+
         System.out.println("in left expression variable" +  variable.getValue());
         return variable.getValue();
     }
@@ -464,7 +475,63 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         }
         return null;
     }
-//
+
+    @Override
+    public Void visitLeftAction(SlipParser.LeftActionContext ctx){
+        int arg;
+        if (ctx.exprD() != null) {
+            arg = (Integer) ctx.exprD().accept(this);
+        } else {
+            arg = 1;
+        }
+        this.compiler.addAction(NbcCompiler.ActionType.LEFT, arg);
+        return null;
+    }
+
+    public Void visitRightAction(SlipParser.RightActionContext ctx){
+        int arg;
+        if (ctx.exprD() != null) {
+            arg = (Integer) ctx.exprD().accept(this);
+        } else {
+            arg = 1;
+        }
+        this.compiler.addAction(NbcCompiler.ActionType.RIGHT, arg);
+        return null;
+    }
+    public Void visitUpAction(SlipParser.UpActionContext ctx){
+        int arg;
+        if (ctx.exprD() != null) {
+            arg = (Integer) ctx.exprD().accept(this);
+        } else {
+            arg = 1;
+        }
+        this.compiler.addAction(NbcCompiler.ActionType.UP, arg);
+        return null;
+    }
+    public Void visitDownAction(SlipParser.DownActionContext ctx){
+        int arg;
+        if (ctx.exprD() != null) {
+            arg = (Integer) ctx.exprD().accept(this);
+        } else {
+            arg = 1;
+        }
+        this.compiler.addAction(NbcCompiler.ActionType.DOWN, arg);
+        return null;
+    }
+    public Void visitJumpAction(SlipParser.JumpActionContext ctx){
+        this.compiler.addAction(NbcCompiler.ActionType.JUMP);
+        return null;
+    }
+
+    public Void visitDigAction(SlipParser.DigActionContext ctx){
+        this.compiler.addAction(NbcCompiler.ActionType.DIG);
+        return null;
+    }
+
+    public Void visitFightAction(SlipParser.FightActionContext ctx){
+        this.compiler.addAction(NbcCompiler.ActionType.FIGHT);
+        return null;
+    }
 
 }
 

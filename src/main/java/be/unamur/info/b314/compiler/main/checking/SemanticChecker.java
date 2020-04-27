@@ -2,6 +2,7 @@ package be.unamur.info.b314.compiler.main.checking;
 
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.main.nbc.Evaluator;
+import be.unamur.info.b314.compiler.main.nbc.NbcCompiler;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 
 public class SemanticChecker {
@@ -18,8 +19,10 @@ public class SemanticChecker {
         CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler);
         checkPhase.visit(tree);
         if (!errorHandler.isErrorOccurred()){
-            Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, null);
+            NbcCompiler compiler = new NbcCompiler();
+            Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, null, compiler);
             eval.visit(tree);
+            compiler.toString();
         }
         return !errorHandler.isErrorOccurred();
     }

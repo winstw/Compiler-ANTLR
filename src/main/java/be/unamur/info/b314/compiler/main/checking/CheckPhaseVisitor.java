@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -572,40 +573,28 @@ public class CheckPhaseVisitor extends CheckSlipVisitor<Type> {
 
     @Override
     public Type visitLeftAction(SlipParser.LeftActionContext ctx){
-        if (ctx.getChild (SlipParser.ExprDContext.class, 0) != null) {
-            Type type = visit(ctx.exprD());
-            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
-        }
-        return Type.VOID;
+        return this.checkActionArg(ctx);
     }
     public Type visitRightAction(SlipParser.RightActionContext ctx){
-        if (ctx.exprD() != null) {
-            Type type = visit(ctx.exprD());
-            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
-        }
-        return Type.VOID;
+        return this.checkActionArg(ctx);
     }
     public Type visitUpAction(SlipParser.UpActionContext ctx){
-        if (ctx.exprD() != null) {
-            Type type = visit(ctx.exprD());
-            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
-        }
-        return Type.VOID;
+        return this.checkActionArg(ctx);
     }
     public Type visitDownAction(SlipParser.DownActionContext ctx){
-        if (ctx.exprD() != null) {
-            Type type = visit(ctx.exprD());
-            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
-        }
-        return Type.VOID;
+        return this.checkActionArg(ctx);
     }
     public Type visitJumpAction(SlipParser.JumpActionContext ctx){
-        if (ctx.exprD() != null) {
-            Type type = visit(ctx.exprD());
-            checkEqual(type, Type.INTEGER, ctx.exprD().start, "expression must be of type integer");
+        return this.checkActionArg(ctx);
+    }
+
+    private Type checkActionArg(SlipParser.ActionTypeContext ctx){
+        SlipParser.ExprDContext arg = ctx.getChild(SlipParser.ExprDContext.class, 0);
+        if (arg != null){
+            Type type = arg.accept(this);
+            checkEqual(type, Type.INTEGER, arg.start, "expression must be of type integer");
         }
         return Type.VOID;
     }
-
 
 }

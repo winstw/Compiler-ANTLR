@@ -6,6 +6,7 @@ do
   for i:= 1 to (i < 5)
   do
     right();
+    i := i + 1;
   end
   dig();
 end

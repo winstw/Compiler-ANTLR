@@ -12,6 +12,7 @@ do
     do
       for j:= 1 to (j < 5)
         do
+          j:= j + 1;
           right();
         end
       left();

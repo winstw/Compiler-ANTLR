@@ -45,10 +45,11 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         tree.accept(visitor);
         CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
-        NbcCompiler compiler = new NbcCompiler();
+        NbcCompiler compiler = new NbcCompiler("output.slip");
         Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/", compiler);
         evaluator.visitProgram(tree);
         System.out.println(compiler);
+        compiler.compile();
 
     }
 

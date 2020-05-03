@@ -157,15 +157,6 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         return null;
     }
 
-    // @Override
-    // public Void visitFuncDecl(SlipParser.FuncDeclContext ctx){
-    //     this.currentScope = this.scopes.get(ctx);
-
-    //     ctx.instBlock().forEach(instruction -> instruction.accept(this));
-
-    //     this.currentScope = this.currentScope.getParentScope();
-    //     return null;
-    // }
 
     @Override
     public Void visitDeclaration(SlipParser.DeclarationContext ctx){
@@ -175,10 +166,6 @@ public class Evaluator extends CheckSlipVisitor<Object> {
 
     @Override
     public String visitArgList(SlipParser.ArgListContext ctx) {
-//        for(SlipParser.VarDefContext varDef : ctx.varDef()) {
-//            args.add(varDef.ID().get(0).getText());
-//        }
-//        return String.join(", ", args);
         return null;
     }
 
@@ -187,10 +174,6 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         ctx.instruction().forEach(instruction -> instruction.accept(this));
         return null;
     }
-
-//    public String visitDeclaration(SlipParser.DeclarationContext ctx) {
-//        return visitChildren(ctx);
-//    }
 
     private List<Integer> findIndexes(SlipParser.ExprGContext ctx){
         List<Integer> indexes = ctx.getRuleContexts(SlipParser.ExprDContext.class)// get all "index expressions"

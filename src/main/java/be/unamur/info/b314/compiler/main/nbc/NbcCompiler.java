@@ -39,10 +39,7 @@
 
         public void addAction(ActionType actionType, int value){
             System.out.println("COMPILER ADD ACTION :" + actionType + value);
-            if (actionType == ActionType.LEFT
-                    || actionType ==  ActionType.RIGHT
-                    || actionType ==  ActionType.UP
-                    || actionType == ActionType.DOWN) {
+            if (actionType ==  ActionType.UP) {
                 SlipAction lastAction = this.actions.peekLast();
                 if (lastAction != null && lastAction.type == actionType) {
                     lastAction.value = lastAction.value + value;

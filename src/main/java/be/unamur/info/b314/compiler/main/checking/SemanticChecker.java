@@ -5,7 +5,7 @@ import be.unamur.info.b314.compiler.main.nbc.Evaluator;
 import be.unamur.info.b314.compiler.main.nbc.NbcCompiler;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 
-import java.io.FileNotFoundException;
+import java.io.File;
 
 public class SemanticChecker {
     boolean errorOccurred = false;
@@ -14,15 +14,15 @@ public class SemanticChecker {
      * @effect print a message on System.err if semantic is wrong
      * @return true if there is no semantic error, else return false
      */
-    public static boolean run(SlipParser.ProgramContext tree) {
+    public static boolean run(SlipParser.ProgramContext tree, String inputPath, File outputFile) {
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase definitionPhase = new GlobalDefinitionPhase(errorHandler);
         definitionPhase.visit(tree);
         CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler);
         checkPhase.visit(tree);
         if (!errorHandler.isErrorOccurred()){
-            NbcCompiler compiler = new NbcCompiler("output.slip");
-            Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, null, compiler);
+            NbcCompiler compiler = new NbcCompiler(outputFile);
+            Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, inputPath, compiler);
             eval.visit(tree);
             compiler.toString();
         }

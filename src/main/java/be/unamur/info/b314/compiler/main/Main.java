@@ -53,7 +53,6 @@ public class Main {
 
         // Print the tested file
         String filename = args[1];
-        System.out.println(System.getProperty("user.dir"));
         try (BufferedReader br = new BufferedReader(new FileReader(filename))){
             String line = "";
             LOG.debug("-- Printing file content --");
@@ -182,7 +181,7 @@ public class Main {
         LOG.debug("AST is {}", tree.toStringTree(parser));
         // Build symbol table
         LOG.debug("Building symbol table");
-        if (!SemanticChecker.run(tree)) {
+        if (!SemanticChecker.run(tree, inputFile.getPath(), outputFile)) {
             throw new RuntimeException("there are semantic error");
         }
         LOG.debug("Building symbol table: done");

@@ -49,7 +49,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         tree.accept(visitor);
         CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
-        NbcCompiler compiler = new NbcCompiler("output.slip");
+        NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "output.slip"));
         Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/", compiler);
         evaluator.visitProgram(tree);
         System.out.println(compiler);
@@ -73,27 +73,30 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
     private String[][] loadMapFile(SlipParser.ImpDeclContext ctx) {
-        // populate map field from file
+        // populate map field from file, if file exists!
         String filename = ctx.FILENAME().getText().replace("\"", "");
         String filePath = this.currentPath + filename;
-        try {
-            SlipLexer mapLexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(filePath)));
-            CommonTokenStream tokens = new CommonTokenStream(mapLexer);
-            SlipParser parser = new SlipParser(tokens);
-            SlipParser.MapContext tree = parser.map();
-            boolean isValidMap = new MapVisitor(this.errorHandler).visit(tree);
-            if (isValidMap){
-                this.visit(tree);
+        System.out.println("MAP FILE PATH " + filePath);
+        File mapFile = new File(filePath);
+        if (mapFile.exists() && mapFile.isFile()) {
+            try {
+                SlipLexer mapLexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(filePath)));
+                CommonTokenStream tokens = new CommonTokenStream(mapLexer);
+                SlipParser parser = new SlipParser(tokens);
+                SlipParser.MapContext tree = parser.map();
+                boolean isValidMap = new MapVisitor(this.errorHandler).visit(tree);
+                if (isValidMap){
+                    this.visit(tree);
+                }
+            } catch (RecognitionException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-        } catch (FileNotFoundException e) {
-            signalError(ctx.start , String.format("Cannot load map file %s", filePath));
-            e.printStackTrace();
-        } catch (RecognitionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } else {
+            System.out.println("NO MAP FILE PROVIDED!");
         }
         return null;
     }
@@ -137,18 +140,18 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     public Object visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = this.scopes.get(ctx);
         ctx.children.stream()
-                .filter(child -> !(child instanceof TerminalNodeImpl)) // keep only statement children
-                .forEach(child -> child.accept(this));
+            .filter(child -> !(child instanceof TerminalNodeImpl)) // keep only statement children
+            .forEach(child -> child.accept(this));
 
         this.currentScope = this.currentScope.getParentScope();
         return null;
     }
 
     public Void visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
-       Boolean guard = (Boolean) ctx.exprD().accept(this);
-       if (guard){
-           ctx.instruction().forEach(instruction -> instruction.accept(this));
-       }
+        Boolean guard = (Boolean) ctx.exprD().accept(this);
+        if (guard){
+            ctx.instruction().forEach(instruction -> instruction.accept(this));
+        }
         return null;
     }
 
@@ -187,9 +190,9 @@ public class Evaluator extends CheckSlipVisitor<Object> {
             exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
         }
         List<Integer> indexes = exprDContexts // get all "index expressions"
-                .stream()
-                .map(nbContext -> (Integer) nbContext.accept(this))
-                .collect(Collectors.toList());
+            .stream()
+            .map(nbContext -> (Integer) nbContext.accept(this))
+            .collect(Collectors.toList());
         return indexes;
     }
 
@@ -262,15 +265,15 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         Integer left = (Integer) ctx.exprD(0).accept(this);
         Integer right = (Integer) ctx.exprD(1).accept(this);
         switch (ctx.op.getType()) {
-            case SlipParser.TIMES:
-                return left * right;
-            case SlipParser.DIVIDE:
-                // TODO CATCH DIVIDE BY 0
-                return left / right;
-            case SlipParser.MODULO:
-                return left % right;
-            default:
-                return null;
+        case SlipParser.TIMES:
+            return left * right;
+        case SlipParser.DIVIDE:
+            // TODO CATCH DIVIDE BY 0
+            return left / right;
+        case SlipParser.MODULO:
+            return left % right;
+        default:
+            return null;
         }
     }
 
@@ -278,7 +281,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     public Object visitExprGExpr(SlipParser.ExprGExprContext ctx){
         System.out.println("in ExprGexpr" + ctx.exprG().accept(this));
         return ctx.exprG().accept(this);
-//        return ctx.exprG().accept(this);
+        //        return ctx.exprG().accept(this);
     }
 
     @Override

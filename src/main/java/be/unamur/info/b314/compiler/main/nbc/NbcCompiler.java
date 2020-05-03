@@ -44,11 +44,11 @@
 
         Deque<SlipAction> actions;
         private PrintWriter writer;
-        private String fileName;
+        private File outputFile;
 
-        public NbcCompiler(String fileName) {
+        public NbcCompiler(File outputFile) {
             this.actions = new LinkedList<>();
-            this.fileName = fileName;
+            this.outputFile = outputFile;
         }
 
         public void addAction(ActionType actionType){
@@ -75,7 +75,7 @@
         }
 
         public void compile() {
-            File f = new File(fileName);
+            File f = outputFile;
             if(f.exists()) {
                 f.delete();
             }

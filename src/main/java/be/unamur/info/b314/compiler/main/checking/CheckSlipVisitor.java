@@ -24,7 +24,7 @@ public abstract class CheckSlipVisitor<T> extends SlipBaseVisitor<T> {
 
     protected <U> boolean checkEqual(U firstValue, U secondValue, Token t, String message){
         boolean equal = true;
-        if (firstValue != secondValue){
+        if (!firstValue.equals(secondValue)){
             equal = false;
             signalError(t, message);
         }

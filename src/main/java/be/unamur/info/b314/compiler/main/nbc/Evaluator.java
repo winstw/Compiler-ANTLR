@@ -459,55 +459,42 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         return null;
     }
 
-    @Override
-    public Void visitLeftAction(SlipParser.LeftActionContext ctx){
+    /**
+     * Add a "move" action (RIGHT, LEFT, UP, DOWN) to the compiler
+     *
+     * @param argContext The context corresponding to the argument of the action.
+     * @param actionType The type of the action to add.
+     */
+    private void addMoveAction(SlipParser.ExprDContext argContext, NbcCompiler.ActionType actionType){
         int arg;
-        if (ctx.exprD() != null) {
-            arg = (Integer) ctx.exprD().accept(this);
+        if (argContext != null) {
+            arg = (Integer) argContext.accept(this);
         } else {
             arg = 1;
         }
-        this.compiler.addAction(NbcCompiler.ActionType.LEFT, arg);
+        this.compiler.addAction(actionType, arg);
+    }
+
+    @Override
+    public Void visitLeftAction(SlipParser.LeftActionContext ctx){
+        this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.LEFT);
         return null;
     }
 
     public Void visitRightAction(SlipParser.RightActionContext ctx){
-        int arg;
-        if (ctx.exprD() != null) {
-            arg = (Integer) ctx.exprD().accept(this);
-        } else {
-            arg = 1;
-        }
-        this.compiler.addAction(NbcCompiler.ActionType.RIGHT, arg);
+        this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.RIGHT);
         return null;
     }
     public Void visitUpAction(SlipParser.UpActionContext ctx){
-        int arg;
-        if (ctx.exprD() != null) {
-            arg = (Integer) ctx.exprD().accept(this);
-        } else {
-            arg = 1;
-        }
-        this.compiler.addAction(NbcCompiler.ActionType.UP, arg);
+        this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.UP);
         return null;
     }
     public Void visitDownAction(SlipParser.DownActionContext ctx){
-        int arg;
-        if (ctx.exprD() != null) {
-            arg = (Integer) ctx.exprD().accept(this);
-        } else {
-            arg = 1;
-        }
-        this.compiler.addAction(NbcCompiler.ActionType.DOWN, arg);
+        this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.DOWN);
         return null;
     }
     public Void visitJumpAction(SlipParser.JumpActionContext ctx){
         this.compiler.addAction(NbcCompiler.ActionType.JUMP);
-        return null;
-    }
-
-    public Void visitDigAction(SlipParser.DigActionContext ctx){
-        this.compiler.addAction(NbcCompiler.ActionType.DIG);
         return null;
     }
 
@@ -516,6 +503,15 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         return null;
     }
 
+    public Void visitDigAction(SlipParser.DigActionContext ctx){
+        this.compiler.addAction(NbcCompiler.ActionType.DIG);
+        return null;
+    }
+
+    public Void visitDig(SlipParser.DigContext ctx){
+        this.compiler.addAction(NbcCompiler.ActionType.DIG);
+        return null;
+    }
 }
 
 

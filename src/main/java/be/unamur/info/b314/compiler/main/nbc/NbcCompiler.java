@@ -39,16 +39,21 @@
 
         public void addAction(ActionType actionType, int value){
             System.out.println("COMPILER ADD ACTION :" + actionType + value);
-            if (actionType ==  ActionType.UP) {
+            if (actionType == ActionType.UP){
                 SlipAction lastAction = this.actions.peekLast();
                 if (lastAction != null && lastAction.type == actionType) {
                     lastAction.value = lastAction.value + value;
-                } else {
-                    actions.addLast(new SlipAction(actionType, value));
-                }
-            } else {
-                this.actions.addLast(new SlipAction(actionType));
-            }
+
+                } else actions.addLast(new SlipAction(actionType, value));
+
+            } else if (actionType == ActionType.LEFT ||
+                       actionType == ActionType.RIGHT ||
+                    actionType == ActionType.DOWN) {
+
+                actions.addLast(new SlipAction(actionType, value));
+
+            } else this.actions.addLast(new SlipAction(actionType));
+
         }
 
         public String toString(){

@@ -11,6 +11,11 @@ do
     boolArray[4, 3] := true;
     charArray[2, 1] := 'c';
     b := boolArray[4, 4];
+    right(intArray[2, 1]);
+    up(2);
+    up(2);
+    left(2);
+    left(2);
     dig();
 
 end

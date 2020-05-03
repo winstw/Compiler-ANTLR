@@ -3,9 +3,7 @@ package be.unamur.info.b314.compiler.symboltable;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class SlipBaseScope implements SlipScope{
@@ -23,16 +21,23 @@ public class SlipBaseScope implements SlipScope{
     public SlipBaseScope(String name, SlipScope parentScope, SlipBaseScope fromScope) {
         this.name = name;
         this.parentScope= parentScope;
-        this.symbols = fromScope.cloneSymbols();
+        this.symbols = fromScope.cloneSymbols(this);
     }
 
-    protected Map<String, SlipSymbol> cloneSymbols(){
+    protected Map<String, SlipSymbol> cloneSymbols(SlipScope parentScope){
         Map<String, SlipSymbol> map = new HashMap<>();
-        this.symbols.forEach((key, symbol) -> {
-            SlipSymbol copy = ((SlipBaseSymbol) symbol).clone();
-            map.put(key, copy);
-                });
-        return map;
+            this.symbols.forEach((key, symbol) -> {
+                SlipSymbol copy;
+                    if (symbol instanceof SlipStructureSymbol) {
+                        copy = new SlipStructureSymbol(symbol.getName(), parentScope, symbol.isAssignable());
+                        ((SlipBaseScope) copy).symbols = ((SlipStructureSymbol) symbol).cloneSymbols(parentScope);
+                    }
+                    else {
+                        copy = ((CloneableSymbol) symbol).cloneSymbol();
+                    }
+                map.put(key, copy);
+            });
+            return map;
     }
 
     @Override

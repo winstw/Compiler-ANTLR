@@ -53,6 +53,7 @@ public class Main {
 
         // Print the tested file
         String filename = args[1];
+        System.out.println(System.getProperty("user.dir"));
         try (BufferedReader br = new BufferedReader(new FileReader(filename))){
             String line = "";
             LOG.debug("-- Printing file content --");

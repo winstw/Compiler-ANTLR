@@ -9,7 +9,7 @@ public class SlipVariableSymbol extends SlipBaseSymbol {
     }
 
     @Override
-    public SlipSymbol clone(){
+    public SlipSymbol cloneSymbol(){
         return new SlipVariableSymbol(this.getName(), this.getType(), this.isAssignable());
     }
 

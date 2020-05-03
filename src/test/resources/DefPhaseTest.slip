@@ -1,24 +1,144 @@
 #import "file.map"
 
-intArray as integer[5, 5];
-boolArray as boolean[5, 5];
-charArray as char[5, 5];
-b as boolean;
+i as integer;
+
+fun as function(): integer
+do
+ rec as record
+   a as integer[5];
+   b as char;
+   inrec as record
+      c as boolean[5,3];
+   end;
+ end;
+ rec.a[2] := 2;
+ fun := rec.a[2];
+end
+
+funbool as function(t as boolean): boolean
+do
+ rec as record
+   a as integer[5];
+   b as char;
+   inrec as record
+      c as boolean[5,3];
+   end;
+ end;
+ rec.inrec.c[2, 2] := t;
+ funbool := rec.inrec.c[2, 2];
+end
+
 main as function(): void
 do
-
-    intArray[2, 1] := 5;
-    boolArray[4, 3] := true;
-    charArray[2, 1] := 'c';
-    b := boolArray[4, 4];
-    right(intArray[2, 1]);
-    up(2);
-    up(2);
-    left(2);
-    left(2);
-    dig();
-
+ rec2 as record
+   a as integer[5];
+   b as char;
+   c as boolean[5,3];
+ end;
+ if (funbool(true))
+ then
+  i := fun();
+  right(i);
+  end
+  dig();
 end
+
+// #import "file.map"
+// arr as integer[2, 3];
+// struct as record
+//     y as integer;
+//     v as char;
+//     ko as boolean;
+//     array as integer[3, 3];
+//     imbrStruct as record
+//         x as integer;
+//         array as integer[3, 3];
+//         c as char;
+//         ok as boolean;
+//     end;
+// end;
+
+
+// main as function(): void
+// do
+//     arr[1, 2] := 0;
+//     struct.y := 5;
+//     struct.v := 'c';
+//     struct.ko := true;
+//     struct.array[2, 1] := 3;
+//     struct.imbrStruct.x := 6;
+//     struct.imbrStruct.c := 'c';
+//     struct.imbrStruct.array[2, 2] := 7;
+//     struct.imbrStruct.ok := true;
+
+//     left(struct.imbrStruct.array[2, 2]);
+//     dig();
+
+// end
+
+// #import "file.map"
+
+// struct as record
+//        x as integer;
+//     end;
+
+
+// main as function(): void
+// do
+//     struct.x := 5;
+//     left(struct.x);
+//     dig();
+
+// end
+
+// #import "file.map"
+
+// i as integer;
+
+// fun as function(): integer
+// do
+//  rec as record
+//    a as integer[5];
+//    b as char;
+//    c as boolean[5,3];
+//  end;
+//  fun := 4;
+// end
+
+// main as function(): void
+// do
+//  rec2 as record
+//    a as integer[5];
+//    b as char;
+//    c as boolean[5,3];
+//  end;
+
+//   i := fun();
+//   right(i);
+//   dig();
+// end
+
+// #import "file.map"
+
+// intArray as integer[5, 5];
+// boolArray as boolean[5, 5];
+// charArray as char[5, 5];
+// b as boolean;
+// main as function(): void
+// do
+
+//     intArray[2, 1] := 5;
+//     boolArray[4, 3] := true;
+//     charArray[2, 1] := 'c';
+//     b := boolArray[4, 4];
+//     right(intArray[2, 1]);
+//     up(2);
+//     up(2);
+//     left(2);
+//     left(2);
+//     dig();
+
+// end
 
 // #import "file.map"
 

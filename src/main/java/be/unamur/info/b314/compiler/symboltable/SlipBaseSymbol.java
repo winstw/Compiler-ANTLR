@@ -1,6 +1,6 @@
 package be.unamur.info.b314.compiler.symboltable;
 
-public abstract class SlipBaseSymbol implements SlipSymbol {
+public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
     protected String value = null;
     private String name;
     protected Type type;
@@ -13,7 +13,7 @@ public abstract class SlipBaseSymbol implements SlipSymbol {
     }
 
     @Override
-    public abstract SlipSymbol clone();
+    public abstract SlipSymbol cloneSymbol();
 
     protected String getInitValue(){
         switch(this.type){

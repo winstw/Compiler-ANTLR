@@ -1,7 +1,5 @@
 package be.unamur.info.b314.compiler.symboltable;
 
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,9 +22,9 @@ public class SlipArraySymbol extends SlipBaseSymbol {
         }
     }
 
-    public SlipSymbol clone(){
+    public SlipSymbol cloneSymbol(){
         return new SlipArraySymbol(this.getName(), this.getType(), this.isAssignable(),
-                this.sizes.stream().collect(Collectors.toList()) // clone sizes
+                this.sizes // clone sizes
         );
     }
     public void setValue(List<Integer> indexes, Object value) {

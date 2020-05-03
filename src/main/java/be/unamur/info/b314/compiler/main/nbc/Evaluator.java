@@ -1,6 +1,20 @@
 package be.unamur.info.b314.compiler.main.nbc;
 
-import be.unamur.info.b314.compiler.SlipBaseVisitor;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.tree.ParseTreeProperty;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.TerminalNodeImpl;
+
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
@@ -9,24 +23,14 @@ import be.unamur.info.b314.compiler.main.checking.CheckSlipVisitor;
 import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
 import be.unamur.info.b314.compiler.main.checking.MapVisitor;
-import be.unamur.info.b314.compiler.symboltable.*;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.SemanticContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeProperty;
-import org.antlr.v4.runtime.tree.TerminalNodeImpl;
-import org.antlr.v4.runtime.tree.xpath.XPath;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
+import be.unamur.info.b314.compiler.main.checking.StructExprGVisitor;
+import be.unamur.info.b314.compiler.symboltable.SlipArraySymbol;
+import be.unamur.info.b314.compiler.symboltable.SlipBaseScope;
+import be.unamur.info.b314.compiler.symboltable.SlipMethodSymbol;
+import be.unamur.info.b314.compiler.symboltable.SlipScope;
+import be.unamur.info.b314.compiler.symboltable.SlipStructureSymbol;
+import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
+import be.unamur.info.b314.compiler.symboltable.SlipVariableSymbol;
 
 public class Evaluator extends CheckSlipVisitor<Object> {
     String[][] map = null;
@@ -177,7 +181,12 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
     private List<Integer> findIndexes(SlipParser.ExprGContext ctx){
-        List<Integer> indexes = ctx.getRuleContexts(SlipParser.ExprDContext.class)// get all "index expressions"
+        List<SlipParser.ExprDContext> exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
+        while (exprDContexts.size() == 0){
+            ctx = ctx.getRuleContext(SlipParser.ExprGContext.class, 1);
+            exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
+        }
+        List<Integer> indexes = exprDContexts // get all "index expressions"
                 .stream()
                 .map(nbContext -> (Integer) nbContext.accept(this))
                 .collect(Collectors.toList());
@@ -185,9 +194,22 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
     public Void visitAssignInstr(SlipParser.AssignInstrContext ctx) {
-        String varName = ctx.exprG().getToken(SlipParser.ID, 0).getText();
-        SlipSymbol symbol = this.currentScope.resolve(varName);
+        TerminalNode id = ctx.exprG().getToken(SlipParser.ID, 0);
+        SlipSymbol symbol;
+        String varName;
+        // not a struct
+        if (id != null) {
+            varName = id.getText();
+            System.out.println("ASSIGN VAR NAME : ");
+            symbol = this.currentScope.resolve(varName);
+        } else { // STRUCT
+            StructExprGVisitor structVisitor = new StructExprGVisitor(currentScope, errorHandler);
+            symbol = structVisitor.visit(ctx.exprG());
+            varName = symbol.getName();
+            System.out.println("ASSIGN STRUCT: " + symbol);
+            System.out.println("in scope " +  this.currentScope.getName());
 
+        }
         if (symbol != null) {
             if (ctx.exprD() != null) {
                 Object value = visit(ctx.exprD());
@@ -197,7 +219,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
                     System.out.println(String.format("ASSIGNATION SYMBOL:  %s VALUE: %s", varSymbol, varSymbol.getValue()));
                 } else {
                     SlipArraySymbol arraySymbol = (SlipArraySymbol) symbol;
-
+                    System.out.println("IN ASSIGN ARRAY, CTX.exprG()" + ctx.getText());
                     List<Integer> indexes = this.findIndexes(ctx.exprG());
                     arraySymbol.setValue(indexes, value);
                     System.out.println(String.format("ASSIGNATION SYMBOL:  %s%s VALUE: %s", varName, indexes, value));
@@ -428,18 +450,34 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     }
 
 
-    public Object visitLeftExprRecord(SlipParser.LeftExprIDContext ctx) {
-        return null;
+    public Object visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx) {
+        SlipSymbol symbol = new StructExprGVisitor(currentScope, errorHandler).visit(ctx);
+        System.out.println("IS ARRAY" +  symbol.isArray());
+        if (symbol.isArray()){
+            return ((SlipArraySymbol) symbol).getValue(findIndexes(ctx.exprG(1)));
+        }
+        return ((SlipVariableSymbol) symbol).getValue();
+
     }
 
     @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
         System.out.println("in left expression ID" +  ctx.ID().getText());
+        System.out.println("in scope " +  this.currentScope.getName());
 
+        SlipSymbol symbol =  currentScope.resolve(ctx.ID().getText());
+
+        if ( symbol instanceof SlipStructureSymbol){
         // TODO handle struct case
-        SlipVariableSymbol variable = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
+            //symbol = new StructExprGVisitor(currentScope, errorHandler).visit(ctx);
+            System.out.println("STRUCTURES NOT HANDLED BY EVALUATOR!");
+//            this.currentScope = (SlipStructureSymbol) symbol;
+//            System.out.println("in scope " +  this.currentScope.getName());
+            return null;
+        }
+            SlipVariableSymbol variable = (SlipVariableSymbol) symbol;
+            System.out.println("in left expression variable" + variable.getValue());
 
-        System.out.println("in left expression variable" +  variable.getValue());
         return variable.getValue();
     }
     public Void visitVarDecl(SlipParser.VarDeclContext ctx) {

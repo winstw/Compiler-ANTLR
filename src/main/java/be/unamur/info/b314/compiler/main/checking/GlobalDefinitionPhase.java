@@ -132,7 +132,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
                 currentScope = symbol;
 
                 for (SlipParser.DeclarationContext var : ctx.declaration()) {
-                    visit(var);
+                    var.accept(this);
                 }
 
                 System.out.println(currentScope);

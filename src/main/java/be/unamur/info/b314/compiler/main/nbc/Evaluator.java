@@ -49,8 +49,8 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         tree.accept(visitor);
         CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
         second.visitProgram(tree);
-        NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "output.slip"));
-        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources/", compiler);
+        NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "/" + "output.slip"));
+        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources", compiler);
         evaluator.visitProgram(tree);
         System.out.println(compiler);
         compiler.compile();
@@ -75,7 +75,7 @@ public class Evaluator extends CheckSlipVisitor<Object> {
     private String[][] loadMapFile(SlipParser.ImpDeclContext ctx) {
         // populate map field from file, if file exists!
         String filename = ctx.FILENAME().getText().replace("\"", "");
-        String filePath = this.currentPath + filename;
+        String filePath = this.currentPath + "/" + filename;
         System.out.println("MAP FILE PATH " + filePath);
         File mapFile = new File(filePath);
         if (mapFile.exists() && mapFile.isFile()) {
@@ -123,16 +123,32 @@ public class Evaluator extends CheckSlipVisitor<Object> {
         int nbLines = Integer.parseInt(ctx.NAT(0).getText());
         int nbColumns = Integer.parseInt(ctx.NAT(1).getText());
         this.map = new String[nbLines][nbColumns];
+        int nbTreasure = 0;
+        int nbRobot = 0;
+        boolean hasEnemy = false;
         for (int line = 0; line < nbLines; line++) {
             for (int col = 0; col < nbColumns; col++) {
                 int index = line * nbColumns + col;
-                map[line][col] = ctx.map_char(index).getText();
+                String value = ctx.map_char(index).getText();
+                if (value.equals("X")) nbTreasure++;
+                if (value.equals("@")) nbRobot++;
+                if (value.equals("Q")) hasEnemy = true;
+                map[line][col] = value;
                 System.out.print(map[line][col]);
             }
             System.out.println();
         }
-        System.out.println("=== MAP EVAL ===");
+        if (nbTreasure != 1){
+            signalError(ctx.start, "wrong number of Treasure on map, should be one!");
+        }
+        if (nbRobot != 1){
+            signalError(ctx.start, "wrong number of Robot on map, should be one!");
+        }
+        if (!hasEnemy) {
+            signalError(ctx.start, "map should contain at least one enemy!");
+        }
 
+        System.out.println("=== MAP EVAL ===");
         return null;
     }
 

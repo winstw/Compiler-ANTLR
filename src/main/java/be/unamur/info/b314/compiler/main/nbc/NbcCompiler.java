@@ -75,6 +75,7 @@
         }
 
         public void compile() {
+            System.out.println("GENERATE COMPILE FILE TO : " + outputFile.getPath());
             File f = outputFile;
             if(f.exists()) {
                 f.delete();

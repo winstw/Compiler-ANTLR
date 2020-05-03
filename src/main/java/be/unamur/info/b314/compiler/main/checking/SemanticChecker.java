@@ -24,6 +24,9 @@ public class SemanticChecker {
             NbcCompiler compiler = new NbcCompiler(outputFile);
             Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, inputPath, compiler);
             eval.visit(tree);
+            if (!errorHandler.isErrorOccurred() && outputFile.isFile()){
+                compiler.compile();
+            }
             compiler.toString();
         }
         return !errorHandler.isErrorOccurred();

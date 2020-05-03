@@ -8,19 +8,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
 
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
-import be.unamur.info.b314.compiler.main.nbc.Evaluator;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -181,7 +177,8 @@ public class Main {
         LOG.debug("AST is {}", tree.toStringTree(parser));
         // Build symbol table
         LOG.debug("Building symbol table");
-        if (!SemanticChecker.run(tree, inputFile.getPath(), outputFile)) {
+        
+        if (!SemanticChecker.run(tree, inputFile.getParent(), outputFile)) {
             throw new RuntimeException("there are semantic error");
         }
         LOG.debug("Building symbol table: done");

@@ -1,8 +1,7 @@
     package be.unamur.info.b314.compiler.main.nbc;
 
     import java.io.*;
-    import java.util.Deque;
-    import java.util.LinkedList;
+    import java.util.*;
 
     public class NbcCompiler {
         enum ActionType {
@@ -42,7 +41,12 @@
             }
         }
 
+        private static final String L_MOTOR = "B";
+        private static final String R_MOTOR = "C";
+        private static final String FWD_MOTOR = "BC";
+
         Deque<SlipAction> actions;
+        private Set<ActionType> actionsUsed = new HashSet<>();
         private PrintWriter writer;
         private File outputFile;
 
@@ -97,40 +101,141 @@
         }
 
         private void printConstants() {
-            writer.println("#define ROT_DEG 410\n#define FWD_DEG 1000\n#define SPEED 80\n#define WAIT 200\n");
+            writer.println("#define ROT_DEG 410");
+            writer.println("#define FWD_DEG 1000");
+            writer.println("#define SPEED 80");
+            writer.println("#define WAIT 200");
+            writer.printf("#define L_MOTOR OUT_%s", L_MOTOR).println();
+            writer.printf("#define R_MOTOR OUT_%s", R_MOTOR).println();
+            writer.printf("#define FWD_MOTOR OUT_%s", FWD_MOTOR).println();
+            writer.println();
         }
 
         private void printSegment() {
-            writer.println("var_def segment\n\tup_count byte\n\tnote_count byte\nends\n");
+            writer.println("var_def segment");
+            writer.println("\tup_count byte");
+            writer.println("\tnote_count byte");
+            writer.println("ends");
+            writer.println();
         }
 
         private void printMain() {
             writer.println("thread main");
             printActions();
-            writer.println("endt\n");
+            writer.println("endt");
+            writer.println();
         }
 
         private void printSubroutines() {
-            writer.println("subroutine up\nup_loop:\n\tRotateMotor(OUT_BC, SPEED, FWD_DEG)\n\twait WAIT\n\tsub up_count, up_count, 1\n\tbrtst GT, up_loop, up_count\n\treturn\nends\n");
-            writer.println("subroutine down\n\tRotateMotor(OUT_C, SPEED, ROT_DEG)\n\twait WAIT\n\tRotateMotor(OUT_C, SPEED, ROT_DEG)\n\twait WAIT\n\tcall up\n\treturn\nends\n");
-            writer.println("subroutine right\n\tRotateMotor(OUT_B, SPEED, ROT_DEG)\n\twait WAIT\n\tcall up\n\treturn\nends\n");
-            writer.println("subroutine left\n\tRotateMotor(OUT_C, SPEED, ROT_DEG)\n\twait WAIT\n\tcall up\n\treturn\nends\n");
-            writer.println("subroutine dig\n\tRotateMotor(OUT_C, SPEED, FWD_DEG)\n\tRotateMotor(OUT_B, SPEED, -FWD_DEG)\n\twait WAIT*2\n\tRotateMotor(OUT_C, SPEED, -FWD_DEG)\n\tRotateMotor(OUT_B, SPEED, FWD_DEG)\n\twait WAIT*2\n\treturn\nends\n");
-            writer.println("subroutine jump\n\tset note_count, 8\njump_loop:\n\tPlayTone(TONE_C5, 700)\n\twait 800\n\tsub note_count, note_count, 1\n\tbrtst GT, jump_loop, note_count\n\treturn\nends\n");
-            writer.println("subroutine fight\n\tset note_count, 8\nfight_loop:\n\tPlayTone(TONE_E5, 700)\n\twait 800\n\tsub note_count, note_count, 1\n\tbrtst GT, fight_loop, note_count\n\treturn\nends\n");
+            if (actionsUsed.contains(ActionType.UP)) printUpSubroutine();
+            if (actionsUsed.contains(ActionType.DOWN)) printDownSubRoutine();
+            if (actionsUsed.contains(ActionType.RIGHT)) printRightSubroutine();
+            if (actionsUsed.contains(ActionType.LEFT)) printLeftSubroutine();
+            if (actionsUsed.contains(ActionType.DIG)) printDigSubroutine();
+            if (actionsUsed.contains(ActionType.JUMP)) printJumpSubroutine();
+            if (actionsUsed.contains(ActionType.FIGHT)) printFightSubroutine();
+        }
+
+        private void printUpSubroutine() {
+            writer.println("subroutine up");
+            writer.println("up_loop:");
+            writer.println("\tRotateMotor(FWD_MOTOR, SPEED, FWD_DEG)");
+            writer.println("\twait WAIT");
+            writer.println("\tsub up_count, up_count, 1");
+            writer.println("\tbrtst GT, up_loop, up_count");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printDownSubRoutine() {
+            writer.println("subroutine down");
+            writer.println("\tRotateMotor(R_MOTOR, SPEED, ROT_DEG)");
+            writer.println("\twait WAIT");
+            writer.println("\tRotateMotor(R_MOTOR, SPEED, ROT_DEG)");
+            writer.println("\twait WAIT");
+            writer.println("\tcall up");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printRightSubroutine() {
+            writer.println("subroutine right");
+            writer.println("\tRotateMotor(L_MOTOR, SPEED, ROT_DEG)");
+            writer.println("\twait WAIT");
+            writer.println("\tcall up");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printLeftSubroutine() {
+            writer.println("subroutine left");
+            writer.println("\tRotateMotor(R_MOTOR, SPEED, ROT_DEG)");
+            writer.println("\twait WAIT");
+            writer.println("\tcall up");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printDigSubroutine() {
+            writer.println("subroutine dig");
+            writer.println("\tRotateMotor(R_MOTOR, SPEED, FWD_DEG)");
+            writer.println("\tRotateMotor(L_MOTOR, SPEED, -FWD_DEG)");
+            writer.println("\twait WAIT*2");
+            writer.println("\tRotateMotor(R_MOTOR, SPEED, -FWD_DEG)");
+            writer.println("\tRotateMotor(L_MOTOR, SPEED, FWD_DEG)");
+            writer.println("\twait WAIT*2");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printJumpSubroutine() {
+            writer.println("subroutine jump");
+            writer.println("\tset note_count, 8");
+            writer.println("jump_loop:");
+            writer.println("\tPlayTone(TONE_C5, 700)");
+            writer.println("\twait 800");
+            writer.println("\tsub note_count, note_count, 1");
+            writer.println("\tbrtst GT, jump_loop, note_count");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
+        }
+
+        private void printFightSubroutine() {
+            writer.println("subroutine fight");
+            writer.println("\tset note_count, 8");
+            writer.println("fight_loop:");
+            writer.println("\tPlayTone(TONE_E5, 700)");
+            writer.println("\twait 800");
+            writer.println("\tsub note_count, note_count, 1");
+            writer.println("\tbrtst GT, fight_loop, note_count");
+            writer.println("\treturn");
+            writer.println("ends");
+            writer.println();
         }
 
         private void printActions() {
             SlipAction action;
-            while (actions.size() > 0) {
-                action = actions.removeFirst();
+            Iterator<SlipAction> iterator = actions.iterator();
+
+            while (iterator.hasNext()) {
+                action = iterator.next();
+                actionsUsed.add(action.type);
+                if (action.type == ActionType.LEFT || action.type == ActionType.RIGHT || action.type == ActionType.DOWN) {
+                    actionsUsed.add(ActionType.UP);
+                }
 
                 if (action.isParametrable()) {
-                    writer.printf("\tset up_count, %s\n", action.value);
+                    writer.printf("\tset up_count, %s", action.value).println();
                 }
-                writer.printf("\tcall %s\n", action.type.getName());
-
+                writer.printf("\tcall %s", action.type.getName()).println();
             }
+
         }
 
         public String toString(){

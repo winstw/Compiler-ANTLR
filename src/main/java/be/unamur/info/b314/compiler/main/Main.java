@@ -12,7 +12,12 @@ import java.io.IOException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+import be.unamur.info.b314.compiler.main.checking.CheckPhaseVisitor;
+import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
+import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
 import be.unamur.info.b314.compiler.main.checking.SemanticChecker;
+import be.unamur.info.b314.compiler.main.nbc.Evaluator;
+import be.unamur.info.b314.compiler.main.nbc.NbcCompiler;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -175,16 +180,48 @@ public class Main {
         SlipParser.ProgramContext tree = parse(new ANTLRInputStream(new FileInputStream(inputFile)));
         LOG.debug("Parsing input: done");
         LOG.debug("AST is {}", tree.toStringTree(parser));
+
         // Build symbol table
         LOG.debug("Building symbol table");
-        
-        if (!SemanticChecker.run(tree, inputFile.getParent(), outputFile)) {
+
+        // Create object to print errors
+        ErrorHandler errorHandler = new ErrorHandler();
+
+        // Build symbol table for global scope to allow forward reference
+        LOG.debug("Defining global variables");
+        GlobalDefinitionPhase definitionPhase = new GlobalDefinitionPhase(errorHandler);
+        definitionPhase.visit(tree);
+        LOG.debug("Defining global variables: done");
+
+        // Build symbol table for local scope and check types
+        LOG.debug("Defining local variables and checking global and local types");
+        CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler);
+        checkPhase.visit(tree);
+        LOG.debug("Defining local variables and checking global and local types: done");
+        LOG.debug("Building symbol table: done");
+
+        // If there is semantic errors in SLIP code or the map, the compiler stops
+        if (errorHandler.isErrorOccurred()) {
             throw new RuntimeException("there are semantic error");
         }
-        LOG.debug("Building symbol table: done");
+
+        LOG.debug("Evaluating Slip code");
+        // Evaluate SLIP code
+        NbcCompiler compiler = new NbcCompiler(outputFile);
+        Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, inputFile.getParent(), compiler);
+        eval.visit(tree);
+        LOG.debug("Evaluating Slip code: done");
         // Print NBC Code
         LOG.debug("Printing NBC Code");
-        //printNBCCode(tree, symTable);
+        if (!errorHandler.isErrorOccurred() && outputFile.isFile()){
+            compiler.compile();
+        }
+        compiler.toString();
+
+        // If there is semantic errors in SLIP code or the map, the compiler stops
+        if (errorHandler.isErrorOccurred()) {
+            throw new RuntimeException("there are semantic error");
+        }
         LOG.debug("Printing NBC Code: done");
 
     }
@@ -214,14 +251,4 @@ public class Main {
         return tree;
     }
 
-
-//    private void printNBCCode(SlipParser.ProgramContext tree, Map<String, Integer> symTable) throws FileNotFoundException {
-//
-//        NBCPrinter printer = new NBCPrinter("nbcCode.nbc");
-//        NBCVisitor visitor = new NBCVisitor(symTable, printer);
-//        tree.accept(visitor);
-//        printer.flush();
-//        printer.close();
-//    }
-//
 }

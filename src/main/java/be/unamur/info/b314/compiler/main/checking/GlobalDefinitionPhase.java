@@ -3,7 +3,6 @@ package be.unamur.info.b314.compiler.main.checking;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
-import be.unamur.info.b314.compiler.main.MyConsoleErrorListener;
 import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -14,11 +13,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static be.unamur.info.b314.compiler.main.checking.SemanticChecker.getType;
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
@@ -209,7 +205,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
      */
     private void defineFunction(SlipParser.FuncDeclContext ctx) {
         String name = ctx.ID().getText();
-        Type type = getType(ctx.funcType().start.getType());
+        Type type = visit(ctx.funcType());
         SlipMethodSymbol symbol = new SlipMethodSymbol(name + "_fn", type, currentScope);
         symbol.setBody(ctx.instBlock());
         scopes.put(ctx, symbol);
@@ -234,6 +230,17 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
     }
 
     @Override
+    public Type visitFuncType(SlipParser.FuncTypeContext ctx) {
+
+        if (ctx.scalar() == null) {
+            return Type.VOID;
+        } else {
+            return visit(ctx.scalar());
+        }
+
+    }
+
+    @Override
     public Type visitMainDecl(SlipParser.MainDeclContext ctx) {
         SlipMethodSymbol symbol = new SlipMethodSymbol("main", Type.VOID, currentScope);
 
@@ -252,8 +259,15 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
     @Override
     public Type visitScalar(SlipParser.ScalarContext ctx) {
-        Type type = getType(ctx.start.getType());
-        return type;
+        if (ctx.BOOLEANTYPE() != null){
+            return Type.BOOLEAN;
+        }
+        if (ctx.CHARTYPE() != null){
+            return Type.CHARACTER;
+        }
+        else {
+            return Type.INTEGER;
+        }
     }
 
 }

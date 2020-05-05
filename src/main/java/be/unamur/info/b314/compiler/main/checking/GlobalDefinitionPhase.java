@@ -13,8 +13,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor {
 
@@ -82,30 +80,6 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor {
         return null;
     }
 
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineVariable(SlipParser.VarDeclContext ctx) {
-        boolean isConst = ctx.getParent().getStart().getText().equals("const");
-
-        Type type = visit(ctx.scalar());
-
-        for (TerminalNode node : ctx.ID()) {
-            String name = node.getText();
-            SlipSymbol symbol = new SlipVariableSymbol(name, type, !isConst);
-
-            try {
-                currentScope.define(symbol);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                eh.signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-            }
-
-        }
-    }
-
     @Override
     public Type visitStructDecl(SlipParser.StructDeclContext ctx) {
 
@@ -114,77 +88,12 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor {
         return null;
     }
 
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineStructure(SlipParser.StructDeclContext ctx) {
-        boolean isConst = ctx.getParent().getStart().getText().equals("const");
-
-        System.out.println("=== START STRUCT DECL ===");
-
-        for (TerminalNode node : ctx.ID()) {
-            String name = node.getText();
-            SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, !isConst);
-
-            try {
-                currentScope.define(symbol);
-                currentScope = symbol;
-
-                for (SlipParser.DeclarationContext var : ctx.declaration()) {
-                    var.accept(this);
-                }
-
-                System.out.println(currentScope);
-                currentScope = currentScope.getParentScope();
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                eh.signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-            }
-
-        }
-
-        System.out.println("=== END STRUCT DECL ===");
-
-    }
-
     @Override
     public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
+
         defineArray(ctx);
 
         return null;
-    }
-
-    /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
-     */
-    private void defineArray(SlipParser.ArrayDeclContext ctx) {
-        boolean isConst = ctx.getParent().getStart().getText().equals("const");
-        System.out.println("CONST : " + isConst);
-        Type type = visit(ctx.scalar());
-
-        for (TerminalNode node : ctx.ID()) {
-            String name = node.getText();
-            List<Integer> arraySizes = ctx.number()
-                    .stream()
-                    .map(numCtx -> Integer.parseInt(numCtx.getText()))
-                    .collect(Collectors.toList());
-            SlipSymbol symbol = new SlipArraySymbol(name, type, !isConst, arraySizes);
-
-            try {
-                currentScope.define(symbol);
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-            } catch (SymbolAlreadyDefinedException e) {
-                eh.signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-
-            }
-
-        }
-
     }
 
     @Override

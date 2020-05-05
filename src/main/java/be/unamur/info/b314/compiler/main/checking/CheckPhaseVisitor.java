@@ -156,26 +156,18 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
 
         Type definedVarType = visit(ctx.scalar());
 
-        if (this.currentScope.getName() != "global") {
-            for (TerminalNode id : ctx.ID()) {
-                try {
-                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
-                } catch (SymbolAlreadyDefinedException e) {
-                    eh.signalError(id.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
-                }
-            }
+        if (!(this.currentScope instanceof SlipGlobalScope)) {
+            defineVariable(ctx);
         }
 
         // type check initialisation
         if (ctx.exprD() != null) {
             Type initVarType = visit(ctx.exprD());
-            System.out.println("in visitVarDECL, init var : " + initVarType);
-            eh.checkEqual(initVarType,
-                               definedVarType,
-                               ctx.exprD().start,
-                               String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            String errorMessage = String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType);
+            eh.checkEqual(initVarType, definedVarType, ctx.exprD().start, errorMessage);
         } else if (isConst) {
-            eh.signalError(ctx.start,String.format("const var not initialized: %s", ctx.ID(0).getText()));
+            String errorMessage = String.format("const var not initialized: %s", ctx.ID(0).getText());
+            eh.signalError(ctx.start, errorMessage);
         }
 
         return definedVarType;
@@ -186,56 +178,33 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
         Type definedVarType = visit(ctx.scalar());
 
-        if (currentScope.getName() != "global") {
-            for (TerminalNode node : ctx.ID()) {
-                String name = node.getText();
-                List<Integer> arraySizes = ctx.number()
-                        .stream()
-                        .map(numCtx -> Integer.parseInt(numCtx.getText()))
-                        .collect(Collectors.toList());
-                SlipSymbol symbol = new SlipArraySymbol(name, definedVarType, !isConst, arraySizes);
-
-                try {
-                    currentScope.define(symbol);
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                } catch (SymbolAlreadyDefinedException e) {
-                    eh.signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-                }
-
-            }
+        if (!(this.currentScope instanceof SlipGlobalScope)) {
+            defineArray(ctx);
         }
 
         // type check initialisation
         if (ctx.initArrays() != null) {
             Type initVarType = visit(ctx.initArrays());
 
-            System.out.println("in visitVarDECL, init var : " + initVarType);
-
             int expectedFirstDimLength = Integer.parseInt(ctx.number(0).getText());
             int actualFirstDimLength = ctx.initArrays().initVar().size();
-            eh.checkEqual(
-                    expectedFirstDimLength,
-                    actualFirstDimLength,
-                    ctx.start,
-                    "First dimension size does not match between declaration and initialization");
+            String errorMessage = "First dimension size does not match between declaration and initialization";
+            eh.checkEqual(expectedFirstDimLength, actualFirstDimLength, ctx.start, errorMessage);
 
             if (ctx.number().size() > 1) {
                 int expectedSecondDimLength = Integer.parseInt(ctx.number(1).getText());
                 for (SlipParser.InitVarContext init : ctx.initArrays().initVar()) {
-                    eh.checkEqual(init.initArrays().initVar().size(),
-                            expectedSecondDimLength,
-                            init.start,
-                            "Second dimension size does not match between declaration and initialization");
+                    errorMessage = "Second dimension size does not match between declaration and initialization";
+                    eh.checkEqual(init.initArrays().initVar().size(), expectedSecondDimLength, init.start, errorMessage);
                 }
             }
-            eh.checkEqual(initVarType,
-                          definedVarType,
-                          ctx.initArrays().start,
-                          String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType));
+            errorMessage = String.format("cannot assign expression of type %s to variable of type %s", initVarType, definedVarType);
+            eh.checkEqual(initVarType, definedVarType, ctx.initArrays().start, errorMessage);
         } else if (isConst) {
-            eh.signalError(ctx.start,String.format("const array not initialized: %s", ctx.ID(0).getText()));
+            String errorMessage = String.format("const array not initialized: %s", ctx.ID(0).getText());
+            eh.signalError(ctx.start, errorMessage);
         }
+
         return definedVarType;
     }
 
@@ -245,10 +214,10 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         for (SlipParser.InitVarContext var : ctx.initVar()) {
             if (type == null) {
                 type = visit(var);
-            } else eh.checkEqual(type,
-                    visit(var),
-                    var.start,
-                    String.format("Array initialized with different types: %s and %s", type, visit(var)));
+            } else {
+                String errorMessage = String.format("Array initialized with different types: %s and %s", type, visit(var));
+                eh.checkEqual(type, visit(var), var.start, errorMessage);
+            }
         }
 
         return type;
@@ -257,27 +226,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     @Override
     public Type visitStructDecl(SlipParser.StructDeclContext ctx) {
 
-        if (currentScope.getName() != "global") {
-            for (TerminalNode node : ctx.ID()) {
-                String name = node.getText();
-                SlipStructureSymbol symbol = new SlipStructureSymbol(name, currentScope, true);
-
-                try {
-                    currentScope.define(symbol);
-                    currentScope = symbol;
-
-                    for (SlipParser.DeclarationContext var : ctx.declaration()) {
-                        visit(var);
-                    }
-
-                    currentScope = currentScope.getParentScope();
-
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
-                } catch (SymbolAlreadyDefinedException e) {
-                    eh.signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
-                }
-            }
+        if (!(this.currentScope instanceof SlipGlobalScope)) {
+            defineStructure(ctx);
         }
 
         return Type.STRUCT;
@@ -288,16 +238,16 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
         Type definedVarType = visit(ctx.scalar());
-        // add new var definition to the local scope (already done in first pass for global scope)
-        if (this.currentScope.getName() != "global") {
-            for (TerminalNode id : ctx.ID()) {
-                try {
-                    this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
-                } catch (SymbolAlreadyDefinedException e) {
-                    eh.signalError(id.getSymbol(), String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName()));
-                }
+
+        for (TerminalNode id : ctx.ID()) {
+            try {
+                this.currentScope.define(new SlipVariableSymbol(id.getText(), definedVarType, !isConst));
+            } catch (SymbolAlreadyDefinedException e) {
+                String errorMessage = String.format("param symbol \"%s\" already exists in %s scope", id.getText(), currentScope.getName());
+                eh.signalError(id.getSymbol(), errorMessage);
             }
         }
+
         return definedVarType;
     }
 
@@ -306,7 +256,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         if (ctx.exprD() != null) {
             return visit(ctx.exprD());
         }
-        else return visit(ctx.initArrays());
+        else {
+            return visit(ctx.initArrays());
+        }
     }
 
     @Override
@@ -358,7 +310,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
             }
             return symbol.getType();
         } catch (SymbolNotFoundException e){
-            eh.signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            String errorMessage = String.format("use of undeclared identifier %s", idName);
+            eh.signalError(ctx.ID().getSymbol(), errorMessage);
         }
         return Type.VOID;
     }
@@ -369,11 +322,13 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         try {
             SlipSymbol symbol = currentScope.resolve(idName);
             if (this.assignationContext && !symbol.isAssignable()) {
-                    eh.signalError(ctx.ID().getSymbol(), String.format("cannot assign to const array \"%s\"", idName));
+                String errorMessage = String.format("cannot assign to const array \"%s\"", idName);
+                eh.signalError(ctx.ID().getSymbol(), errorMessage);
             }
-                return symbol.getType();
+            return symbol.getType();
         } catch (SymbolNotFoundException e){
-            eh.signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            String errorMessage = String.format("use of undeclared identifier %s", idName);
+            eh.signalError(ctx.ID().getSymbol(), errorMessage);
         }
 
         return Type.VOID;
@@ -396,11 +351,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         this.assignationContext = false;
         Type exprDType = visit(ctx.exprD());
 
-        eh.checkEqual(exprGType,
-                     exprDType,
-                     ctx.start,
-                     String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType));
-
+        String errorMessage = String.format("cannot assign expression of type %s to variable of type %s", exprDType, exprGType);
+        eh.checkEqual(exprGType, exprDType, ctx.start, errorMessage);
 
         return Type.VOID;
     }
@@ -429,7 +381,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     public Type visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
         Type type = visit(ctx.exprD());
 
-        eh.checkEqual(type, Type.INTEGER, ctx.exprD().start, "can only negate integer expression");
+        String errorMessage = "can only negate integer expression";
+        eh.checkEqual(type, Type.INTEGER, ctx.exprD().start, errorMessage);
 
         return Type.INTEGER;
     }
@@ -443,25 +396,29 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
 
     @Override
     public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
-        checkAndVisitExprD(Type.INTEGER, "can only use '*', '/' and '%' operators on expressions of type integer", ctx.exprD());
+        String errorMessage = "can only use '*', '/' and '%' operators on expressions of type integer";
+        checkAndVisitExprD(Type.INTEGER, errorMessage, ctx.exprD());
         return Type.INTEGER;
     }
 
     @Override
     public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
-        checkAndVisitExprD(Type.INTEGER, "can only use '+' and '-' operators on expressions of type integer", ctx.exprD());
+        String errorMessage = "can only use '+' and '-' operators on expressions of type integer";
+        checkAndVisitExprD(Type.INTEGER, errorMessage, ctx.exprD());
         return Type.INTEGER;
     }
 
     @Override
     public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
-        checkAndVisitExprD(Type.INTEGER, "can only compare integer expressions", ctx.exprD());
+        String errorMessage = "can only compare integer expressions";
+        checkAndVisitExprD(Type.INTEGER, errorMessage, ctx.exprD());
         return Type.BOOLEAN;
     }
 
     @Override
     public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx){
-        checkAndVisitExprD(Type.BOOLEAN, "can only use 'AND' & 'OR' on expressions of type boolean", ctx.exprD());
+        String errorMessage = "can only use 'AND' & 'OR' on expressions of type boolean";
+        checkAndVisitExprD(Type.BOOLEAN, errorMessage, ctx.exprD());
         return Type.BOOLEAN;
     }
 
@@ -480,24 +437,22 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
 
         Type leftExprType = visit(ctx.exprD(0));
         Type rightExprType = visit(ctx.exprD(1));
-        eh.checkEqual(leftExprType, rightExprType, ctx.start, "can only compare expressions of the same type");
+        String errorMessage = "can only compare expressions of the same type";
+        eh.checkEqual(leftExprType, rightExprType, ctx.start, errorMessage);
 
         return Type.BOOLEAN;
     }
 
-
-
     @Override
     public Type visitNotExpr(SlipParser.NotExprContext ctx){
-        eh.checkEqual(visit(ctx.exprD()),
-                     Type.BOOLEAN,
-                     ctx.exprD().start,
-                     String.format("%s must be of boolean type", ctx.exprD().getText()));
+        String errorMessage = String.format("%s must be of boolean type", ctx.exprD().getText());
+        eh.checkEqual(visit(ctx.exprD()), Type.BOOLEAN, ctx.exprD().start, errorMessage);
         return Type.BOOLEAN;
     }
 
     private Type checkGuardAndVisitInstr(Type actualType, Token errorToken, List<SlipParser.InstructionContext> toVisitContexts){
-        eh.checkEqual(actualType, Type.BOOLEAN, errorToken, "expression must be of type boolean");
+        String errorMessage = "expression must be of type boolean";
+        eh.checkEqual(actualType, Type.BOOLEAN, errorToken, errorMessage);
         for (SlipParser.InstructionContext ctx : toVisitContexts) {
             visit(ctx);
         }
@@ -532,9 +487,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         Type initValueType = visit(ctx.exprD(0));
         Type conditionValueType = visit(ctx.exprD(1));
 
-        eh.checkEqual(initValueType, Type.INTEGER, ctx.exprD(0).start, "expression must be of type integer");
+        String errorMessage = "expression must be of type integer";
+        eh.checkEqual(initValueType, Type.INTEGER, ctx.exprD(0).start, errorMessage);
 
-        eh.checkEqual(conditionValueType, Type.BOOLEAN, ctx.exprD(1).start, "expression must be of type boolean");
+        errorMessage = "expression must be of type boolean";
+        eh.checkEqual(conditionValueType, Type.BOOLEAN, ctx.exprD(1).start, errorMessage);
 
         for (SlipParser.InstructionContext inst : ctx.instruction()) {
             visit(inst);
@@ -564,7 +521,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         SlipParser.ExprDContext arg = ctx.getChild(SlipParser.ExprDContext.class, 0);
         if (arg != null){
             Type type = arg.accept(this);
-            eh.checkEqual(type, Type.INTEGER, arg.start, "expression must be of type integer");
+            String errorMessage = "expression must be of type integer";
+            eh.checkEqual(type, Type.INTEGER, arg.start, errorMessage);
         }
         return Type.VOID;
     }

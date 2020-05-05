@@ -44,7 +44,8 @@ public class StructExprGVisitor extends SlipBaseVisitor<SlipSymbol> {
 
             return declaredId;
         } catch (SymbolNotFoundException e){
-            eh.signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            String errorMessage = String.format("use of undeclared identifier %s", idName);
+            eh.signalError(ctx.ID().getSymbol(), errorMessage);
             return null;
         }
     }
@@ -63,7 +64,8 @@ public class StructExprGVisitor extends SlipBaseVisitor<SlipSymbol> {
             }
             return rightSymbol;
         } catch (SymbolNotFoundException e) {
-            eh.signalError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
+            String errorMessage = String.format("%s doesn't exist in %s scope", name, currentScope.getName());
+            eh.signalError(ctx.exprG(1).start, errorMessage);
             return leftSymbol;
         }
     }

@@ -8,10 +8,17 @@ import org.antlr.v4.runtime.tree.ParseTreeProperty;
 public abstract class CheckSlipVisitor<T> extends SlipBaseVisitor<T> {
     protected ErrorHandler errorHandler;
     protected ParseTreeProperty<SlipScope> scopes;
+    protected SlipScope currentScope;
 
     public CheckSlipVisitor(ErrorHandler errorHandler) {
         super();
         this.errorHandler = errorHandler;
+    }
+
+    public CheckSlipVisitor(ErrorHandler errorHandler, ParseTreeProperty<SlipScope> scopes) {
+        super();
+        this.errorHandler = errorHandler;
+        this.scopes = scopes;
     }
 
     public ParseTreeProperty<SlipScope> getScopes() {

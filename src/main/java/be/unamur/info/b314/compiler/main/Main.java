@@ -192,6 +192,13 @@ public class Main {
         definitionPhase.visit(tree);
         LOG.debug("Defining global variables: done");
 
+        if (definitionPhase.isMap()) {
+            if (errorHandler.isErrorOccurred()) {
+                throw new RuntimeException("there are semantic errors in map");
+            }
+            return;
+        }
+
         // Build symbol table for local scope and check types
         LOG.debug("Defining local variables and checking global and local types");
         CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler);

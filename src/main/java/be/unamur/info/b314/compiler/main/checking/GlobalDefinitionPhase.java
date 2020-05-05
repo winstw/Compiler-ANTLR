@@ -18,9 +18,10 @@ import java.util.stream.Collectors;
 
 public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
+    private boolean isMap = false;
+
     public GlobalDefinitionPhase(ErrorHandler e) {
-        super(e);
-        this.scopes = new ParseTreeProperty<>();
+        super(e, new ParseTreeProperty<>());
     }
 
     public static void main(String[] args) throws IOException {
@@ -34,20 +35,23 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         visitor.visit(tree);
     }
 
-    private SlipScope currentScope;
+    public boolean isMap() {
+        return isMap;
+    }
 
     @Override
     public Type visitProgram(SlipParser.ProgramContext ctx) {
-        System.out.println("=== START ===");
 
-        if (ctx.prog() != null) {
-            visit(ctx.prog());
-        } else if (ctx.map() != null) {
-            MapVisitor mapVisitor = new MapVisitor(this.errorHandler);
-            mapVisitor.visit(ctx.map());
-        }
+        visitChildren(ctx);
 
-        System.out.println("=== STOP ===");
+        return null;
+    }
+
+    @Override
+    public Type visitMap(SlipParser.MapContext ctx) {
+        isMap = true;
+        MapVisitor mapVisitor = new MapVisitor(this.errorHandler);
+        mapVisitor.visit(ctx);
 
         return null;
     }
@@ -195,7 +199,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
     @Override
     public Type visitFuncDecl(SlipParser.FuncDeclContext ctx) {
         defineFunction(ctx);
-        return Type.VOID;
+        return null;
     }
 
     /**
@@ -254,7 +258,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
 
         scopes.put(ctx, symbol);
 
-        return Type.VOID;
+        return symbol.getType();
     }
 
     @Override

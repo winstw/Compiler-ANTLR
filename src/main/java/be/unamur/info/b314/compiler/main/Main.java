@@ -193,7 +193,7 @@ public class Main {
         LOG.debug("Defining global variables: done");
 
         if (definitionPhase.isMap()) {
-            if (errorHandler.isErrorOccurred()) {
+            if (errorHandler.hasErrorOccurred()) {
                 throw new RuntimeException("there are semantic errors in map");
             }
             return;
@@ -207,7 +207,7 @@ public class Main {
         LOG.debug("Building symbol table: done");
 
         // If there is semantic errors in SLIP code or the map, the compiler stops
-        if (errorHandler.isErrorOccurred()) {
+        if (errorHandler.hasErrorOccurred()) {
             throw new RuntimeException("there are semantic error");
         }
 
@@ -219,13 +219,13 @@ public class Main {
         LOG.debug("Evaluating Slip code: done");
         // Print NBC Code
         LOG.debug("Printing NBC Code");
-        if (!errorHandler.isErrorOccurred() && outputFile.isFile()){
+        if (!errorHandler.hasErrorOccurred() && outputFile.isFile()){
             compiler.compile();
         }
         compiler.toString();
 
         // If there is semantic errors in SLIP code or the map, the compiler stops
-        if (errorHandler.isErrorOccurred()) {
+        if (errorHandler.hasErrorOccurred()) {
             throw new RuntimeException("there are semantic error");
         }
         LOG.debug("Printing NBC Code: done");

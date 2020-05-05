@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
+public class GlobalDefinitionPhase extends CheckSlipVisitor {
 
     private boolean isMap = false;
 
@@ -50,7 +50,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
     @Override
     public Type visitMap(SlipParser.MapContext ctx) {
         isMap = true;
-        MapVisitor mapVisitor = new MapVisitor(this.errorHandler);
+        MapVisitor mapVisitor = new MapVisitor(this.eh);
         mapVisitor.visit(ctx);
 
         return null;
@@ -100,7 +100,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                eh.signalError(node.getSymbol(), String.format("variable symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
         }
@@ -141,7 +141,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                eh.signalError(node.getSymbol(), String.format("structure symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
             }
 
         }
@@ -179,7 +179,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                eh.signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
 
             }
 
@@ -221,7 +221,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            signalError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
+            eh.signalError(ctx.getStart(), "function symbol already exists in " + currentScope.getName() + " scope");
         }
 
         if (ctx.argList() != null) {
@@ -253,7 +253,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor<Type> {
         } catch (NullPointerException e) {
             e.printStackTrace();
         } catch (SymbolAlreadyDefinedException e) {
-            errorHandler.signalError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
+            eh.signalError(ctx.getStart(), "main symbol already exists in " + currentScope.getName() + " scope");
         }
 
         scopes.put(ctx, symbol);

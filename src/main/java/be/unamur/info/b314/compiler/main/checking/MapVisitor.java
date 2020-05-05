@@ -1,15 +1,18 @@
 package be.unamur.info.b314.compiler.main.checking;
 
+import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 
-public class MapVisitor extends CheckSlipVisitor<Boolean> {
+public class MapVisitor extends SlipBaseVisitor<Boolean> {
 
     private boolean hasRobot = false;
     private boolean hasTreasure = false;
     private boolean hasEnemies = false;
+    private ErrorHandler eh;
 
     public MapVisitor(ErrorHandler e) {
-        super(e);
+        super();
+        this.eh = e;
     }
 
     public Boolean visitMap(SlipParser.MapContext ctx) {
@@ -17,17 +20,17 @@ public class MapVisitor extends CheckSlipVisitor<Boolean> {
         int nbColumns = Integer.parseInt(ctx.NAT(1).getText());
         int requiredNbChar = nbLines * nbColumns;
         int actualNbChar = ctx.map_char().size();
-        boolean isValidMap = checkEqual(actualNbChar, requiredNbChar, ctx.map_char(actualNbChar - 1).start, String.format("Not enough characters in map : %d, expected %d", actualNbChar, requiredNbChar));
+        boolean isValidMap = eh.checkEqual(actualNbChar, requiredNbChar, ctx.map_char(actualNbChar - 1).start, String.format("Not enough characters in map : %d, expected %d", actualNbChar, requiredNbChar));
         visitChildren(ctx);
 
         if (!hasTreasure){
-            signalError(ctx.start, "map must contain one Treasure!");
+            eh.signalError(ctx.start, "map must contain one Treasure!");
         }
         if (!hasRobot){
-            signalError(ctx.start, "map must contain one Robot!");
+            eh.signalError(ctx.start, "map must contain one Robot!");
         }
         if (!hasEnemies) {
-            signalError(ctx.start, "map must contain at least one enemy!");
+            eh.signalError(ctx.start, "map must contain at least one enemy!");
         }
 
         return isValidMap;
@@ -39,7 +42,7 @@ public class MapVisitor extends CheckSlipVisitor<Boolean> {
 
         if (mapChar.equals("@")) {
             if (hasRobot) {
-                signalError(ctx.start, "Too many Robots, map must contain one!");
+                eh.signalError(ctx.start, "Too many Robots, map must contain one!");
             } else {
                 hasRobot = true;
             }
@@ -47,7 +50,7 @@ public class MapVisitor extends CheckSlipVisitor<Boolean> {
 
         if (mapChar.equals("X")) {
             if (hasTreasure) {
-                signalError(ctx.start, "Too many Treasures, map must contain one!");
+                eh.signalError(ctx.start, "Too many Treasures, map must contain one!");
             } else {
                 hasTreasure = true;
             }

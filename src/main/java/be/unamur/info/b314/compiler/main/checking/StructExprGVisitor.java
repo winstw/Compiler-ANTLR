@@ -1,6 +1,7 @@
 
 package be.unamur.info.b314.compiler.main.checking;
 
+import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import be.unamur.info.b314.compiler.symboltable.SlipScope;
@@ -9,13 +10,15 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-public class StructExprGVisitor extends CheckSlipVisitor<SlipSymbol> {
+public class StructExprGVisitor extends SlipBaseVisitor<SlipSymbol> {
 
     private SlipScope currentScope;
+    private ErrorHandler eh;
 
     public StructExprGVisitor(SlipScope currentScope, ErrorHandler e) {
-        super(e);
+        super();
         this.currentScope = currentScope;
+        this.eh = e;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class StructExprGVisitor extends CheckSlipVisitor<SlipSymbol> {
 
             return declaredId;
         } catch (SymbolNotFoundException e){
-            signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
+            eh.signalError(ctx.ID().getSymbol(), String.format("use of undeclared identifier %s", idName));
             return null;
         }
     }
@@ -60,7 +63,7 @@ public class StructExprGVisitor extends CheckSlipVisitor<SlipSymbol> {
             }
             return rightSymbol;
         } catch (SymbolNotFoundException e) {
-            signalError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
+            eh.signalError(ctx.exprG(1).start, String.format("%s doesn't exist in %s scope", name, currentScope.getName()));
             return leftSymbol;
         }
     }

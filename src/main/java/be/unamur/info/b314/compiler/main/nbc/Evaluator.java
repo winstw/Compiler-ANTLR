@@ -214,7 +214,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
             // TODO CATCH DIVIDE BY 0
             return left / right;
         case SlipParser.MODULO:
-            return left % right;
+            return Math.floorMod(left, right);
         default:
             return null;
         }

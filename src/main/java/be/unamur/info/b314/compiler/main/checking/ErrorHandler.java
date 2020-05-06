@@ -3,9 +3,9 @@ package be.unamur.info.b314.compiler.main.checking;
 import org.antlr.v4.runtime.Token;
 
 public class ErrorHandler {
-    boolean errorOccurred = false;
+    private boolean errorOccurred = false;
 
-    void signalError(Token t, String msg) {
+    public void signalError(Token t, String msg) {
         this.errorOccurred = true;
         System.out.println("signalERROR : ");
         if (msg != null) {
@@ -13,7 +13,16 @@ public class ErrorHandler {
         }
     }
 
-    public boolean isErrorOccurred() {
+    public <U> boolean checkEqual(U firstValue, U secondValue, Token t, String message){
+        boolean equal = true;
+        if (!firstValue.equals(secondValue)){
+            equal = false;
+            signalError(t, message);
+        }
+        return equal;
+    }
+
+    public boolean hasErrorOccurred() {
         return errorOccurred;
     }
 

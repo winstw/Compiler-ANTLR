@@ -1,21 +1,65 @@
 package be.unamur.info.b314.compiler.main.checking;
 
+import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 
-public class MapVisitor extends CheckSlipVisitor<Boolean> {
+public class MapVisitor extends SlipBaseVisitor<Boolean> {
+
+    private boolean hasRobot = false;
+    private boolean hasTreasure = false;
+    private boolean hasEnemies = false;
+    private ErrorHandler eh;
 
     public MapVisitor(ErrorHandler e) {
-        super(e);
+        super();
+        this.eh = e;
     }
 
     public Boolean visitMap(SlipParser.MapContext ctx) {
-        System.out.println("=== MAP CHECK START ===");
         int nbLines = Integer.parseInt(ctx.NAT(0).getText());
         int nbColumns = Integer.parseInt(ctx.NAT(1).getText());
         int requiredNbChar = nbLines * nbColumns;
         int actualNbChar = ctx.map_char().size();
-        boolean isValidMap = checkEqual(actualNbChar, requiredNbChar, ctx.map_char(actualNbChar - 1).start, String.format("Not enough characters in map : %d, expected %d", actualNbChar, requiredNbChar));
-        System.out.println("=== MAP CHECK STOP ===");
+        boolean isValidMap = eh.checkEqual(actualNbChar, requiredNbChar, ctx.map_char(actualNbChar - 1).start, String.format("Not enough characters in map : %d, expected %d", actualNbChar, requiredNbChar));
+        visitChildren(ctx);
+
+        if (!hasTreasure){
+            eh.signalError(ctx.start, "map must contain one Treasure!");
+        }
+        if (!hasRobot){
+            eh.signalError(ctx.start, "map must contain one Robot!");
+        }
+        if (!hasEnemies) {
+            eh.signalError(ctx.start, "map must contain at least one enemy!");
+        }
+
         return isValidMap;
+    }
+
+    @Override
+    public Boolean visitMap_char(SlipParser.Map_charContext ctx) {
+        String mapChar = ctx.getText();
+
+        if (mapChar.equals("@")) {
+            if (hasRobot) {
+                eh.signalError(ctx.start, "Too many Robots, map must contain one!");
+            } else {
+                hasRobot = true;
+            }
+        }
+
+        if (mapChar.equals("X")) {
+            if (hasTreasure) {
+                eh.signalError(ctx.start, "Too many Treasures, map must contain one!");
+            } else {
+                hasTreasure = true;
+            }
+        }
+
+        if (mapChar.equals("Q")) {
+            hasEnemies = true;
+        }
+
+        return null;
     }
 }

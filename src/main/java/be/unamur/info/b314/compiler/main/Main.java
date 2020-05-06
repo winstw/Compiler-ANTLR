@@ -201,7 +201,7 @@ public class Main {
 
         // Build symbol table for local scope and check types
         LOG.debug("Defining local variables and checking global and local types");
-        CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler);
+        CheckPhaseVisitor checkPhase = new CheckPhaseVisitor(definitionPhase.getScopes(), errorHandler, inputFile.getParent());
         checkPhase.visit(tree);
         LOG.debug("Defining local variables and checking global and local types: done");
         LOG.debug("Building symbol table: done");
@@ -214,7 +214,7 @@ public class Main {
         LOG.debug("Evaluating Slip code");
         // Evaluate SLIP code
         NbcCompiler compiler = new NbcCompiler(outputFile);
-        Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, inputFile.getParent(), compiler);
+        Evaluator eval = new Evaluator(checkPhase.getScopes(), errorHandler, compiler);
         eval.visit(tree);
         LOG.debug("Evaluating Slip code: done");
         // Print NBC Code

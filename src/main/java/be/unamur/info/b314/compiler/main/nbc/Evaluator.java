@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.antlr.v4.runtime.tree.TerminalNodeImpl;
@@ -20,7 +19,6 @@ import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.main.checking.CheckPhaseVisitor;
 import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
-import be.unamur.info.b314.compiler.main.checking.MapVisitor;
 import be.unamur.info.b314.compiler.main.checking.StructExprGVisitor;
 import be.unamur.info.b314.compiler.symboltable.SlipArraySymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipBaseScope;
@@ -31,8 +29,6 @@ import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
 import be.unamur.info.b314.compiler.symboltable.SlipVariableSymbol;
 
 public class Evaluator extends SlipBaseVisitor<Object> {
-    String[][] map = null;
-    String currentPath = "";
     private ParseTreeProperty<SlipScope> scopes;
     SlipScope currentScope;
     NbcCompiler compiler;
@@ -47,21 +43,20 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
         tree.accept(visitor);
-        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
+        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler, System.getProperty("user.dir"));
         second.visitProgram(tree);
         NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "/" + "output.nbc"));
-        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources", compiler);
+        Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, compiler);
         evaluator.visitProgram(tree);
         System.out.println(compiler);
         compiler.compile();
 
     }
 
-    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath, NbcCompiler compiler){
+    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, NbcCompiler compiler){
         super();
         this.eh = e;
         this.scopes = scopes;
-        this.currentPath = currentPath;
         this.compiler = compiler;
     }
 
@@ -73,83 +68,14 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
-    private String[][] loadMapFile(SlipParser.ImpDeclContext ctx) {
-        // populate map field from file, if file exists!
-        String filename = ctx.FILENAME().getText().replace("\"", "");
-        String filePath = this.currentPath + "/" + filename;
-        System.out.println("MAP FILE PATH " + filePath);
-        File mapFile = new File(filePath);
-        if (mapFile.exists() && mapFile.isFile()) {
-            try {
-                SlipLexer mapLexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(filePath)));
-                CommonTokenStream tokens = new CommonTokenStream(mapLexer);
-                SlipParser parser = new SlipParser(tokens);
-                SlipParser.MapContext tree = parser.map();
-                boolean isValidMap = new MapVisitor(this.eh).visit(tree);
-                if (isValidMap){
-                    this.visit(tree);
-                }
-            } catch (RecognitionException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("NO MAP FILE PROVIDED!");
-        }
-        return null;
-    }
-
     @Override
     public Object visitProg(SlipParser.ProgContext ctx){
-        if (this.currentPath != null) {
-            this.loadMapFile(ctx.impDecl());
-        }
-
-
         this.currentScope = this.scopes.get(ctx);
         // obligé de visiter les déclarations pour initialiser les valeurs des variables le cas échéant
         ctx.declaration().forEach(decl -> decl.accept(this));
 
         ctx.mainDecl().accept(this);
         this.currentScope = this.currentScope.getParentScope();
-        return null;
-    }
-
-
-    public Void visitMap(SlipParser.MapContext ctx) {
-        System.out.println("=== MAP EVAL ===");
-        int nbLines = Integer.parseInt(ctx.NAT(0).getText());
-        int nbColumns = Integer.parseInt(ctx.NAT(1).getText());
-        this.map = new String[nbLines][nbColumns];
-        int nbTreasure = 0;
-        int nbRobot = 0;
-        boolean hasEnemy = false;
-        for (int line = 0; line < nbLines; line++) {
-            for (int col = 0; col < nbColumns; col++) {
-                int index = line * nbColumns + col;
-                String value = ctx.map_char(index).getText();
-                if (value.equals("X")) nbTreasure++;
-                if (value.equals("@")) nbRobot++;
-                if (value.equals("Q")) hasEnemy = true;
-                map[line][col] = value;
-                System.out.print(map[line][col]);
-            }
-            System.out.println();
-        }
-        if (nbTreasure != 1){
-            eh.signalError(ctx.start, "wrong number of Treasure on map, should be one!");
-        }
-        if (nbRobot != 1){
-            eh.signalError(ctx.start, "wrong number of Robot on map, should be one!");
-        }
-        if (!hasEnemy) {
-            eh.signalError(ctx.start, "map should contain at least one enemy!");
-        }
-
-        System.out.println("=== MAP EVAL ===");
         return null;
     }
 

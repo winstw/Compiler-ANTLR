@@ -9,6 +9,7 @@ import be.unamur.info.b314.compiler.symboltable.*;
 import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
@@ -25,8 +26,9 @@ import java.util.stream.Collectors;
 
 public class CheckPhaseVisitor extends CheckSlipVisitor {
 
-    public CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e) {
+    public CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath) {
         super(e, scopes);
+        this.currentPath = currentPath;
     }
 
     public static void main(String[] args) throws IOException {
@@ -38,11 +40,12 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
         visitor.visit(tree);
-        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler);
+        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler, System.getProperty("user.dir"));
         second.visitProgram(tree);
     }
 
     private boolean assignationContext = false;
+    private String currentPath;
 
     @Override
     public Type visitProgram(SlipParser.ProgramContext ctx) {
@@ -65,6 +68,49 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         System.out.println(this.currentScope);
         this.currentScope = null;
         return Type.VOID;
+    }
+
+    @Override
+    public Type visitImpDecl(SlipParser.ImpDeclContext ctx) {
+        String filename = ctx.FILENAME().getText().replace("\"", "");
+        String filePath = this.currentPath + "/" + filename;
+        System.out.println("MAP FILE PATH " + filePath);
+
+        File mapFile = new File(filePath);
+        if (mapFile.exists() && mapFile.isFile()) {
+            try {
+                SlipLexer mapLexer = new SlipLexer(new ANTLRInputStream(new FileInputStream(filePath)));
+                CommonTokenStream tokens = new CommonTokenStream(mapLexer);
+                SlipParser parser = new SlipParser(tokens);
+                SlipParser.MapContext tree = parser.map();
+
+                ErrorHandler mapEh = new ErrorHandler();
+                GlobalDefinitionPhase gdp = new GlobalDefinitionPhase(mapEh);
+
+                gdp.visit(tree);
+
+                if (!gdp.isMap()) {
+                    String errorMessage = "provided map file isn't a map";
+                    eh.signalError(ctx.start, errorMessage);
+                }
+
+                if (mapEh.hasErrorOccurred()) {
+                    String errorMessage = "provided map file contains errors";
+                    eh.signalError(ctx.start, errorMessage);
+                }
+
+            } catch (RecognitionException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("NO MAP FILE PROVIDED!");
+        }
+
+        return null;
     }
 
     @Override

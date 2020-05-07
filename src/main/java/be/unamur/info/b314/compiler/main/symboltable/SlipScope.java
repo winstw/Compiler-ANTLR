@@ -1,4 +1,4 @@
-package be.unamur.info.b314.compiler.symboltable;
+package be.unamur.info.b314.compiler.main.symboltable;
 
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;

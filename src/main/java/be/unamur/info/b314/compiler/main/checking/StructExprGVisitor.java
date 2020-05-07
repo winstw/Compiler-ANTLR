@@ -4,10 +4,11 @@ package be.unamur.info.b314.compiler.main.checking;
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
-import be.unamur.info.b314.compiler.symboltable.SlipScope;
-import be.unamur.info.b314.compiler.symboltable.SlipStructureSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
+import be.unamur.info.b314.compiler.main.ErrorHandler;
+import be.unamur.info.b314.compiler.main.symboltable.SlipScope;
+import be.unamur.info.b314.compiler.main.symboltable.SlipStructureSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class StructExprGVisitor extends SlipBaseVisitor<SlipSymbol> {

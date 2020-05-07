@@ -2,6 +2,7 @@ package be.unamur.info.b314.compiler.main.checking;
 
 import be.unamur.info.b314.compiler.SlipBaseVisitor;
 import be.unamur.info.b314.compiler.SlipParser;
+import be.unamur.info.b314.compiler.main.ErrorHandler;
 
 public class MapVisitor extends SlipBaseVisitor<Boolean> {
 
@@ -15,6 +16,7 @@ public class MapVisitor extends SlipBaseVisitor<Boolean> {
         this.eh = e;
     }
 
+    @Override
     public Boolean visitMap(SlipParser.MapContext ctx) {
         int nbLines = Integer.parseInt(ctx.NAT(0).getText());
         int nbColumns = Integer.parseInt(ctx.NAT(1).getText());

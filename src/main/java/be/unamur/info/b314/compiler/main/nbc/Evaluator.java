@@ -17,16 +17,16 @@ import org.antlr.v4.runtime.tree.TerminalNodeImpl;
 import be.unamur.info.b314.compiler.SlipLexer;
 import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.main.checking.CheckPhaseVisitor;
-import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
+import be.unamur.info.b314.compiler.main.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
 import be.unamur.info.b314.compiler.main.checking.StructExprGVisitor;
-import be.unamur.info.b314.compiler.symboltable.SlipArraySymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipBaseScope;
-import be.unamur.info.b314.compiler.symboltable.SlipMethodSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipScope;
-import be.unamur.info.b314.compiler.symboltable.SlipStructureSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
-import be.unamur.info.b314.compiler.symboltable.SlipVariableSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipArraySymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipBaseScope;
+import be.unamur.info.b314.compiler.main.symboltable.SlipMethodSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipScope;
+import be.unamur.info.b314.compiler.main.symboltable.SlipStructureSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipVariableSymbol;
 
 public class Evaluator extends SlipBaseVisitor<Object> {
     private ParseTreeProperty<SlipScope> scopes;

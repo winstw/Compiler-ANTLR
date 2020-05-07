@@ -5,8 +5,9 @@ import be.unamur.info.b314.compiler.SlipParser;
 import be.unamur.info.b314.compiler.exception.SymbolAlreadyDefinedException;
 import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 
-import be.unamur.info.b314.compiler.symboltable.*;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol.Type;
+import be.unamur.info.b314.compiler.main.ErrorHandler;
+import be.unamur.info.b314.compiler.main.symboltable.*;
+import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -14,7 +15,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import be.unamur.info.b314.compiler.symboltable.SlipSymbol;
+import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -177,16 +178,16 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
                     if (declaredParamTypes.hasNext()) {
                         Type declaredParamType = declaredParamTypes.next().getType();
                         System.out.println("EFFECTIVE : " + actualParamType + " DECLARED : " + declaredParamType);
-                        eh.checkEqual(actualParamType, declaredParamType, param.start,
-                                String.format("parameter %s of %s should be of type %s instead of %s",
-                                        param.getText(), funcName ,declaredParamType, actualParamType));
+                        String errorMessage = String.format("parameter %s of %s should be of type %s instead of %s", param.getText(), funcName ,declaredParamType, actualParamType);
+                        eh.checkEqual(actualParamType, declaredParamType, param.start, errorMessage);
                     }
                 }
             }
 
             return scopedFunc.getType();
         } catch (SymbolNotFoundException e) {
-            eh.signalError(ctx.start, String.format("function %s is never defined", ctx.ID().getText()));
+            String errorMessage = String.format("function %s is never defined", ctx.ID().getText());
+            eh.signalError(ctx.start, errorMessage);
         }
         return Type.VOID;
     }

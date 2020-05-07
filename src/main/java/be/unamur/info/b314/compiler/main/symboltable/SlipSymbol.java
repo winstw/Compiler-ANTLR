@@ -1,4 +1,4 @@
-package be.unamur.info.b314.compiler.symboltable;
+package be.unamur.info.b314.compiler.main.symboltable;
 
 /**
  * @overview A SlipSymbol is an association of a name and type

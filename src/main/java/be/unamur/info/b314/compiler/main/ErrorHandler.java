@@ -1,4 +1,4 @@
-package be.unamur.info.b314.compiler.main.checking;
+package be.unamur.info.b314.compiler.main;
 
 import org.antlr.v4.runtime.Token;
 

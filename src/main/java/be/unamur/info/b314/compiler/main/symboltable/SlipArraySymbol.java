@@ -1,7 +1,6 @@
-package be.unamur.info.b314.compiler.symboltable;
+package be.unamur.info.b314.compiler.main.symboltable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SlipArraySymbol extends SlipBaseSymbol {
     private String[][] value;

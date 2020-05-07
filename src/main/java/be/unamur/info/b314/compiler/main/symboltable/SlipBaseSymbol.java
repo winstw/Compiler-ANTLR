@@ -1,4 +1,4 @@
-package be.unamur.info.b314.compiler.symboltable;
+package be.unamur.info.b314.compiler.main.symboltable;
 
 public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
     protected String value = null;

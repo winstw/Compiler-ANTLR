@@ -13,7 +13,6 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 
 import be.unamur.info.b314.compiler.main.checking.CheckPhaseVisitor;
-import be.unamur.info.b314.compiler.main.checking.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
 import be.unamur.info.b314.compiler.main.nbc.Evaluator;
 import be.unamur.info.b314.compiler.main.nbc.NbcCompiler;

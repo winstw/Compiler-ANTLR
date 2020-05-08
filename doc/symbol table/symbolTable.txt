@@ -1,17 +1,19 @@
 @startuml
 
 enum Type {
-    void
-    integer
-    boolean
-    char
-    struct
+    VOID
+    INTEGER
+    BOOLEAN
+    CHARACTER
+    STRUCT
+    STRING
 }
 
 interface SlipSymbol {
     +String getName()
     +String getType()
     +boolean isAssignable()
+    +SlipSymbol clone()
 }
 
 abstract class SlipBaseSymbol {
@@ -20,9 +22,19 @@ abstract class SlipBaseSymbol {
     -boolean isAssignable
 }
 
-class SlipVariableSymbol
-class SlipArraySymbol
+class SlipVariableSymbol {
+    -String value
 
+    +void setValue(Object value)
+    +Object getValue()
+}
+
+class SlipArraySymbol {
+    -String[][] value
+
+    +void setValue(List<Integer> indexes, Object value)
+    +Object getValue(List<Integer> indexes)
+}
 
 interface SlipScope {
     +String getName()
@@ -43,11 +55,16 @@ abstract class SlipScopedSymbol {
 }
 
 class SlipMethodSymbol {
-    -Type parameterTypes[0-N]
+    -ArrayList<SlipVariableSymbol> parameters
+    -List<SlipParser.InstBlockContext> body;
 
-    +void addParameter(Type type)
-    +Type[] getParameterType()
+    +void addParameter(SlipVariableSymbol symbol)
+    +int getNumberOfParameters()
+    +Iterator<SlipVariableSymbol> getParameters()
+    +void setBody(List<SlipParser.InstBlockContext> body)
+    +List<SlipParser.InstBlockContext> getBody()
 }
+
 class SlipStructureSymbol
 class SlipGlobalScope
 

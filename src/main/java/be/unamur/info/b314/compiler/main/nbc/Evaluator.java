@@ -128,7 +128,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     private List<Integer> findIndexes(SlipParser.ExprGContext ctx) {
-        ((SlipParser.LeftExprArrayContext) ctx).exprD();
         List<SlipParser.ExprDContext> exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
         while (exprDContexts.size() == 0) {
             ctx = ctx.getRuleContext(SlipParser.ExprGContext.class, 1);

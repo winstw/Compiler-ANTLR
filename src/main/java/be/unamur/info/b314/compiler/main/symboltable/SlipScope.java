@@ -20,16 +20,16 @@ public interface SlipScope {
     String getName();
 
     /**
-     * @modifies this
-     * @throws NullPointerException if symbol == null
+     * @throws NullPointerException          if symbol == null
      * @throws SymbolAlreadyDefinedException if symbol is already in this
+     * @modifies this
      * @effect this_post = this + symbol
      */
     void define(SlipSymbol symbol) throws NullPointerException, SymbolAlreadyDefinedException;
 
     /**
+     * @return this[name] || parentScope.resolve(name)
      * @throws SymbolNotFoundException if there is no symbol named name in this
-     * @return this[name] || englobingScope.resolve(name)
      */
     SlipSymbol resolve(String name) throws SymbolNotFoundException;
 

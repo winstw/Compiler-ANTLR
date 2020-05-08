@@ -10,6 +10,7 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
 
     private ArrayList<SlipVariableSymbol> parameters;
     private List<SlipParser.InstBlockContext> body;
+
     public SlipMethodSymbol(String name, Type type, SlipScope parentScope) {
         super(name, type, parentScope, false);
         parameters = new ArrayList<SlipVariableSymbol>();
@@ -34,16 +35,17 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
 
     /**
      * @modifies this
-     * @effect add type to parameterTypes
+     * @effect add symbol to parameters
      */
     public void addParameter(SlipVariableSymbol symbol) {
         parameters.add(symbol);
     }
 
-    public void setBody(List<SlipParser.InstBlockContext> body){
+    public void setBody(List<SlipParser.InstBlockContext> body) {
         this.body = body;
     }
-    public List<SlipParser.InstBlockContext> getBody(){
+
+    public List<SlipParser.InstBlockContext> getBody() {
         return this.body;
     }
 
@@ -55,4 +57,20 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         return this.parameters.iterator();
     }
 
+    @Override
+    public SlipMethodSymbol clone() {
+        SlipMethodSymbol methodCopy = new SlipMethodSymbol(this.getName(), this.getType(), this.getParentScope());
+
+        methodCopy.body = this.body;
+
+        for (String key : symbols.keySet()) {
+            methodCopy.symbols.put(key, this.symbols.get(key).clone());
+        }
+
+        for (SlipVariableSymbol svs : parameters) {
+            methodCopy.parameters.add(svs.clone());
+        }
+
+        return methodCopy;
+    }
 }

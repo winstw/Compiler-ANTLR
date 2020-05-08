@@ -62,11 +62,15 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
 
         for (TerminalNode node : ctx.ID()) {
             String name = node.getText();
-            List<Integer> arraySizes = ctx.number()
-                    .stream()
-                    .map(numCtx -> Integer.parseInt(numCtx.getText()))
-                    .collect(Collectors.toList());
-            SlipSymbol symbol = new SlipArraySymbol(name, type, !isConst, arraySizes);
+            SlipSymbol symbol;
+            int first_dim = Integer.parseInt(ctx.number(0).getText());
+
+            if (ctx.number(1) == null) {
+                symbol = new SlipArraySymbol(name, type, !isConst, first_dim, 1);
+            } else {
+                int second_dim = Integer.parseInt(ctx.number(1).getText());
+                symbol = new SlipArraySymbol(name, type, !isConst, first_dim, second_dim);
+            }
 
             try {
                 currentScope.define(symbol);

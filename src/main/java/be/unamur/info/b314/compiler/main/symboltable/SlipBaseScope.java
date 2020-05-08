@@ -6,7 +6,7 @@ import be.unamur.info.b314.compiler.exception.SymbolNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SlipBaseScope implements SlipScope{
+public abstract class SlipBaseScope implements SlipScope {
 
     private String name;
     protected Map<String, SlipSymbol> symbols;
@@ -14,30 +14,8 @@ public class SlipBaseScope implements SlipScope{
 
     public SlipBaseScope(String name, SlipScope parentScope) {
         this.name = name;
-        this.parentScope= parentScope;
+        this.parentScope = parentScope;
         this.symbols = new HashMap<>();
-    }
-
-    public SlipBaseScope(String name, SlipScope parentScope, SlipBaseScope fromScope) {
-        this.name = name;
-        this.parentScope= parentScope;
-        this.symbols = fromScope.cloneSymbols(this);
-    }
-
-    protected Map<String, SlipSymbol> cloneSymbols(SlipScope parentScope){
-        Map<String, SlipSymbol> map = new HashMap<>();
-            this.symbols.forEach((key, symbol) -> {
-                SlipSymbol copy;
-                    if (symbol instanceof SlipStructureSymbol) {
-                        copy = new SlipStructureSymbol(symbol.getName(), parentScope, symbol.isAssignable());
-                        ((SlipBaseScope) copy).symbols = ((SlipStructureSymbol) symbol).cloneSymbols(parentScope);
-                    }
-                    else {
-                        copy = ((CloneableSymbol) symbol).cloneSymbol();
-                    }
-                map.put(key, copy);
-            });
-            return map;
     }
 
     @Override
@@ -55,7 +33,7 @@ public class SlipBaseScope implements SlipScope{
         if (symbols.get(symbol.getName()) == null) {
             symbols.put(symbol.getName(), symbol);
         } else {
-            throw  new SymbolAlreadyDefinedException();
+            throw new SymbolAlreadyDefinedException();
         }
 
     }
@@ -75,7 +53,6 @@ public class SlipBaseScope implements SlipScope{
         return symbol;
 
     }
-
 
     @Override
     public SlipScope getParentScope() {

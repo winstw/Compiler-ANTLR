@@ -36,4 +36,16 @@ public class SlipStructureSymbol extends SlipScopedSymbol {
         return sb.toString();
     }
 
+    @Override
+    public SlipStructureSymbol clone() {
+
+        SlipStructureSymbol structCopy = new SlipStructureSymbol(this.getName(), this.getParentScope(), this.isAssignable());
+
+        for (String key : symbols.keySet()) {
+            structCopy.symbols.put(key, this.symbols.get(key).clone());
+        }
+
+        return structCopy;
+
+    }
 }

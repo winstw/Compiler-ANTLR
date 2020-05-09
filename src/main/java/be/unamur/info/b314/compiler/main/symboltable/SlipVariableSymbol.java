@@ -2,14 +2,15 @@ package be.unamur.info.b314.compiler.main.symboltable;
 
 public class SlipVariableSymbol extends SlipBaseSymbol {
 
-    public SlipVariableSymbol(String name, Type type, boolean isAssignable) {
+    private String value = null;
 
+    public SlipVariableSymbol(String name, Type type, boolean isAssignable) {
         super(name, type, isAssignable);
         this.setValue(getInitValue());
     }
 
     @Override
-    public SlipSymbol cloneSymbol(){
+    public SlipVariableSymbol clone() {
         return new SlipVariableSymbol(this.getName(), this.getType(), this.isAssignable());
     }
 

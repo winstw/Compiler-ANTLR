@@ -22,8 +22,6 @@ public abstract class SlipScopedSymbol extends SlipBaseScope implements SlipSymb
     }
 
     @Override
-    public boolean isArray() {
-        return false;
-    }
+    public abstract SlipScopedSymbol clone();
 
 }

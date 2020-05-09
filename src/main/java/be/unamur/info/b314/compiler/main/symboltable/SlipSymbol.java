@@ -38,6 +38,10 @@ public interface SlipSymbol {
      * @return assignable
      */
     boolean isAssignable();
-    boolean isArray();
+
+    /**
+     * @return a deep copy of this
+     */
+    SlipSymbol clone();
 
 }

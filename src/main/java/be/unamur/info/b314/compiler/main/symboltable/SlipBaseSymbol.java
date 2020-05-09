@@ -1,7 +1,6 @@
 package be.unamur.info.b314.compiler.main.symboltable;
 
-public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
-    protected String value = null;
+public abstract class SlipBaseSymbol implements SlipSymbol {
     private String name;
     protected Type type;
     private boolean isAssignable;
@@ -12,11 +11,8 @@ public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
         this.isAssignable = isAssignable;
     }
 
-    @Override
-    public abstract SlipSymbol cloneSymbol();
-
-    protected String getInitValue(){
-        switch(this.type){
+    protected String getInitValue() {
+        switch (this.type) {
             case CHARACTER:
                 return "\000";
             case INTEGER:
@@ -27,22 +23,17 @@ public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
         return null;
     }
 
-    protected Object switchValue(String value){
+    protected Object switchValue(String value) {
         switch (this.type) {
-        case BOOLEAN:
-            return Boolean.parseBoolean(value);
-        case CHARACTER:
-            return value.charAt(0);
-        case INTEGER:
-            return Integer.parseInt(value);
-        default:
-            return value;
+            case BOOLEAN:
+                return Boolean.parseBoolean(value);
+            case CHARACTER:
+                return value.charAt(0);
+            case INTEGER:
+                return Integer.parseInt(value);
+            default:
+                return value;
         }
-    }
-
-
-    public boolean isArray() {
-        return false;
     }
 
     @Override
@@ -59,4 +50,7 @@ public abstract class SlipBaseSymbol implements SlipSymbol, CloneableSymbol {
     public boolean isAssignable() {
         return isAssignable;
     }
+
+    @Override
+    public abstract SlipBaseSymbol clone();
 }

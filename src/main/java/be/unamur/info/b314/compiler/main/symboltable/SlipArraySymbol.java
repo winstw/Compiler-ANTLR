@@ -4,28 +4,23 @@ import java.util.List;
 
 public class SlipArraySymbol extends SlipBaseSymbol {
     private String[][] value;
-    List<Integer> sizes;
 
-    public SlipArraySymbol(String name, Type type, boolean isAssignable, List<Integer> sizes) {
+    public SlipArraySymbol(String name, Type type, boolean isAssignable, int first_dim, int second_dim) {
         super(name, type, isAssignable);
-        this.sizes = sizes;
-        int first_dim = sizes.get(0);
-        int second_dim = sizes.size() > 1 ? sizes.get(1) : 1;
-
         this.value = new String[first_dim][second_dim];
 
-        for (int i = 0; i < first_dim; i++){
-            for (int j = 0; j < second_dim; j++){
+        for (int i = 0; i < first_dim; i++) {
+            for (int j = 0; j < second_dim; j++) {
                 this.value[i][j] = this.getInitValue();
             }
         }
     }
 
-    public SlipSymbol cloneSymbol(){
-        return new SlipArraySymbol(this.getName(), this.getType(), this.isAssignable(),
-                this.sizes // clone sizes
-        );
+    @Override
+    public SlipArraySymbol clone() {
+        return new SlipArraySymbol(this.getName(), this.getType(), this.isAssignable(), this.value.length, this.value[0].length);
     }
+
     public void setValue(List<Integer> indexes, Object value) {
         if (value != null) {
             this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0] = value.toString();
@@ -34,24 +29,10 @@ public class SlipArraySymbol extends SlipBaseSymbol {
 
     public Object getValue(List<Integer> indexes) {
         String rawValue = this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0];
-        if (rawValue == null){
+        if (rawValue == null) {
             return null;
         }
         return this.switchValue(rawValue);
-    }
-
-//    public Object getValue(){
-//        int length = this.value.length;
-//        Object[] values = new Object[length];
-//        for (int i = 0; i < length; i ++){
-//            values[i] = this.getValue(i);
-//        }
-//        return values;
-//    }
-
-    @Override
-    public boolean isArray(){
-        return true;
     }
 
     @Override

@@ -35,7 +35,7 @@ number : (MINUS)? NAT;
 
 declaration: (varDecl | arrayDecl | structDecl) SEMICOLON;
 varDecl : ID (COMMA ID)* AS scalar (EQUAL exprD)?;
-arrayDecl : ID (COMMA ID)* AS scalar LBRACKET number (COMMA number)* RBRACKET (EQUAL initArrays)?;
+arrayDecl : ID (COMMA ID)* AS scalar LBRACKET number (COMMA number)? RBRACKET (EQUAL initArrays)?;
 structDecl : ID (COMMA ID)* AS STRUCT (declaration)+ END;
 
 initVar : exprD

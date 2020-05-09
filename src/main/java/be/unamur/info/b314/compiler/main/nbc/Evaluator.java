@@ -21,7 +21,6 @@ import be.unamur.info.b314.compiler.main.ErrorHandler;
 import be.unamur.info.b314.compiler.main.checking.GlobalDefinitionPhase;
 import be.unamur.info.b314.compiler.main.checking.StructExprGVisitor;
 import be.unamur.info.b314.compiler.main.symboltable.SlipArraySymbol;
-import be.unamur.info.b314.compiler.main.symboltable.SlipBaseScope;
 import be.unamur.info.b314.compiler.main.symboltable.SlipMethodSymbol;
 import be.unamur.info.b314.compiler.main.symboltable.SlipScope;
 import be.unamur.info.b314.compiler.main.symboltable.SlipStructureSymbol;
@@ -53,7 +52,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     }
 
-    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, NbcCompiler compiler){
+    public Evaluator(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, NbcCompiler compiler) {
         super();
         this.eh = e;
         this.scopes = scopes;
@@ -69,7 +68,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public Object visitProg(SlipParser.ProgContext ctx){
+    public Object visitProg(SlipParser.ProgContext ctx) {
         this.currentScope = this.scopes.get(ctx);
         // obligé de visiter les déclarations pour initialiser les valeurs des variables le cas échéant
         ctx.declaration().forEach(decl -> decl.accept(this));
@@ -83,24 +82,26 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     public Object visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = this.scopes.get(ctx);
         ctx.children.stream()
-            .filter(child -> !(child instanceof TerminalNodeImpl)) // keep only statement children
-            .forEach(child -> child.accept(this));
+                .filter(child -> !(child instanceof TerminalNodeImpl)) // keep only statement children
+                .forEach(child -> child.accept(this));
 
         this.currentScope = this.currentScope.getParentScope();
         return null;
     }
 
+    @Override
     public Void visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
         Boolean guard = (Boolean) ctx.exprD().accept(this);
-        if (guard){
+        if (guard) {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
         }
         return null;
     }
 
+    @Override
     public Void visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
         Boolean guard = (Boolean) ctx.exprD().accept(this);
-        if (guard){
+        if (guard) {
             ctx.guardedBlock(0).instruction().forEach(instruction -> instruction.accept(this));
         } else {
             ctx.guardedBlock(1).instruction().forEach(instruction -> instruction.accept(this));
@@ -110,7 +111,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
 
     @Override
-    public Void visitDeclaration(SlipParser.DeclarationContext ctx){
+    public Void visitDeclaration(SlipParser.DeclarationContext ctx) {
         visitChildren(ctx);
         return null;
     }
@@ -121,24 +122,25 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public String visitInstBlock(SlipParser.InstBlockContext ctx){
-        ctx.instruction().forEach(instruction -> instruction.accept(this));
+    public String visitInstBlock(SlipParser.InstBlockContext ctx) {
+        ctx.children.forEach(children -> children.accept(this));
         return null;
     }
 
-    private List<Integer> findIndexes(SlipParser.ExprGContext ctx){
+    private List<Integer> findIndexes(SlipParser.ExprGContext ctx) {
         List<SlipParser.ExprDContext> exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
-        while (exprDContexts.size() == 0){
+        while (exprDContexts.size() == 0) {
             ctx = ctx.getRuleContext(SlipParser.ExprGContext.class, 1);
             exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
         }
         List<Integer> indexes = exprDContexts // get all "index expressions"
-            .stream()
-            .map(nbContext -> (Integer) nbContext.accept(this))
-            .collect(Collectors.toList());
+                .stream()
+                .map(nbContext -> (Integer) nbContext.accept(this))
+                .collect(Collectors.toList());
         return indexes;
     }
 
+    @Override
     public Void visitAssignInstr(SlipParser.AssignInstrContext ctx) {
         TerminalNode id = ctx.exprG().getToken(SlipParser.ID, 0);
         SlipSymbol symbol;
@@ -153,13 +155,13 @@ public class Evaluator extends SlipBaseVisitor<Object> {
             symbol = structVisitor.visit(ctx.exprG());
             varName = symbol.getName();
             System.out.println("ASSIGN STRUCT: " + symbol);
-            System.out.println("in scope " +  this.currentScope.getName());
+            System.out.println("in scope " + this.currentScope.getName());
 
         }
         if (symbol != null) {
             if (ctx.exprD() != null) {
                 Object value = visit(ctx.exprD());
-                if (!symbol.isArray()) {
+                if (!(symbol instanceof SlipArraySymbol)) {
                     SlipVariableSymbol varSymbol = (SlipVariableSymbol) symbol;
                     varSymbol.setValue(value);
                     System.out.println(String.format("ASSIGNATION SYMBOL:  %s VALUE: %s", varSymbol, varSymbol.getValue()));
@@ -172,101 +174,110 @@ public class Evaluator extends SlipBaseVisitor<Object> {
                 }
             }
         } else {
-            System.out.print("error no var with name " +  varName);
-            System.out.println("in scope " +  this.currentScope.getName());
+            System.out.print("error no var with name " + varName);
+            System.out.println("in scope " + this.currentScope.getName());
         }
         return null;
     }
 
     @Override
-    public String visitString(SlipParser.StringContext ctx){
+    public String visitString(SlipParser.StringContext ctx) {
         return ctx.STRING().getText();
     }
+
     @Override
-    public Character visitChar(SlipParser.CharContext ctx){
+    public Character visitChar(SlipParser.CharContext ctx) {
         return ctx.CHAR().getText().charAt(1);
     }
 
     @Override
-    public Integer visitIntExpr(SlipParser.IntExprContext ctx){
-        System.out.println("in visit int" +  Integer.parseInt(ctx.number().getText()));
+    public Integer visitIntExpr(SlipParser.IntExprContext ctx) {
+        System.out.println("in visit int" + Integer.parseInt(ctx.number().getText()));
         return Integer.parseInt(ctx.number().getText());
     }
+
     @Override
-    public Object visitParens(SlipParser.ParensContext ctx){
+    public Object visitParens(SlipParser.ParensContext ctx) {
         return ctx.exprD().accept(this);
     }
 
 
     @Override
-    public Integer visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
-        return - (Integer) ctx.exprD().accept(this);
+    public Integer visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx) {
+        return -(Integer) ctx.exprD().accept(this);
     }
 
     @Override
-    public Integer visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
+    public Integer visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
         Integer right = (Integer) ctx.exprD(1).accept(this);
         switch (ctx.op.getType()) {
-        case SlipParser.TIMES:
-            return left * right;
-        case SlipParser.DIVIDE:
-            // TODO CATCH DIVIDE BY 0
-            return left / right;
-        case SlipParser.MODULO:
-            return Math.floorMod(left, right);
-        default:
-            return null;
+            case SlipParser.TIMES:
+                return left * right;
+            case SlipParser.DIVIDE:
+                // TODO CATCH DIVIDE BY 0
+                return left / right;
+            case SlipParser.MODULO:
+                return Math.floorMod(left, right);
+            default:
+                return null;
         }
     }
 
     @Override
-    public Object visitExprGExpr(SlipParser.ExprGExprContext ctx){
+    public Object visitExprGExpr(SlipParser.ExprGExprContext ctx) {
         System.out.println("in ExprGexpr" + ctx.exprG().accept(this));
         return ctx.exprG().accept(this);
         //        return ctx.exprG().accept(this);
     }
 
     @Override
-    public Integer visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
+    public Integer visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
         Integer right = (Integer) ctx.exprD(1).accept(this);
 
-        System.out.println(String.format("LEFT: %S RIGHT: %s ",left, right));
-        if (ctx.op.getType() == SlipParser.PLUS) return  left + right;
+        System.out.println(String.format("LEFT: %S RIGHT: %s ", left, right));
+        if (ctx.op.getType() == SlipParser.PLUS) return left + right;
         else return left - right;
     }
 
-    public Boolean visitTrueExpr(SlipParser.TrueExprContext ctx){
+    @Override
+    public Boolean visitTrueExpr(SlipParser.TrueExprContext ctx) {
         return true;
     }
-    public Boolean visitFalseExpr(SlipParser.FalseExprContext ctx){
+
+    @Override
+    public Boolean visitFalseExpr(SlipParser.FalseExprContext ctx) {
         return false;
     }
-    public Boolean visitNotExpr(SlipParser.NotExprContext ctx){
+
+    @Override
+    public Boolean visitNotExpr(SlipParser.NotExprContext ctx) {
         Boolean toNegateExpr = (Boolean) visit(ctx.exprD());
         if (toNegateExpr != null) {
             return !toNegateExpr;
-        }
-        else return toNegateExpr;
+        } else return toNegateExpr;
     }
 
-    public Boolean visitAndOrExpr(SlipParser.AndOrExprContext ctx){
-       if (ctx.AND() != null) {
-           return (Boolean) visit(ctx.exprD(0)) && (Boolean) visit(ctx.exprD(1));
-       }
-       else {
-           return (Boolean) visit(ctx.exprD(0)) || (Boolean) visit(ctx.exprD(1));
+    @Override
+    public Boolean visitAndOrExpr(SlipParser.AndOrExprContext ctx) {
+        if (ctx.AND() != null) {
+            return (Boolean) visit(ctx.exprD(0)) && (Boolean) visit(ctx.exprD(1));
+        } else {
+            return (Boolean) visit(ctx.exprD(0)) || (Boolean) visit(ctx.exprD(1));
         }
     }
 
-    public Boolean visitComparExpr(SlipParser.ComparExprContext ctx){
+    @Override
+    public Boolean visitComparExpr(SlipParser.ComparExprContext ctx) {
         Object left = ctx.exprD(0).accept(this);
         Object right = ctx.exprD(1).accept(this);
         // TODO check if == ok here
-        if(ctx.op.getType() == SlipParser.EQUAL) return left == right;
+        if (ctx.op.getType() == SlipParser.EQUAL) return left == right;
         else return left != right;
     }
+
+    @Override
     public Boolean visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
         Integer right = (Integer) ctx.exprD(1).accept(this);
@@ -286,12 +297,12 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public Void visitUntilInstr(SlipParser.UntilInstrContext ctx){
+    public Void visitUntilInstr(SlipParser.UntilInstrContext ctx) {
         int iterations = 0;
         do {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
             iterations++;
-        } while((Boolean) ctx.exprD().accept(this) && iterations < 1000);
+        } while ((Boolean) ctx.exprD().accept(this) && iterations < 1000);
 
         if (iterations == 1000) {
             eh.signalError(ctx.start, "INFINITE LOOP");
@@ -301,11 +312,11 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public Void visitWhileInstr(SlipParser.WhileInstrContext ctx){
+    public Void visitWhileInstr(SlipParser.WhileInstrContext ctx) {
         int iterations = 0;
-        while ((Boolean) ctx.exprD().accept(this)  && iterations < 1000) {
+        while ((Boolean) ctx.exprD().accept(this) && iterations < 1000) {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
-            iterations ++;
+            iterations++;
         }
 
 
@@ -317,14 +328,14 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public Void visitForInstr(SlipParser.ForInstrContext ctx){
+    public Void visitForInstr(SlipParser.ForInstrContext ctx) {
         //    FOR ID AFFECT exprD TO exprD DO instruction+ END
 
         SlipVariableSymbol counter = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
         counter.setValue(ctx.exprD(0).accept(this));
         int iterations = 0;
 
-        while((Boolean) ctx.exprD(1).accept(this) && iterations < 1000) {
+        while ((Boolean) ctx.exprD(1).accept(this) && iterations < 1000) {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
             iterations++;
         }
@@ -337,47 +348,48 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    @Override
     public Object visitFuncExpr(SlipParser.FuncExprContext ctx) {
+        SlipScope previousScope = currentScope;
         String funcName = ctx.ID().getText();
         SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(funcName + "_fn");
 
-
         // create a function call scope, with all variables cloned from the scope linked to the method declaration
         // we have already collected all functions declarations in the previous phases
-        SlipScope funcCallScope = new SlipBaseScope("aname", this.currentScope, scopedFunc);
+        SlipMethodSymbol calledFunc = scopedFunc.clone();
 
-         // assign each param in the method call scope
-         Iterator<SlipVariableSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
-         List<SlipParser.ExprDContext> args = ctx.exprD(); // args to the function call
+        // assign each param in the method call scope
+        Iterator<SlipVariableSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
+        List<SlipParser.ExprDContext> args = ctx.exprD(); // args to the function call
         System.out.println("ARGS LIST SIZE IN FUNCTION CALL : " + ctx.exprD().size());
-         int i = 0;
-         while (paramIter.hasNext() && i < args.size()){
-             // get param from method definition
-             SlipVariableSymbol param = paramIter.next();
-             System.out.println("PARAM : " + param.getName());
-             // assign value from function call to param
-             SlipVariableSymbol paramInScope = (SlipVariableSymbol) funcCallScope.resolve(param.getName());
-             System.out.println("PARAM IN ScOPE : " + paramInScope.getName() + ctx.exprD(i).getText());
+        int i = 0;
+        while (paramIter.hasNext() && i < args.size()) {
+            // get param from method definition
+            SlipVariableSymbol param = paramIter.next();
+            System.out.println("PARAM : " + param.getName());
+            // assign value from function call to param
+            SlipVariableSymbol paramInScope = (SlipVariableSymbol) calledFunc.resolve(param.getName());
+            System.out.println("PARAM IN ScOPE : " + paramInScope.getName() + ctx.exprD(i).getText());
 
-             System.out.println("Get arg value " + ctx.exprD(i).accept(this));
+            System.out.println("Get arg value " + ctx.exprD(i).accept(this));
 
-             paramInScope.setValue(ctx.exprD(i).accept(this));
-             System.out.println(String.format("set param %s : %s", paramInScope.getName(), paramInScope.getValue()));
-             i++;
-         }
+            paramInScope.setValue(ctx.exprD(i).accept(this));
+            System.out.println(String.format("set param %s : %s", paramInScope.getName(), paramInScope.getValue()));
+            i++;
+        }
 
         // CAUTION DO NOT CHANGE SCOPE TOO SOON OR YOU WON'T BE ABLE TO USE OLD PARAMS in NEW CALL
         // WHEN EMBEDDED CALLS
-        this.currentScope = funcCallScope;
+        this.currentScope = calledFunc;
 
         scopedFunc.getBody().forEach(instBlock -> instBlock.accept(this));
 
         // return method return value (variable with same name as method which should be declared in scope)
         SlipVariableSymbol returnSymbol = (SlipVariableSymbol) this.currentScope.resolve(funcName);
 
-        this.currentScope = this.currentScope.getParentScope();
+        this.currentScope = previousScope;
 
-        // TODO delete funcCallScope
+        // TODO delete calledFunc
 
         System.out.println("Return value" + returnSymbol.getValue());
         return returnSymbol.getValue();
@@ -385,21 +397,21 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Object visitLeftExprArray(SlipParser.LeftExprArrayContext ctx) {
-        System.out.println("in left expression Array" +  ctx.ID().getText());
+        System.out.println("in left expression Array" + ctx.ID().getText());
 
         SlipArraySymbol array = (SlipArraySymbol) currentScope.resolve(ctx.ID().getText());
 
         List<Integer> indexes = findIndexes(ctx);
         System.out.println("INDEXES : " + indexes);
-        System.out.println("in left expression array" +  array.getValue(indexes));
+        System.out.println("in left expression array" + array.getValue(indexes));
         return array.getValue(indexes);
     }
 
-
+    @Override
     public Object visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx) {
         SlipSymbol symbol = new StructExprGVisitor(currentScope, eh).visit(ctx);
-        System.out.println("IS ARRAY" +  symbol.isArray());
-        if (symbol.isArray()){
+        System.out.println("IS ARRAY" + (symbol instanceof SlipArraySymbol));
+        if (symbol instanceof SlipArraySymbol) {
             return ((SlipArraySymbol) symbol).getValue(findIndexes(ctx.exprG(1)));
         }
         return ((SlipVariableSymbol) symbol).getValue();
@@ -408,24 +420,26 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
-        System.out.println("in left expression ID" +  ctx.ID().getText());
-        System.out.println("in scope " +  this.currentScope.getName());
+        System.out.println("in left expression ID" + ctx.ID().getText());
+        System.out.println("in scope " + this.currentScope.getName());
 
-        SlipSymbol symbol =  currentScope.resolve(ctx.ID().getText());
+        SlipSymbol symbol = currentScope.resolve(ctx.ID().getText());
 
-        if ( symbol instanceof SlipStructureSymbol){
-        // TODO handle struct case
+        if (symbol instanceof SlipStructureSymbol) {
+            // TODO handle struct case
             //symbol = new StructExprGVisitor(currentScope, errorHandler).visit(ctx);
             System.out.println("STRUCTURES NOT HANDLED BY EVALUATOR!");
 //            this.currentScope = (SlipStructureSymbol) symbol;
 //            System.out.println("in scope " +  this.currentScope.getName());
             return null;
         }
-            SlipVariableSymbol variable = (SlipVariableSymbol) symbol;
-            System.out.println("in left expression variable" + variable.getValue());
+        SlipVariableSymbol variable = (SlipVariableSymbol) symbol;
+        System.out.println("in left expression variable" + variable.getValue());
 
         return variable.getValue();
     }
+
+    @Override
     public Void visitVarDecl(SlipParser.VarDeclContext ctx) {
         if (ctx.exprD() != null) {
             Object value = ctx.exprD().accept(this);
@@ -450,7 +464,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
      * @param argContext The context corresponding to the argument of the action.
      * @param actionType The type of the action to add.
      */
-    private void addMoveAction(SlipParser.ExprDContext argContext, NbcCompiler.ActionType actionType){
+    private void addMoveAction(SlipParser.ExprDContext argContext, NbcCompiler.ActionType actionType) {
         int arg;
         if (argContext != null) {
             arg = (Integer) argContext.accept(this);
@@ -461,39 +475,49 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     @Override
-    public Void visitLeftAction(SlipParser.LeftActionContext ctx){
+    public Void visitLeftAction(SlipParser.LeftActionContext ctx) {
         this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.LEFT);
         return null;
     }
 
-    public Void visitRightAction(SlipParser.RightActionContext ctx){
+    @Override
+    public Void visitRightAction(SlipParser.RightActionContext ctx) {
         this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.RIGHT);
         return null;
     }
-    public Void visitUpAction(SlipParser.UpActionContext ctx){
+
+    @Override
+    public Void visitUpAction(SlipParser.UpActionContext ctx) {
         this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.UP);
         return null;
     }
-    public Void visitDownAction(SlipParser.DownActionContext ctx){
+
+    @Override
+    public Void visitDownAction(SlipParser.DownActionContext ctx) {
         this.addMoveAction(ctx.exprD(), NbcCompiler.ActionType.DOWN);
         return null;
     }
-    public Void visitJumpAction(SlipParser.JumpActionContext ctx){
+
+    @Override
+    public Void visitJumpAction(SlipParser.JumpActionContext ctx) {
         this.compiler.addAction(NbcCompiler.ActionType.JUMP);
         return null;
     }
 
-    public Void visitFightAction(SlipParser.FightActionContext ctx){
+    @Override
+    public Void visitFightAction(SlipParser.FightActionContext ctx) {
         this.compiler.addAction(NbcCompiler.ActionType.FIGHT);
         return null;
     }
 
-    public Void visitDigAction(SlipParser.DigActionContext ctx){
+    @Override
+    public Void visitDigAction(SlipParser.DigActionContext ctx) {
         this.compiler.addAction(NbcCompiler.ActionType.DIG);
         return null;
     }
 
-    public Void visitDig(SlipParser.DigContext ctx){
+    @Override
+    public Void visitDig(SlipParser.DigContext ctx) {
         this.compiler.addAction(NbcCompiler.ActionType.DIG);
         return null;
     }

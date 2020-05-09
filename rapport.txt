@@ -1,0 +1,72 @@
+* Description de la démarche
+Pour les 3 étapes du projet, nous avons commencé par une analyse du problème et
+une recherche de solution individuelle. Nous avons ensuite discuté ensemble de
+la solution à adopter. Finalement le travail a été distribué en fonction des
+agendas de chacuns.
+
+* Table des symboles
+Ecrire des trucs.
+
+* Description de l'architecture
+Le processus de compilation du code Slip est divisé en 4 étapes principales:
++ Parsing: création de l'AST
++ Création de la table des symboles et vérification des types
+  - Création de la table globale
+  - Création de la table locale et vérification des types
++ Evaluation du code
++ Génération du code nbc
+Ces différentes étapes sont lancées à partir de méthode compile() de Main.java
+dans la mesure où l'étape précédente ne contenait pas d'erreur.
+
+Le projet est divisé en 3 packages: checking, nbc et symboltable.
+
+** Package checking
+Ce package gère l'étape de création de la table des symboles et de la vérification
+des types. Il contient 2 classes principales: GlobalDefinitionPhase et CheckPhaseVisitor.
+
+*** GlobalDefinitionPhase
+Cette classe a pour objectif de répertorier les variables et fonctions déclarées
+globalement. Cette étape est nécessaire afin que le langage accepte les forward
+references. Elle consiste en un visiteur de l'AST. À chaque fois qu'elle rencontre
+un symbol (variable ou fonction), elle vérifie que le symbole n'existe pas déjà
+et elle ajoute ce dernier à la table des symboles dans le scope global.
+
+*** CheckPhaseVisitor
+Cette classe fait la même chose que GlobalDefinitionPhase (le code commun est repris
+dans la classe CheckSlipVisitor dont elles héritent) mais cette fois pour les variables
+locales. En plus elle va vérifier les types des expressions. Par exemple lors d'une
+assignation, elle va vérifier que le type de l'expression à gauche est bien le même
+que celui de l'expression à droite de :=.
+
+** Package nbc
+Ce package est responsable de la traduction du code Slip en code nbc. Cette traduction
+se fait en 2 étapes: l'interprétation du code Slip et la génération d'un code nbc
+simplifié ne reprenant que la sémantique du code Slip. À noter que nous traduisons
+le Slip de cette manière à cause d'un changement dans l'énoncé de la 3ème partie
+intervenu après que nous ayons implémenté l'interpréteur. En effet, afin de ne pas
+jeter le code de celui-ci nous l'avons utilisé pour générer un code simplifié.
+Le package contient 2 classes principales: Evaluator et NbcCompiler.
+
+*** Evaluator
+Geof je te laisse écrire des trucs ici.
+
+*** NbcCompiler
+Cette classe génère le code nbc. Elle reçoit de l'Evaluator la liste des actions
+que le code nbc devra exécuter. Elle parcourt la liste en liste en ajoutant au main
+du nbc les appels aux fonctions. Elle termine en ajoutant uniquement les subroutines
+nécessaires à l'éxécution du programme.
+
+** Package symboltable
+Ce package est détaillé dans la section "Table des symboles".
+
+* Conclusion
+
+** Amélioration:
+Si nous avions su dès le départ que nous allions interprèter le code, nous aurions
+fait la vérification des types lors de la phase d'interprétation.
+
+** Commentaire constructif:
+Une chose qui nous aurait aider à voir dès le début comment le langage Slip
+fonctionnait aurait été d'avoir un exemple de code Slip correct reprenant toutes
+les strucutres du langage. Cela nous aurait permis de ne pas devoir revenir en
+arrière à certains moment.

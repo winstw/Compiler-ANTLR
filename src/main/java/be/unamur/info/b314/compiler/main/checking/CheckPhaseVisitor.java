@@ -314,19 +314,6 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     @Override
-    public Type visitScalar(SlipParser.ScalarContext ctx){
-        if (ctx.BOOLEANTYPE() != null){
-            return Type.BOOLEAN;
-        }
-        if (ctx.CHARTYPE() != null){
-            return Type.CHARACTER;
-        }
-        else {
-            return Type.INTEGER;
-        }
-    }
-
-    @Override
     public Type visitExprGExpr(SlipParser.ExprGExprContext ctx){
         return visit(ctx.exprG());
     }

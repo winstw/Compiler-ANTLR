@@ -170,19 +170,5 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor {
 
         return symbol.getType();
     }
-
-    @Override
-    public Type visitScalar(SlipParser.ScalarContext ctx) {
-        if (ctx.BOOLEANTYPE() != null){
-            return Type.BOOLEAN;
-        }
-        if (ctx.CHARTYPE() != null){
-            return Type.CHARACTER;
-        }
-        else {
-            return Type.INTEGER;
-        }
-    }
-
 }
 

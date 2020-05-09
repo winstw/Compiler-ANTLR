@@ -25,6 +25,19 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
         return scopes;
     }
 
+    @Override
+    public Type visitScalar(SlipParser.ScalarContext ctx){
+        if (ctx.BOOLEANTYPE() != null){
+            return Type.BOOLEAN;
+        }
+        if (ctx.CHARTYPE() != null){
+            return Type.CHARACTER;
+        }
+        else {
+            return Type.INTEGER;
+        }
+    }
+
     /**
      * @modifies this, System.err
      * @effect add ctx to currentScope if it doesn't contain it, else print an error

@@ -9,8 +9,6 @@ import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> {
     protected ErrorHandler eh;

@@ -27,6 +27,17 @@ public class SlipArraySymbol extends SlipBaseSymbol {
         }
     }
 
+    public void setValues(List<Object> values) {
+        int first_dim = this.value.length;
+        int second_dim = this.value[0].length;
+        for (int i = 0; i < first_dim; i++) {
+            for (int j = 0; j < second_dim; j++) {
+                int index = i * second_dim + j;
+                this.value[i][j] = values.get(index).toString();
+            }
+        }
+    }
+
     public Object getValue(List<Integer> indexes) {
         String rawValue = this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0];
         if (rawValue == null) {

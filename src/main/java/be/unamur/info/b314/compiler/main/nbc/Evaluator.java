@@ -112,8 +112,48 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Void visitDeclaration(SlipParser.DeclarationContext ctx) {
-        visitChildren(ctx);
+        ctx.children.forEach(children -> children.accept(this));
         return null;
+    }
+
+    @Override
+    public Void visitStructDecl(SlipParser.StructDeclContext ctx) {
+
+        SlipScope previousScope = currentScope;
+        ctx.ID().forEach(structID -> {
+            SlipStructureSymbol struct = (SlipStructureSymbol) this.currentScope.resolve(structID.getText());
+            this.currentScope = struct;
+            ctx.children.forEach(children -> children.accept(this));
+            this.currentScope = previousScope;
+        });
+        return null;
+    }
+
+    @Override
+    public Void visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
+        if (ctx.initArrays() != null){
+            List<Object> initValues;
+            if (ctx.number().size() == 1) { // only one dimension
+                initValues = ctx.initArrays().initVar().stream()
+                        .map(initVar -> initVar.accept(this)).collect(Collectors.toList());
+            } else { // two dimensions
+                initValues = ctx.initArrays().initVar().stream()
+                        .flatMap(var -> var.initArrays().initVar()
+                                .stream()
+                                .map(initVar -> initVar.accept(this)))
+                        .collect(Collectors.toList());
+            }
+            ctx.ID().forEach(arrayID -> {
+                SlipArraySymbol arraySymbol = (SlipArraySymbol) this.currentScope.resolve(arrayID.getText());
+                arraySymbol.setValues(initValues);
+                });
+        }
+        return null;
+    }
+
+    @Override
+    public Object visitInitVar(SlipParser.InitVarContext ctx) {
+            return ctx.exprD().accept(this);
     }
 
     @Override

@@ -1,6 +1,6 @@
 #+OPTIONS: toc:nil
 #+TITLE: Syntaxe et sémantique \\
-#+TITLE: Compilateur
+#+TITLE: Project : Compilateur
 #+AUTHOR: Emil NOIRHOMME, Geoffroy LARUE
 #+LATEX_CLASS: koma-article
 
@@ -21,7 +21,7 @@ La structure de la table des symboles est celle donnée par Terence Parr dans l'
 Create Your Own Domain-Specific and General Programming Languages/.
 À cette structure, nous avons ajouté les éléments nécessaire à l'interprétation, par exemple, le corps des méthodes et leurs paramètres, et les valeurs que prennent les variables durant l'évaluation du programme.
 
-La table des symboles est divisée en 2 grandes classes: les Symboles et les Scopes.
+La table des symboles (cf. [[fig:symboltable][Figure 1]]) est divisée en 2 grandes classes: les Symboles et les Scopes.
 
 Les *symboles* représentent les entités d'un programme, ceux-ci ont
 3 propriétés principales: un nom (qui les identifie), un type (entier, booléen, caractère,...) et une catégorie (variable,
@@ -30,10 +30,11 @@ tableau, record, ...).
 Ces entités (symboles) n'existent, et ne sont donc accessibles, qu'à des endroits spécifiques dans
 le programme. Ces endroits, ce sont les *scopes*. Ils sont de 2 types, le scope global et les scopes locaux. Les symboles
 contenu par le scopes global sont donc accessibles partout dans le programme. Certains symboles, tels que les méthodes et
-les structures, sont également des scopes. En effet, ils peuvent contenir des symboles qui n'existe qu'au sein de leur de
+les structures, sont également des scopes. En effet, ils peuvent contenir des symboles qui n'existent qu'au sein de leur de
 leur bloc.
 
 #+CAPTION: Table des symboles - Diagramme de classe
+#+LABEL: fig:symboltable
 #+ATTR_LATEX: :float sideways
 [[file:symbol_table/symbolTable.png]]
 
@@ -93,8 +94,7 @@ Il va ensuite exécuter le code de la fonction ~main~ du programme source : lign
   clonées du scope lié à la déclaration de fonction[fn:1]. Ensuite il
   va visiter, dans le contexte de ce nouveau scope, les instructions
   qui constituent le corps de la fonction.
-+ si l'instruction est une instruction d'action (~ActionType~ dans la
-  grammaire), il va appeler l'ajouter à une file (deque) qui sera utilisée par le compilateur ~NbcCommpiler~ pour générer le code.
++ si l'instruction est une instruction d'action, il va l'ajouter à une file (deque) qui sera utilisée par le compilateur ~NbcCompiler~ pour générer le code.
 
 *** NbcCompiler
 Cette classe génère le code nbc. Elle reçoit de l'~Evaluator~ la liste des actions que le code nbc devra exécuter. Elle
@@ -106,17 +106,50 @@ Ce package est détaillé dans la section "Table des symboles".
 
 * Conclusion
 ** Forces et faiblesses
-** Apprentissage
+Notre expérience assez limitée de la programmation orientée objet se
+ressent dans l'organisation du code. Nous n'avons pas toujours été
+capables de découpler autant que souhaité les différentes parties du
+compilateur.
+
 ** Amélioration
-Si nous avions su dès le départ que nous allions interprèter le code, nous aurions
-fait la vérification des types lors de la phase d'interprétation.
+Notre implémentation porte un peu trop le poids de la révélation par
+paliers des détails différentes étapes du projet (consignes par
+étapes). Par exemple, si nous avions su dès le départ que nous allions
+interprèter le code, nous aurions fait la vérification des types lors
+de la phase d'interprétation.  Dès lors certaines parties peuvent
+apparaître quelque peu comme du "bricolage".
+** Apprentissage
+A travers ce projet, nous avons pu mettre en pratique et mieux cerner
+les enjeux de la théorie des langages de programmation. Cela nous
+servira non seulement pour réaliser de petits DSL à l'occasion, mais
+nous a également permis d'élargir notre compréhension du
+fonctionnement interne des langages plus généralistes que nous
+utilisons quotidiennement.
+
+L'ampleur du projet a été également l'occasion de tenter de
+mettre en pratique les notions théoriques vues au cours de /CPOO/.
+Nous avons aussi pu approfondir la connaissance et l'utilisation du design pattern
+Visiteur.
+
+
+Enfin, nous avons appris à utiliser la libraire /ANTLR/, que nous utiliserons certainement encore par la suite, pour réaliser d'autres langages avec des fonctionnalités étendues.
+
 
 ** Commentaire constructif
-Une chose qui nous aurait aider à voir dès le début comment le langage Slip
-fonctionnait aurait été d'avoir un exemple de code Slip correct reprenant toutes
-les strucutres du langage. Cela nous aurait permis de ne pas devoir revenir en
-arrière à certains moment.
-Le langage ne permet pas d'utiliser: les fonctions de type ~void~, les énumérations, le type ~String~.
+Une chose qui nous aurait aider à voir dès le début comment le langage
+Slip fonctionnait aurait été d'avoir un exemple de code Slip correct
+reprenant toutes les structures du langage. Cela nous aurait permis de
+ne pas devoir revenir en arrière à certains moment.
+
+
+Parfois les consignes et les tests ne correspondaient pas, et il fallait un peu
+découvrir la réalité des spécifications en tatônnant, et analysant le résultat des tests.
+Cela empêche une vraie anticipation et rend difficile une organisation cohérente du code.
+
+
+Le langage ne permet pas
+d'utiliser: les fonctions de type ~void~, les énumérations, le type
+~String~.
 
 * Footnotes
 

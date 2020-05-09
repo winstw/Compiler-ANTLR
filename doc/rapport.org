@@ -1,21 +1,39 @@
+#+OPTIONS: toc:nil
+#+TITLE: Syntaxe et sémantique \\
+#+TITLE: Compilateur
+#+AUTHOR: Emil NOIRHOMME, Geoffroy LARUE
+#+LATEX_CLASS: koma-article
+
+
+#+LATEX: \newpage
+#+LATEX: \tableofcontents
+
+
+#+LATEX: \newpage
+
 * Description de la démarche
 Pour les 3 étapes du projet, nous avons commencé par une analyse du problème et une recherche de solution individuelle.
 Nous avons ensuite discuté ensemble de la solution à adopter. Finalement le travail a été distribué en fonction des
 agendas de chacuns.
 
 * Table des symboles
-La structure de la table des symboles est celle donnée par Terence Parr dans l'ouvrage: "Language Implementation Patterns
-Create Your Own Domain-Specific and General Programming Languages". À cette structure, nous avons ajouté les éléments
-nécessaire à l'interprétation, par exemple, le corps des méthodes ou leurs paramètres. La table des symboles est divisée
-en 2 grandes classes: les Symboles et les Scopes. Les symboles représentent les entitées d'un programme, ceux-ci ont
+La structure de la table des symboles est celle donnée par Terence Parr dans l'ouvrage: /Language Implementation Patterns
+Create Your Own Domain-Specific and General Programming Languages/.
+À cette structure, nous avons ajouté les éléments nécessaire à l'interprétation, par exemple, le corps des méthodes et leurs paramètres, et les valeurs que prennent les variables durant l'évaluation du programme.
+
+La table des symboles est divisée en 2 grandes classes: les Symboles et les Scopes.
+
+Les *symboles* représentent les entités d'un programme, ceux-ci ont
 3 propriétés principales: un nom (qui les identifie), un type (entier, booléen, caractère,...) et une catégorie (variable,
-tableau, record, ...). Ces entités (symboles) n'existent, et ne sont donc accessibles, qu'à des endroits spécifiques dans
-le programme. Ces endroits, ce sont les scopes. Ils sont de 2 types, le scope global et les scopes locaux. Les symboles
+tableau, record, ...).
+
+Ces entités (symboles) n'existent, et ne sont donc accessibles, qu'à des endroits spécifiques dans
+le programme. Ces endroits, ce sont les *scopes*. Ils sont de 2 types, le scope global et les scopes locaux. Les symboles
 contenu par le scopes global sont donc accessibles partout dans le programme. Certains symboles, tels que les méthodes et
 les structures, sont également des scopes. En effet, ils peuvent contenir des symboles qui n'existe qu'au sein de leur de
 leur bloc.
 
-#+CAPTION: Sideways Table Test
+#+CAPTION: Table des symboles - Diagramme de classe
 #+ATTR_LATEX: :float sideways
 [[file:symbol_table/symbolTable.png]]
 
@@ -37,6 +55,7 @@ Ce package gère l'étape de création de la table des symboles et de la vérifi
 des types. Il contient 2 classes principales: ~GlobalDefinitionPhase~ et ~CheckPhaseVisitor~.
 
 *** GlobalDefinitionPhase
+
 Cette classe a pour objectif de répertorier les variables et fonctions déclarées
 globalement. Cette étape est nécessaire afin que le langage accepte les forward
 references. Elle consiste en un visiteur de l'AST. À chaque fois qu'elle rencontre
@@ -44,24 +63,42 @@ un symbole (variable ou fonction), elle vérifie que le symbole n'existe pas dé
 et elle ajoute ce dernier à la table des symboles dans le scope global.
 
 *** CheckPhaseVisitor
-Cette classe fait la même chose que GlobalDefinitionPhase (le code commun est repris dans la classe CheckSlipVisitor
+Cette classe fait la même chose que ~GlobalDefinitionPhase~ (le code commun est repris dans la classe ~CheckSlipVisitor~
 dont elles héritent) mais cette fois pour les variables locales. En plus elle va vérifier les types des expressions.
 Par exemple lors d'une assignation, elle va vérifier que le type de l'expression à gauche est bien le même que celui de
-l'expression à droite de :=.
+l'expression à droite de ~:=~.
 
 ** Package nbc
 Ce package est responsable de la traduction du code Slip en code nbc. Cette traduction se fait en 2 étapes:
 l'interprétation du code Slip et la génération d'un code nbc simplifié ne reprenant que la sémantique du code Slip. À
 noter que nous traduisons le Slip de cette manière à cause d'un changement dans l'énoncé de la 3ème partie intervenu après
 que nous ayons implémenté l'interpréteur. En effet, afin de ne pas jeter le code de celui-ci nous l'avons utilisé pour
-générer un code simplifié. Le package contient 2 classes principales: Evaluator et NbcCompiler.
+générer un code simplifié. Le package contient 2 classes principales: ~Evaluator~ et ~NbcCompiler~.
 
 *** Evaluator
-Geof je te laisse écrire des trucs ici.
+
+Ce visiteur va réaliser l'interprétation de tout le code afin de
+déterminer les valeurs nécessaires à la compilation.
+
+Il va commencer par visiter à nouveau toutes les définitions de variables (dans le scope global et les scopes des fonctions), afin d'évaluer et
+stocker dans la table des symboles la valeur des variables si une valeur initiale est donnée.
+Il ne va pas s'occuper des définitions de fonctions, dont le corps est stocké par la ~GlobalDefinitionPhase~ dans la table des symboles.
+Il va ensuite exécuter le code de la fonction ~main~ du programme source : ligne par ligne, il va "exécuter" les instructions :
++ dans le cas d'instruction d'assignation : il va évaluer l'expression
+  droite et placer le résultat dans la table des symboles à la
+  variable correspondante (dans le cas d'un tableau, à la case
+  correspondante du tableau "interne" du symbole.
++ si l'expression droite est un appel de fonction, l'évaluateur va
+  créer un scope d'appel de fonction, contenant toutes les variables
+  clonées du scope lié à la déclaration de fonction[fn:1]. Ensuite il
+  va visiter, dans le contexte de ce nouveau scope, les instructions
+  qui constituent le corps de la fonction.
++ si l'instruction est une instruction d'action (~ActionType~ dans la
+  grammaire), il va appeler l'ajouter à une file (deque) qui sera utilisée par le compilateur ~NbcCommpiler~ pour générer le code.
 
 *** NbcCompiler
-Cette classe génère le code nbc. Elle reçoit de l'Evaluator la liste des actions que le code nbc devra exécuter. Elle
-parcourt la liste en liste en ajoutant au main du nbc les appels aux fonctions. Elle termine en ajoutant uniquement les
+Cette classe génère le code nbc. Elle reçoit de l'~Evaluator~ la liste des actions que le code nbc devra exécuter. Elle
+parcourt la liste en ajoutant au main du nbc les appels aux fonctions. Elle termine en ajoutant uniquement les
 subroutines nécessaires à l'éxécution du programme.
 
 ** Package symboltable
@@ -79,4 +116,8 @@ Une chose qui nous aurait aider à voir dès le début comment le langage Slip
 fonctionnait aurait été d'avoir un exemple de code Slip correct reprenant toutes
 les strucutres du langage. Cela nous aurait permis de ne pas devoir revenir en
 arrière à certains moment.
-Le langage ne permet pas d'utiliser: les fonctions de type void, les énumérations, le type String.
+Le langage ne permet pas d'utiliser: les fonctions de type ~void~, les énumérations, le type ~String~.
+
+* Footnotes
+
+[fn:1] Nous sommes obligés de cloner ce scope pour éviter les partages de références en cas d'appels récursifs à l'intérieur de la fonction.

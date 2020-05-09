@@ -47,7 +47,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "/" + "output.nbc"));
         Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, compiler);
         evaluator.visitProgram(tree);
-        System.out.println(compiler);
         compiler.compile();
 
     }
@@ -188,15 +187,11 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         // not a struct
         if (id != null) {
             varName = id.getText();
-            System.out.println("ASSIGN VAR NAME : ");
             symbol = this.currentScope.resolve(varName);
         } else { // STRUCT
             StructExprGVisitor structVisitor = new StructExprGVisitor(currentScope, eh);
             symbol = structVisitor.visit(ctx.exprG());
             varName = symbol.getName();
-            System.out.println("ASSIGN STRUCT: " + symbol);
-            System.out.println("in scope " + this.currentScope.getName());
-
         }
         if (symbol != null) {
             if (ctx.exprD() != null) {
@@ -204,18 +199,12 @@ public class Evaluator extends SlipBaseVisitor<Object> {
                 if (!(symbol instanceof SlipArraySymbol)) {
                     SlipVariableSymbol varSymbol = (SlipVariableSymbol) symbol;
                     varSymbol.setValue(value);
-                    System.out.println(String.format("ASSIGNATION SYMBOL:  %s VALUE: %s", varSymbol, varSymbol.getValue()));
                 } else {
                     SlipArraySymbol arraySymbol = (SlipArraySymbol) symbol;
-                    System.out.println("IN ASSIGN ARRAY, CTX.exprG()" + ctx.getText());
                     List<Integer> indexes = this.findIndexes(ctx.exprG());
                     arraySymbol.setValue(indexes, value);
-                    System.out.println(String.format("ASSIGNATION SYMBOL:  %s%s VALUE: %s", varName, indexes, value));
                 }
             }
-        } else {
-            System.out.print("error no var with name " + varName);
-            System.out.println("in scope " + this.currentScope.getName());
         }
         return null;
     }
@@ -232,7 +221,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Integer visitIntExpr(SlipParser.IntExprContext ctx) {
-        System.out.println("in visit int" + Integer.parseInt(ctx.number().getText()));
         return Integer.parseInt(ctx.number().getText());
     }
 
@@ -255,7 +243,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
             case SlipParser.TIMES:
                 return left * right;
             case SlipParser.DIVIDE:
-                // TODO CATCH DIVIDE BY 0
                 return left / right;
             case SlipParser.MODULO:
                 return Math.floorMod(left, right);
@@ -266,9 +253,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Object visitExprGExpr(SlipParser.ExprGExprContext ctx) {
-        System.out.println("in ExprGexpr" + ctx.exprG().accept(this));
         return ctx.exprG().accept(this);
-        //        return ctx.exprG().accept(this);
     }
 
     @Override
@@ -276,7 +261,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         Integer left = (Integer) ctx.exprD(0).accept(this);
         Integer right = (Integer) ctx.exprD(1).accept(this);
 
-        System.out.println(String.format("LEFT: %S RIGHT: %s ", left, right));
         if (ctx.op.getType() == SlipParser.PLUS) return left + right;
         else return left - right;
     }
@@ -312,7 +296,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     public Boolean visitComparExpr(SlipParser.ComparExprContext ctx) {
         Object left = ctx.exprD(0).accept(this);
         Object right = ctx.exprD(1).accept(this);
-        // TODO check if == ok here
         if (ctx.op.getType() == SlipParser.EQUAL) return left == right;
         else return left != right;
     }
@@ -401,25 +384,17 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         // assign each param in the method call scope
         Iterator<SlipVariableSymbol> paramIter = scopedFunc.getParameters(); // get declared params in method definition
         List<SlipParser.ExprDContext> args = ctx.exprD(); // args to the function call
-        System.out.println("ARGS LIST SIZE IN FUNCTION CALL : " + ctx.exprD().size());
         int i = 0;
         while (paramIter.hasNext() && i < args.size()) {
             // get param from method definition
             SlipVariableSymbol param = paramIter.next();
-            System.out.println("PARAM : " + param.getName());
             // assign value from function call to param
             SlipVariableSymbol paramInScope = (SlipVariableSymbol) calledFunc.resolve(param.getName());
-            System.out.println("PARAM IN ScOPE : " + paramInScope.getName() + ctx.exprD(i).getText());
-
-            System.out.println("Get arg value " + ctx.exprD(i).accept(this));
 
             paramInScope.setValue(ctx.exprD(i).accept(this));
-            System.out.println(String.format("set param %s : %s", paramInScope.getName(), paramInScope.getValue()));
             i++;
         }
 
-        // CAUTION DO NOT CHANGE SCOPE TOO SOON OR YOU WON'T BE ABLE TO USE OLD PARAMS in NEW CALL
-        // WHEN EMBEDDED CALLS
         this.currentScope = calledFunc;
 
         scopedFunc.getBody().forEach(instBlock -> instBlock.accept(this));
@@ -429,28 +404,21 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
         this.currentScope = previousScope;
 
-        // TODO delete calledFunc
-
-        System.out.println("Return value" + returnSymbol.getValue());
         return returnSymbol.getValue();
     }
 
     @Override
     public Object visitLeftExprArray(SlipParser.LeftExprArrayContext ctx) {
-        System.out.println("in left expression Array" + ctx.ID().getText());
 
         SlipArraySymbol array = (SlipArraySymbol) currentScope.resolve(ctx.ID().getText());
 
         List<Integer> indexes = findIndexes(ctx);
-        System.out.println("INDEXES : " + indexes);
-        System.out.println("in left expression array" + array.getValue(indexes));
         return array.getValue(indexes);
     }
 
     @Override
     public Object visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx) {
         SlipSymbol symbol = new StructExprGVisitor(currentScope, eh).visit(ctx);
-        System.out.println("IS ARRAY" + (symbol instanceof SlipArraySymbol));
         if (symbol instanceof SlipArraySymbol) {
             return ((SlipArraySymbol) symbol).getValue(findIndexes(ctx.exprG(1)));
         }
@@ -460,21 +428,13 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
-        System.out.println("in left expression ID" + ctx.ID().getText());
-        System.out.println("in scope " + this.currentScope.getName());
 
         SlipSymbol symbol = currentScope.resolve(ctx.ID().getText());
 
         if (symbol instanceof SlipStructureSymbol) {
-            // TODO handle struct case
-            //symbol = new StructExprGVisitor(currentScope, errorHandler).visit(ctx);
-            System.out.println("STRUCTURES NOT HANDLED BY EVALUATOR!");
-//            this.currentScope = (SlipStructureSymbol) symbol;
-//            System.out.println("in scope " +  this.currentScope.getName());
             return null;
         }
         SlipVariableSymbol variable = (SlipVariableSymbol) symbol;
-        System.out.println("in left expression variable" + variable.getValue());
 
         return variable.getValue();
     }
@@ -487,12 +447,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
                 SlipVariableSymbol symbol = (SlipVariableSymbol) this.currentScope.resolve(var.getText());
                 if (symbol != null) {
                     symbol.setValue(value);
-                } else {
-                    System.out.print("error no var with name " + var.getText());
-                    System.out.println("in scope " + this.currentScope.getName());
                 }
-
-                System.out.println(String.format("INITIALIZATION SYMBOL:  %s VALUE: %s", symbol, symbol.getValue()));
             });
         }
         return null;

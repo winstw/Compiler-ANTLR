@@ -101,10 +101,8 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
                 }
 
             } catch (RecognitionException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else {
@@ -138,7 +136,6 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
 
         ctx.instBlock().forEach(inst -> inst.accept(this));
 
-        System.out.println(currentScope);
         this.currentScope = localScope.getParentScope();
         return null;
     }
@@ -177,7 +174,6 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
                     Type actualParamType = visit(param);
                     if (declaredParamTypes.hasNext()) {
                         Type declaredParamType = declaredParamTypes.next().getType();
-                        System.out.println("EFFECTIVE : " + actualParamType + " DECLARED : " + declaredParamType);
                         String errorMessage = String.format("parameter %s of %s should be of type %s instead of %s", param.getText(), funcName ,declaredParamType, actualParamType);
                         eh.checkEqual(actualParamType, declaredParamType, param.start, errorMessage);
                     }

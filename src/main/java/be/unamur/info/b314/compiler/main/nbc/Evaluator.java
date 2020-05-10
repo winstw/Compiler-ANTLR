@@ -42,7 +42,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         ErrorHandler errorHandler = new ErrorHandler();
         GlobalDefinitionPhase visitor = new GlobalDefinitionPhase(errorHandler);
         tree.accept(visitor);
-        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler, System.getProperty("user.dir"));
+        CheckPhaseVisitor second = new CheckPhaseVisitor(visitor.getScopes(), errorHandler, System.getProperty("user.dir") + "/src/test/resources");
         second.visitProgram(tree);
         NbcCompiler compiler = new NbcCompiler(new File(System.getProperty("user.dir") + "/" + "output.nbc"));
         Evaluator evaluator = new Evaluator(second.getScopes(), errorHandler, compiler);
@@ -341,7 +341,6 @@ public class Evaluator extends SlipBaseVisitor<Object> {
             ctx.instruction().forEach(instruction -> instruction.accept(this));
             iterations++;
         }
-
 
         if (iterations == 1000) {
             eh.signalError(ctx.start, "INFINITE LOOP");

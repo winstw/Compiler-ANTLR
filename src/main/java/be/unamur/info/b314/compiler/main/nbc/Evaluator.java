@@ -150,22 +150,26 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @return value of ctx.exprD()
+     */
     @Override
     public Object visitInitVar(SlipParser.InitVarContext ctx) {
-            return ctx.exprD().accept(this);
+        return ctx.exprD().accept(this);
     }
 
-    @Override
-    public String visitArgList(SlipParser.ArgListContext ctx) {
-        return null;
-    }
-
+    /**
+     * @modifies this
+     */
     @Override
     public String visitInstBlock(SlipParser.InstBlockContext ctx) {
         ctx.children.forEach(children -> children.accept(this));
         return null;
     }
 
+    /**
+     * @return listof indexes values in ctx
+     */
     private List<Integer> findIndexes(SlipParser.ExprGContext ctx) {
         List<SlipParser.ExprDContext> exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
         while (exprDContexts.size() == 0) {
@@ -179,13 +183,17 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return indexes;
     }
 
+    /**
+     * @modifies this
+     * @effects set value of corresponding symbol in currentScope (or record's scope) if ctx.exprD() != null
+     */
     @Override
     public Void visitAssignInstr(SlipParser.AssignInstrContext ctx) {
         TerminalNode id = ctx.exprG().getToken(SlipParser.ID, 0);
         SlipSymbol symbol;
         String varName;
 
-        if (id != null) {  // we are not in a record
+        if (id != null) { // we are not in a record
             varName = id.getText();
             symbol = this.currentScope.resolve(varName);
         } else { // we are in a record
@@ -193,17 +201,15 @@ public class Evaluator extends SlipBaseVisitor<Object> {
             symbol = structVisitor.visit(ctx.exprG());
             varName = symbol.getName();
         }
-        if (symbol != null) {
-            if (ctx.exprD() != null) {
-                Object value = visit(ctx.exprD());
-                if (!(symbol instanceof SlipArraySymbol)) {
-                    SlipVariableSymbol varSymbol = (SlipVariableSymbol) symbol;
-                    varSymbol.setValue(value);
-                } else {
-                    SlipArraySymbol arraySymbol = (SlipArraySymbol) symbol;
-                    List<Integer> indexes = this.findIndexes(ctx.exprG());
-                    arraySymbol.setValue(indexes, value);
-                }
+        if (ctx.exprD() != null) {
+            Object value = visit(ctx.exprD());
+            if (!(symbol instanceof SlipArraySymbol)) {
+                SlipVariableSymbol varSymbol = (SlipVariableSymbol) symbol;
+                varSymbol.setValue(value);
+            } else {
+                SlipArraySymbol arraySymbol = (SlipArraySymbol) symbol;
+                List<Integer> indexes = this.findIndexes(ctx.exprG());
+                arraySymbol.setValue(indexes, value);
             }
         }
         return null;
@@ -363,6 +369,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     /**
+     * @modifies this, System.err
      * @requires (value of ctx.exprD()) instanceof Boolean
      * @return null
      */
@@ -382,6 +389,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     /**
+     * @modifies this, System.err
      * @requires (value of ctx.exprD()) instanceof Boolean
      * @return null
      */
@@ -401,6 +409,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     /**
+     * @modifies this, System.err
      * @requires (value of ctx.exprD(1)) instanceof Boolean
      * @return null
      */

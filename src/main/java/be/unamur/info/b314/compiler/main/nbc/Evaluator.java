@@ -27,6 +27,16 @@ import be.unamur.info.b314.compiler.main.symboltable.SlipStructureSymbol;
 import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol;
 import be.unamur.info.b314.compiler.main.symboltable.SlipVariableSymbol;
 
+
+/**
+ * @overview An Evaluator is a visitor of a Slip AST
+ * Its purpose is to evaluate all nodes in the AST which are necessary to determine compilation
+ * A SlipScope is mutable
+ * @specfield scopes: ParseTreeProperty<SlipScope> // the various scopes created and filled
+ * during the global definition and check phases and which will serve as an environment
+ * for the evaluation of the program
+ * @specfield currentScope: SlipScope // the context (scope) in which the nodes are evaluated
+ */
 public class Evaluator extends SlipBaseVisitor<Object> {
     private ParseTreeProperty<SlipScope> scopes;
     SlipScope currentScope;
@@ -58,6 +68,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         this.compiler = compiler;
     }
 
+    /**
+     * @modifies this
+     */
     @Override
     public Object visitProgram(SlipParser.ProgramContext ctx) {
         if (ctx.prog() != null) {
@@ -66,10 +79,14 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @modifies this
+     * @effects set currentScope and visit each declaration and main nodes
+     */
     @Override
     public Object visitProg(SlipParser.ProgContext ctx) {
         this.currentScope = this.scopes.get(ctx);
-        // obligé de visiter les déclarations pour initialiser les valeurs des variables le cas échéant
+        // we have to visit declarations to evaluate and set variables initialization when given
         ctx.declaration().forEach(decl -> decl.accept(this));
 
         ctx.mainDecl().accept(this);
@@ -77,6 +94,10 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @modifies this
+     * @effects visit each statement in ctx, potentially setting values in symbols
+     */
     @Override
     public Object visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = this.scopes.get(ctx);
@@ -88,6 +109,11 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @requires (value of ctx.exprD()) instanceof Boolean
+     * @modifies this
+     * @effects visit each instruction in ctx if (value of ctx.exprD()) == true
+     */
     @Override
     public Void visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
         Boolean guard = (Boolean) ctx.exprD().accept(this);
@@ -97,6 +123,11 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @requires (value of ctx.exprD()) instanceof Boolean
+     * @modifies this
+     * @effects visit each instruction in ctx.guardedBlock(0) if (value of ctx.exprD()) == true else visit each instruction in ctx.guardedBlock(1)
+     */
     @Override
     public Void visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
         Boolean guard = (Boolean) ctx.exprD().accept(this);
@@ -108,13 +139,21 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
-
+    /**
+     * @modifies this
+     * @effects = visit non terminal node in ctx
+     */
     @Override
     public Void visitDeclaration(SlipParser.DeclarationContext ctx) {
-        ctx.children.forEach(children -> children.accept(this));
+        ctx.getChild(0).accept(this);
         return null;
     }
 
+    /**
+     * @modifies this
+     * @effects visit the children of each ID(s) in ctx to eventually
+     * set their init values in their corresponding scopes
+     */
     @Override
     public Void visitStructDecl(SlipParser.StructDeclContext ctx) {
 
@@ -128,24 +167,27 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @modifies this
+     * @effects set the values of the symbols in currentScope corresponding to the ID's in ctx
+     * if ctx.initArrays() != null
+     */
     @Override
     public Void visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
-        if (ctx.initArrays() != null){
+        if (ctx.initArrays() != null) {
             List<Object> initValues;
             if (ctx.number().size() == 1) { // only one dimension
-                initValues = ctx.initArrays().initVar().stream()
-                        .map(initVar -> initVar.accept(this)).collect(Collectors.toList());
+                initValues = ctx.initArrays().initVar().stream().map(initVar -> initVar.accept(this))
+                        .collect(Collectors.toList());
             } else { // two dimensions
                 initValues = ctx.initArrays().initVar().stream()
-                        .flatMap(var -> var.initArrays().initVar()
-                                .stream()
-                                .map(initVar -> initVar.accept(this)))
+                        .flatMap(var -> var.initArrays().initVar().stream().map(initVar -> initVar.accept(this)))
                         .collect(Collectors.toList());
             }
             ctx.ID().forEach(arrayID -> {
                 SlipArraySymbol arraySymbol = (SlipArraySymbol) this.currentScope.resolve(arrayID.getText());
                 arraySymbol.setValues(initValues);
-                });
+            });
         }
         return null;
     }
@@ -160,6 +202,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     /**
      * @modifies this
+     * @effects visit every children of ctx
      */
     @Override
     public String visitInstBlock(SlipParser.InstBlockContext ctx) {

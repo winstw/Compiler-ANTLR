@@ -21,12 +21,20 @@ public class SlipArraySymbol extends SlipBaseSymbol {
         return new SlipArraySymbol(this.getName(), this.getType(), this.isAssignable(), this.value.length, this.value[0].length);
     }
 
+    /**
+     * @modifies this
+     * @effects this.value[indexes.get(0)][indexes.get(1) || 0] = value.toString()
+     */
     public void setValue(List<Integer> indexes, Object value) {
         if (value != null) {
             this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0] = value.toString();
         }
     }
 
+    /**
+     * @modifies this
+     * @effects this.value[i][j] = value(i * value[0].length + j).toString() forall 0 <= i <= value.length; 0 <= j <= value[0].length
+     */
     public void setValues(List<Object> values) {
         int first_dim = this.value.length;
         int second_dim = this.value[0].length;
@@ -38,6 +46,9 @@ public class SlipArraySymbol extends SlipBaseSymbol {
         }
     }
 
+    /**
+     * @return value of this.value[indexes.get(0)][indexes.get(1) || 0]
+     */
     public Object getValue(List<Integer> indexes) {
         String rawValue = this.value[indexes.get(0)][indexes.size() > 1 ? indexes.get(1) : 0];
         if (rawValue == null) {

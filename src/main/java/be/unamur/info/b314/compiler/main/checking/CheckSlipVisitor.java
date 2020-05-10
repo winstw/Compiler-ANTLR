@@ -25,6 +25,9 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
         return scopes;
     }
 
+    /**
+     * @return type of ctx
+     */
     @Override
     public Type visitScalar(SlipParser.ScalarContext ctx){
         if (ctx.BOOLEANTYPE() != null){
@@ -40,7 +43,7 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
 
     /**
      * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
+     * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
     protected void defineVariable(SlipParser.VarDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
@@ -65,7 +68,7 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
 
     /**
      * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
+     * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
     protected void defineArray(SlipParser.ArrayDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
@@ -98,7 +101,7 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
 
     /**
      * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
+     * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
     protected void defineStructure(SlipParser.StructDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");

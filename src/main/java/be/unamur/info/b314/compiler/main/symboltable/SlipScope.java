@@ -23,7 +23,7 @@ public interface SlipScope {
      * @throws NullPointerException          if symbol == null
      * @throws SymbolAlreadyDefinedException if symbol is already in this
      * @modifies this
-     * @effect this_post = this + symbol
+     * @effects this_post = this + symbol
      */
     void define(SlipSymbol symbol) throws NullPointerException, SymbolAlreadyDefinedException;
 

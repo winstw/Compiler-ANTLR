@@ -45,14 +45,23 @@ public class SlipMethodSymbol extends SlipScopedSymbol {
         this.body = body;
     }
 
+    /**
+     * @return body
+     */
     public List<SlipParser.InstBlockContext> getBody() {
         return this.body;
     }
 
+    /**
+     * @return length of parameters
+     */
     public int getNumberOfParameters() {
         return parameters.size();
     }
 
+    /**
+     * @return iterator on parameters
+     */
     public Iterator<SlipVariableSymbol> getParameters() {
         return this.parameters.iterator();
     }

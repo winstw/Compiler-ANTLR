@@ -184,11 +184,11 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         TerminalNode id = ctx.exprG().getToken(SlipParser.ID, 0);
         SlipSymbol symbol;
         String varName;
-        // not a struct
-        if (id != null) {
+
+        if (id != null) {  // we are not in a record
             varName = id.getText();
             symbol = this.currentScope.resolve(varName);
-        } else { // STRUCT
+        } else { // we are in a record
             StructExprGVisitor structVisitor = new StructExprGVisitor(currentScope, eh);
             symbol = structVisitor.visit(ctx.exprG());
             varName = symbol.getName();
@@ -209,32 +209,50 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public String visitString(SlipParser.StringContext ctx) {
         return ctx.STRING().getText();
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Character visitChar(SlipParser.CharContext ctx) {
         return ctx.CHAR().getText().charAt(1);
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Integer visitIntExpr(SlipParser.IntExprContext ctx) {
         return Integer.parseInt(ctx.number().getText());
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Object visitParens(SlipParser.ParensContext ctx) {
         return ctx.exprD().accept(this);
     }
 
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Integer visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx) {
         return -(Integer) ctx.exprD().accept(this);
     }
 
+    /**
+     * @return value of ctx || null
+     */
     @Override
     public Integer visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
@@ -251,11 +269,17 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         }
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Object visitExprGExpr(SlipParser.ExprGExprContext ctx) {
         return ctx.exprG().accept(this);
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Integer visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
@@ -265,16 +289,26 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         else return left - right;
     }
 
+
+    /**
+     * @return value of ctx
+     */
     @Override
     public Boolean visitTrueExpr(SlipParser.TrueExprContext ctx) {
         return true;
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Boolean visitFalseExpr(SlipParser.FalseExprContext ctx) {
         return false;
     }
 
+    /**
+     * @return value of ctx || null
+     */
     @Override
     public Boolean visitNotExpr(SlipParser.NotExprContext ctx) {
         Boolean toNegateExpr = (Boolean) visit(ctx.exprD());
@@ -283,6 +317,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         } else return toNegateExpr;
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Boolean visitAndOrExpr(SlipParser.AndOrExprContext ctx) {
         if (ctx.AND() != null) {
@@ -292,6 +329,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         }
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Boolean visitComparExpr(SlipParser.ComparExprContext ctx) {
         Object left = ctx.exprD(0).accept(this);
@@ -300,6 +340,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         else return left != right;
     }
 
+    /**
+     * @return value of ctx || null
+     */
     @Override
     public Boolean visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
         Integer left = (Integer) ctx.exprD(0).accept(this);
@@ -319,6 +362,10 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         }
     }
 
+    /**
+     * @requires (value of ctx.exprD()) instanceof Boolean
+     * @return null
+     */
     @Override
     public Void visitUntilInstr(SlipParser.UntilInstrContext ctx) {
         int iterations = 0;
@@ -334,6 +381,10 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @requires (value of ctx.exprD()) instanceof Boolean
+     * @return null
+     */
     @Override
     public Void visitWhileInstr(SlipParser.WhileInstrContext ctx) {
         int iterations = 0;
@@ -349,9 +400,12 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @requires (value of ctx.exprD(1)) instanceof Boolean
+     * @return null
+     */
     @Override
     public Void visitForInstr(SlipParser.ForInstrContext ctx) {
-        //    FOR ID AFFECT exprD TO exprD DO instruction+ END
 
         SlipVariableSymbol counter = (SlipVariableSymbol) currentScope.resolve(ctx.ID().getText());
         counter.setValue(ctx.exprD(0).accept(this));
@@ -370,6 +424,10 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return null;
     }
 
+    /**
+     * @modifies this
+     * @return ctx call return value
+     */
     @Override
     public Object visitFuncExpr(SlipParser.FuncExprContext ctx) {
         SlipScope previousScope = currentScope;
@@ -406,6 +464,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return returnSymbol.getValue();
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Object visitLeftExprArray(SlipParser.LeftExprArrayContext ctx) {
 
@@ -415,6 +476,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return array.getValue(indexes);
     }
 
+    /**
+     * @return value of ctx
+     */
     @Override
     public Object visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx) {
         SlipSymbol symbol = new StructExprGVisitor(currentScope, eh).visit(ctx);
@@ -425,6 +489,9 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     }
 
+    /**
+     * @return value of ctx if associated symbol not instanceof SlipStructureSymbol || null
+     */
     @Override
     public Object visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
 
@@ -438,6 +505,10 @@ public class Evaluator extends SlipBaseVisitor<Object> {
         return variable.getValue();
     }
 
+    /**
+     * @modifies this
+     * @effect add value of ctx to currentScope's corresponding symbol if ctx.exprD() != null
+     */
     @Override
     public Void visitVarDecl(SlipParser.VarDeclContext ctx) {
         if (ctx.exprD() != null) {
@@ -454,9 +525,8 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     /**
      * Add a "move" action (RIGHT, LEFT, UP, DOWN) to the compiler
-     *
-     * @param argContext The context corresponding to the argument of the action.
-     * @param actionType The type of the action to add.
+     * @modifies this
+     * @effects call addAction from this.compiler with action type and evaluated action parameter if exists
      */
     private void addMoveAction(SlipParser.ExprDContext argContext, NbcCompiler.ActionType actionType) {
         int arg;

@@ -99,7 +99,7 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor {
 
     @Override
     public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
-        System.out.println("IN visitCONST"+ ctx.getChild(0).getText());
+        System.out.println("IN visitCONST" + ctx.getChild(0).getText());
         visit(ctx.getChild(1));
 
         return null;
@@ -113,9 +113,9 @@ public class GlobalDefinitionPhase extends CheckSlipVisitor {
     }
 
     /**
-     * @modifies this, System.err
-     * @effect add ctx to currentScope if it doesn't contain it, else print an error
      * @return the SlipMethodSymbol added to currentScope
+     * @modifies this, System.err
+     * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
     private void defineFunction(SlipParser.FuncDeclContext ctx) {
         String name = ctx.ID().getText();

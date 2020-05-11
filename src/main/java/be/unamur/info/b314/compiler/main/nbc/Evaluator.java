@@ -159,8 +159,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
         SlipScope previousScope = currentScope;
         ctx.ID().forEach(structID -> {
-            SlipStructureSymbol struct = (SlipStructureSymbol) this.currentScope.resolve(structID.getText());
-            this.currentScope = struct;
+            this.currentScope = (SlipStructureSymbol) this.currentScope.resolve(structID.getText());
             ctx.children.forEach(children -> children.accept(this));
             this.currentScope = previousScope;
         });
@@ -211,7 +210,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
     }
 
     /**
-     * @return listof indexes values in ctx
+     * @return list of indexes values in ctx
      */
     private List<Integer> findIndexes(SlipParser.ExprGContext ctx) {
         List<SlipParser.ExprDContext> exprDContexts = ctx.getRuleContexts(SlipParser.ExprDContext.class);
@@ -559,7 +558,7 @@ public class Evaluator extends SlipBaseVisitor<Object> {
 
     /**
      * @modifies this
-     * @effect add value of ctx to currentScope's corresponding symbol if ctx.exprD() != null
+     * @effects add value of ctx to currentScope's corresponding symbol if ctx.exprD() != null
      */
     @Override
     public Void visitVarDecl(SlipParser.VarDeclContext ctx) {

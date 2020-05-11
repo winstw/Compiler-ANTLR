@@ -12,7 +12,6 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol;
@@ -24,7 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * @overview a CheckPhaseVisitor is subtype of CheckSlipVisitor with additional methods to check Slip expressions and instructions type
+ * A CheckPhaseVisitor is mutable
+ */
 public class CheckPhaseVisitor extends CheckSlipVisitor {
 
     public CheckPhaseVisitor(ParseTreeProperty<SlipScope> scopes, ErrorHandler e, String currentPath) {
@@ -58,19 +60,28 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return null;
     }
 
+    /**
+     * @return null
+     * @modifies this
+     * @effects visit ctx.children
+     */
     @Override
-    public Type visitProg(SlipParser.ProgContext ctx){
+    public Type visitProg(SlipParser.ProgContext ctx) {
         SlipScope globalScope = scopes.get(ctx);
         this.currentScope = globalScope;
-        System.out.println("SCOPE : " + currentScope.getName());
 
         visitChildren(ctx);
 
-        System.out.println(this.currentScope);
         this.currentScope = null;
-        return Type.VOID;
+        return null;
     }
 
+    /**
+     * @return null
+     * @modifies this, System.out
+     * @effects if there is a problem with map code or map file, errorHandler.signalError()
+     * else if there is no map, print a message on System.out
+     */
     @Override
     public Type visitImpDecl(SlipParser.ImpDeclContext ctx) {
         String filename = ctx.FILENAME().getText().replace("\"", "");
@@ -112,6 +123,10 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return null;
     }
 
+    /**
+     * @return Type.VOID
+     * @effects visit each ctx.children
+     */
     @Override
     public Type visitMainDecl(SlipParser.MainDeclContext ctx) {
         this.currentScope = scopes.get(ctx);
@@ -123,8 +138,13 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return null
+     * @modifies this
+     * @effects visit each ctx.argList and ctx.instBlock
+     */
     @Override
-    public Type visitFuncDecl(SlipParser.FuncDeclContext ctx){
+    public Type visitFuncDecl(SlipParser.FuncDeclContext ctx) {
         // function inspection
         SlipScope localScope = scopes.get(ctx);
 
@@ -141,40 +161,23 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     @Override
-    public Type visitArgList(SlipParser.ArgListContext ctx) {
-
-        for(SlipParser.VarDefContext varDef : ctx.varDef()) {
-            visit(varDef);
-        }
-        return null;
-    }
-
-    @Override
-    public Type visitInstBlock(SlipParser.InstBlockContext ctx){
-        for (ParseTree child: ctx.children) {
-            visit(child);
-        }
-        return null;
-    }
-
-    @Override
     public Type visitFuncExpr(SlipParser.FuncExprContext ctx) {
         try {
             String funcName = ctx.ID().getText();
             SlipMethodSymbol scopedFunc = (SlipMethodSymbol) this.currentScope.resolve(funcName + "_fn");
 
-            if(eh.checkEqual(
+            if (eh.checkEqual(
                     ctx.exprD().size(),
                     scopedFunc.getNumberOfParameters(),
                     ctx.start,
                     String.format("function %s expects %d argument(s)", funcName, scopedFunc.getNumberOfParameters()))
-               ){
+            ) {
                 Iterator<SlipVariableSymbol> declaredParamTypes = scopedFunc.getParameters();
-                for (SlipParser.ExprDContext param : ctx.exprD()){
+                for (SlipParser.ExprDContext param : ctx.exprD()) {
                     Type actualParamType = visit(param);
                     if (declaredParamTypes.hasNext()) {
                         Type declaredParamType = declaredParamTypes.next().getType();
-                        String errorMessage = String.format("parameter %s of %s should be of type %s instead of %s", param.getText(), funcName ,declaredParamType, actualParamType);
+                        String errorMessage = String.format("parameter %s of %s should be of type %s instead of %s", param.getText(), funcName, declaredParamType, actualParamType);
                         eh.checkEqual(actualParamType, declaredParamType, param.start, errorMessage);
                     }
                 }
@@ -188,13 +191,15 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return variable's type
+     * @modifies this, System.err
+     * @effects if currentScope != SlipGlobalScope, defineVariable(ctx)
+     * if there is an initialisation, checks that its type is the same as the variable's type, else errorHandler.signalError()
+     * if the variable is a constant and there is no initialisation, errorHandler.signalError()
+     */
     @Override
-    public Type visitDeclaration(SlipParser.DeclarationContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Type visitVarDecl(SlipParser.VarDeclContext ctx){
+    public Type visitVarDecl(SlipParser.VarDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
         Type definedVarType = visit(ctx.scalar());
@@ -216,6 +221,13 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return definedVarType;
     }
 
+    /**
+     * @return array's type
+     * @modifies this, System.err
+     * @effects if currentScope != SlipGlobalScope, defineArray(ctx)
+     * if there is an initialisation, checks that its type is the same as the array's type, else errorHandler.signalError()
+     * if the array is a constant and there is no initialisation, errorHandler.signalError()
+     */
     @Override
     public Type visitArrayDecl(SlipParser.ArrayDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
@@ -251,6 +263,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return definedVarType;
     }
 
+    /**
+     * @return the type of the first ctx.initVar
+     * @modifies this, System.err
+     * @effects visit each ctx.initVar. If they are not of the same type, errorHandler.signalError()
+     */
     @Override
     public Type visitInitArrays(SlipParser.InitArraysContext ctx) {
         Type type = null;
@@ -266,6 +283,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return type;
     }
 
+    /**
+     * @return Type.STRUCT
+     * @modifies this
+     * @effects if currentScope != SlipGlobalScope, defineStruct(ctx)
+     */
     @Override
     public Type visitStructDecl(SlipParser.StructDeclContext ctx) {
 
@@ -276,8 +298,12 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.STRUCT;
     }
 
+    /**
+     * @modifies this, System.err
+     * @effects add ctx to currentScope if it doesn't contain it, else print an error
+     */
     @Override
-    public Type visitVarDef(SlipParser.VarDefContext ctx){
+    public Type visitVarDef(SlipParser.VarDefContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
         Type definedVarType = visit(ctx.scalar());
@@ -294,28 +320,27 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return definedVarType;
     }
 
+    /**
+     * @return the type of ctx.exprD || ctx.initArrays
+     * @modifies this, System.err
+     * @effects if ctx.initArrays() != visitInitArrays(ctx.initArrays)
+     */
     @Override
-    public Type visitInitVar(SlipParser.InitVarContext ctx){
+    public Type visitInitVar(SlipParser.InitVarContext ctx) {
         if (ctx.exprD() != null) {
             return visit(ctx.exprD());
-        }
-        else {
+        } else {
             return visit(ctx.initArrays());
         }
     }
 
+    /**
+     * @return Did you read this ?
+     * @modifies this, System.err
+     * @effects hello James
+     */
     @Override
-    public Type visitConstDecl(SlipParser.ConstDeclContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Type visitExprGExpr(SlipParser.ExprGExprContext ctx){
-        return visit(ctx.exprG());
-    }
-
-    @Override
-    public Type visitLeftExprID(SlipParser.LeftExprIDContext ctx){
+    public Type visitLeftExprID(SlipParser.LeftExprIDContext ctx) {
         String idName = ctx.ID().getText();
 
         try {
@@ -339,15 +364,18 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
                 }
             }
             return symbol.getType();
-        } catch (SymbolNotFoundException e){
+        } catch (SymbolNotFoundException e) {
             String errorMessage = String.format("use of undeclared identifier %s", idName);
             eh.signalError(ctx.ID().getSymbol(), errorMessage);
         }
-        return Type.VOID;
+        return null;
     }
 
+    /**
+     * @return type of ctx
+     */
     @Override
-    public Type visitLeftExprArray(SlipParser.LeftExprArrayContext ctx){
+    public Type visitLeftExprArray(SlipParser.LeftExprArrayContext ctx) {
         String idName = ctx.ID().getText();
         try {
             SlipSymbol symbol = currentScope.resolve(idName);
@@ -356,7 +384,7 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
                 eh.signalError(ctx.ID().getSymbol(), errorMessage);
             }
             return symbol.getType();
-        } catch (SymbolNotFoundException e){
+        } catch (SymbolNotFoundException e) {
             String errorMessage = String.format("use of undeclared identifier %s", idName);
             eh.signalError(ctx.ID().getSymbol(), errorMessage);
         }
@@ -364,8 +392,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return the type of the variable represented by ctx
+     */
     @Override
-    public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx){
+    public Type visitLeftExprRecord(SlipParser.LeftExprRecordContext ctx) {
 
         StructExprGVisitor visitor = new StructExprGVisitor(currentScope, this.eh);
 
@@ -374,6 +405,11 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return symbol.getType();
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks if types on both side of the assignation are the same, if not errorHandler.signalError()
+     */
     @Override
     public Type visitAssignInstr(SlipParser.AssignInstrContext ctx) {
         this.assignationContext = true;
@@ -387,28 +423,45 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return the type of the expression between parenthesis
+     */
     @Override
-    public Type visitParens(SlipParser.ParensContext ctx){
+    public Type visitParens(SlipParser.ParensContext ctx) {
         return visit(ctx.exprD());
     }
 
+    /**
+     * @return Type.STRING
+     */
     @Override
-    public Type visitString(SlipParser.StringContext ctx){
+    public Type visitString(SlipParser.StringContext ctx) {
         return Type.STRING;
     }
 
+    /**
+     * @return Type.CHARACTER
+     */
     @Override
     public Type visitChar(SlipParser.CharContext ctx) {
         return Type.CHARACTER;
     }
 
+    /**
+     * @return Type.INTEGER
+     */
     @Override
-    public Type visitIntExpr(SlipParser.IntExprContext ctx){
+    public Type visitIntExpr(SlipParser.IntExprContext ctx) {
         return Type.INTEGER;
     }
 
+    /**
+     * @return type.INTEGER
+     * @modifies this, System.err
+     * @effects checks if ctx.exprD is of type integer, if not errorHandler.signalError()
+     */
     @Override
-    public Type visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx){
+    public Type visitUnaryMinusExpr(SlipParser.UnaryMinusExprContext ctx) {
         Type type = visit(ctx.exprD());
 
         String errorMessage = "can only negate integer expression";
@@ -417,27 +470,43 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.INTEGER;
     }
 
-    private void checkAndVisitExprD(Type requiredType, String errorMessage, List<SlipParser.ExprDContext> exprDContexts){
-        for (SlipParser.ExprDContext expr: exprDContexts) {
+    /**
+     * @modifies this, System.err
+     * @effects if the type of exprDContexts id different than requiredType, errorHandler.signalError()
+     */
+    private void checkAndVisitExprD(Type requiredType, String errorMessage, List<SlipParser.ExprDContext> exprDContexts) {
+        for (SlipParser.ExprDContext expr : exprDContexts) {
             Type type = visit(expr);
             eh.checkEqual(type, requiredType, expr.start, errorMessage);
         }
     }
 
+    /**
+     * @return Type.INTEGER
+     * @effects checks that both sides of the operator are of type integer
+     */
     @Override
-    public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx){
+    public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx) {
         String errorMessage = "can only use '*', '/' and '%' operators on expressions of type integer";
         checkAndVisitExprD(Type.INTEGER, errorMessage, ctx.exprD());
         return Type.INTEGER;
     }
 
+    /**
+     * @return Type.INTEGER
+     * @effects checks that both sides of the operator are of type integer
+     */
     @Override
-    public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx){
+    public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx) {
         String errorMessage = "can only use '+' and '-' operators on expressions of type integer";
         checkAndVisitExprD(Type.INTEGER, errorMessage, ctx.exprD());
         return Type.INTEGER;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     * @effects checks that both sides of the operator are of type integer
+     */
     @Override
     public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
         String errorMessage = "can only compare integer expressions";
@@ -445,25 +514,40 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.BOOLEAN;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     * @effects checks that both sides of the operator are of type boolean
+     */
     @Override
-    public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx){
+    public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx) {
         String errorMessage = "can only use 'AND' & 'OR' on expressions of type boolean";
         checkAndVisitExprD(Type.BOOLEAN, errorMessage, ctx.exprD());
         return Type.BOOLEAN;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     */
     @Override
-    public Type visitTrueExpr(SlipParser.TrueExprContext ctx){
+    public Type visitTrueExpr(SlipParser.TrueExprContext ctx) {
         return Type.BOOLEAN;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     */
     @Override
-    public Type visitFalseExpr(SlipParser.FalseExprContext ctx){
+    public Type visitFalseExpr(SlipParser.FalseExprContext ctx) {
         return Type.BOOLEAN;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     * @modifies this System.err
+     * @effects if ctx.exprD are of different type, else errorHandler.signalError()
+     */
     @Override
-    public Type visitComparExpr(SlipParser.ComparExprContext ctx){
+    public Type visitComparExpr(SlipParser.ComparExprContext ctx) {
 
         Type leftExprType = visit(ctx.exprD(0));
         Type rightExprType = visit(ctx.exprD(1));
@@ -473,14 +557,19 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.BOOLEAN;
     }
 
+    /**
+     * @return Type.BOOLEAN
+     * @modifies this System.err
+     * @effects if ctx.exprD if of type boolean, else errorHandler.signalError()
+     */
     @Override
-    public Type visitNotExpr(SlipParser.NotExprContext ctx){
+    public Type visitNotExpr(SlipParser.NotExprContext ctx) {
         String errorMessage = String.format("%s must be of boolean type", ctx.exprD().getText());
         eh.checkEqual(visit(ctx.exprD()), Type.BOOLEAN, ctx.exprD().start, errorMessage);
         return Type.BOOLEAN;
     }
 
-    private Type checkGuardAndVisitInstr(Type actualType, Token errorToken, List<SlipParser.InstructionContext> toVisitContexts){
+    private Type checkGuardAndVisitInstr(Type actualType, Token errorToken, List<SlipParser.InstructionContext> toVisitContexts) {
         String errorMessage = "expression must be of type boolean";
         eh.checkEqual(actualType, Type.BOOLEAN, errorToken, errorMessage);
         for (SlipParser.InstructionContext ctx : toVisitContexts) {
@@ -489,28 +578,53 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     */
     @Override
     public Type visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
         return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     */
     @Override
     public Type visitWhileInstr(SlipParser.WhileInstrContext ctx) {
         return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     */
     @Override
     public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
         return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start,
-        ctx.guardedBlock().stream().flatMap(block -> block.instruction().stream()).collect(Collectors.toList())
-                );
+                ctx.guardedBlock().stream().flatMap(block -> block.instruction().stream()).collect(Collectors.toList())
+        );
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     */
     @Override
     public Type visitUntilInstr(SlipParser.UntilInstrContext ctx) {
         return checkGuardAndVisitInstr(visit(ctx.exprD()), ctx.exprD().start, ctx.instruction());
     }
 
+    /**
+     * @return Type.VOID
+     * @modifies this, System.err
+     * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     */
     @Override
     public Type visitForInstr(SlipParser.ForInstrContext ctx) {
 
@@ -530,26 +644,64 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
         return Type.VOID;
     }
 
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
     @Override
-    public Type visitLeftAction(SlipParser.LeftActionContext ctx){
-        return this.checkActionArg(ctx);
-    }
-    public Type visitRightAction(SlipParser.RightActionContext ctx){
-        return this.checkActionArg(ctx);
-    }
-    public Type visitUpAction(SlipParser.UpActionContext ctx){
-        return this.checkActionArg(ctx);
-    }
-    public Type visitDownAction(SlipParser.DownActionContext ctx){
-        return this.checkActionArg(ctx);
-    }
-    public Type visitJumpAction(SlipParser.JumpActionContext ctx){
+    public Type visitLeftAction(SlipParser.LeftActionContext ctx) {
         return this.checkActionArg(ctx);
     }
 
-    private Type checkActionArg(SlipParser.ActionTypeContext ctx){
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
+    @Override
+    public Type visitRightAction(SlipParser.RightActionContext ctx) {
+        return this.checkActionArg(ctx);
+    }
+
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
+    @Override
+    public Type visitUpAction(SlipParser.UpActionContext ctx) {
+        return this.checkActionArg(ctx);
+    }
+
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
+    @Override
+    public Type visitDownAction(SlipParser.DownActionContext ctx) {
+        return this.checkActionArg(ctx);
+    }
+
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
+    @Override
+    public Type visitJumpAction(SlipParser.JumpActionContext ctx) {
+        return this.checkActionArg(ctx);
+    }
+
+    /**
+     * @return
+     * @modifies this, System.err
+     * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     */
+    private Type checkActionArg(SlipParser.ActionTypeContext ctx) {
         SlipParser.ExprDContext arg = ctx.getChild(SlipParser.ExprDContext.class, 0);
-        if (arg != null){
+        if (arg != null) {
             Type type = arg.accept(this);
             String errorMessage = "expression must be of type integer";
             eh.checkEqual(type, Type.INTEGER, arg.start, errorMessage);

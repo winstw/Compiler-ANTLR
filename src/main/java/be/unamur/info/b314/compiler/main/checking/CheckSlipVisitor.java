@@ -9,7 +9,14 @@ import be.unamur.info.b314.compiler.main.symboltable.SlipSymbol.Type;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-
+/**
+ * @overview a is CheckSlipVisitor a SlipParser.ProgramContext visitor
+ * Its role is to define (add them to the symbol table) Symbols from SlipParser.ParserRuleContext objects
+ * A CheckSlipVisitor is mutable
+ * @specfield errorHandler: ErrorHandler // tracks and prints error during checking phase
+ * @specfield scopes: ParseTreeProperty<SlipScope> // associates AST nodes to correspondent scope
+ * @specfield currentScope: SlipScope // the context (scope) in which the nodes are
+ */
 public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> {
     protected ErrorHandler eh;
     protected ParseTreeProperty<SlipScope> scopes;
@@ -21,6 +28,9 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
         this.scopes = scopes;
     }
 
+    /**
+     * @return scopes
+     */
     public ParseTreeProperty<SlipScope> getScopes() {
         return scopes;
     }
@@ -29,14 +39,13 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
      * @return type of ctx
      */
     @Override
-    public Type visitScalar(SlipParser.ScalarContext ctx){
-        if (ctx.BOOLEANTYPE() != null){
+    public Type visitScalar(SlipParser.ScalarContext ctx) {
+        if (ctx.BOOLEANTYPE() != null) {
             return Type.BOOLEAN;
         }
-        if (ctx.CHARTYPE() != null){
+        if (ctx.CHARTYPE() != null) {
             return Type.CHARACTER;
-        }
-        else {
+        } else {
             return Type.INTEGER;
         }
     }
@@ -45,7 +54,7 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
      * @modifies this, System.err
      * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
-    protected void defineVariable(SlipParser.VarDeclContext ctx) {
+    public void defineVariable(SlipParser.VarDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
 
         Type type = visit(ctx.scalar());
@@ -70,7 +79,7 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
      * @modifies this, System.err
      * @effects add ctx to currentScope if it doesn't contain it, else print an error
      */
-    protected void defineArray(SlipParser.ArrayDeclContext ctx) {
+    public void defineArray(SlipParser.ArrayDeclContext ctx) {
         boolean isConst = ctx.getParent().getStart().getText().equals("const");
         Type type = visit(ctx.scalar());
 
@@ -91,7 +100,8 @@ public abstract class CheckSlipVisitor extends SlipBaseVisitor<SlipSymbol.Type> 
             } catch (NullPointerException e) {
                 e.printStackTrace();
             } catch (SymbolAlreadyDefinedException e) {
-                eh.signalError(node.getSymbol(), String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName()));
+                String errorMessage = String.format("array symbol \"%s\" already exists in %s scope", name, currentScope.getName());
+                eh.signalError(node.getSymbol(), errorMessage);
 
             }
 

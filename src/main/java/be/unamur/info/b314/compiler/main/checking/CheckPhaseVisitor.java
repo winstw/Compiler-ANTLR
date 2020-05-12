@@ -482,8 +482,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects checks that both sides of the operator are of type integer, else errorHandler.signalError()
      * @return Type.INTEGER
-     * @effects checks that both sides of the operator are of type integer
      */
     @Override
     public Type visitTimesDivideExpr(SlipParser.TimesDivideExprContext ctx) {
@@ -493,8 +494,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects checks that both sides of the operator are of type integer, else errorHandler.signalError()
      * @return Type.INTEGER
-     * @effects checks that both sides of the operator are of type integer
      */
     @Override
     public Type visitPlusMinusExpr(SlipParser.PlusMinusExprContext ctx) {
@@ -504,8 +506,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects checks that both sides of the operator are of type integer, else errorHandler.signalError()
      * @return Type.BOOLEAN
-     * @effects checks that both sides of the operator are of type integer
      */
     @Override
     public Type visitComparIntExpr(SlipParser.ComparIntExprContext ctx) {
@@ -515,8 +518,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects checks that both sides of the operator are of type boolean, else errorHandler.signalError()
      * @return Type.BOOLEAN
-     * @effects checks that both sides of the operator are of type boolean
      */
     @Override
     public Type visitAndOrExpr(SlipParser.AndOrExprContext ctx) {
@@ -542,9 +546,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects if ctx.exprD are of different types errorHandler.signalError()
      * @return Type.BOOLEAN
-     * @modifies this System.err
-     * @effects if ctx.exprD are of different type, else errorHandler.signalError()
      */
     @Override
     public Type visitComparExpr(SlipParser.ComparExprContext ctx) {
@@ -558,9 +562,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
+     * @modifies this, System.err
+     * @effects if ctx.exprD is not of type boolean errorHandler.signalError()
      * @return Type.BOOLEAN
-     * @modifies this System.err
-     * @effects if ctx.exprD if of type boolean, else errorHandler.signalError()
      */
     @Override
     public Type visitNotExpr(SlipParser.NotExprContext ctx) {
@@ -579,9 +583,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return Type.VOID
      * @modifies this, System.err
      * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     * @return Type.VOID
      */
     @Override
     public Type visitIfThenInstr(SlipParser.IfThenInstrContext ctx) {
@@ -589,9 +593,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return Type.VOID
      * @modifies this, System.err
      * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     * @return Type.VOID
      */
     @Override
     public Type visitWhileInstr(SlipParser.WhileInstrContext ctx) {
@@ -599,9 +603,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return Type.VOID
      * @modifies this, System.err
      * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     * @return Type.VOID
      */
     @Override
     public Type visitIfThenElseInstr(SlipParser.IfThenElseInstrContext ctx) {
@@ -611,9 +615,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return Type.VOID
      * @modifies this, System.err
      * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     * @return Type.VOID
      */
     @Override
     public Type visitUntilInstr(SlipParser.UntilInstrContext ctx) {
@@ -621,9 +625,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return Type.VOID
      * @modifies this, System.err
      * @effects checks that the type of ctx.exprD is boolean and visit each ctx.instruction
+     * @return Type.VOID
      */
     @Override
     public Type visitForInstr(SlipParser.ForInstrContext ctx) {
@@ -645,9 +649,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     @Override
     public Type visitLeftAction(SlipParser.LeftActionContext ctx) {
@@ -655,9 +659,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     @Override
     public Type visitRightAction(SlipParser.RightActionContext ctx) {
@@ -665,9 +669,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     @Override
     public Type visitUpAction(SlipParser.UpActionContext ctx) {
@@ -675,9 +679,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     @Override
     public Type visitDownAction(SlipParser.DownActionContext ctx) {
@@ -685,9 +689,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     @Override
     public Type visitJumpAction(SlipParser.JumpActionContext ctx) {
@@ -695,9 +699,9 @@ public class CheckPhaseVisitor extends CheckSlipVisitor {
     }
 
     /**
-     * @return
      * @modifies this, System.err
      * @effects checks that if ctx.exprD != null, ctx.expD is of type integer, else errorHandler.signalError()
+     * @return Type.VOID
      */
     private Type checkActionArg(SlipParser.ActionTypeContext ctx) {
         SlipParser.ExprDContext arg = ctx.getChild(SlipParser.ExprDContext.class, 0);

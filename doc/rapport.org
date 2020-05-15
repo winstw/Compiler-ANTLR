@@ -19,7 +19,7 @@ agendas de chacuns.
 * Table des symboles
 La structure de la table des symboles est celle donnée par Terence Parr dans l'ouvrage: /Language Implementation Patterns
 Create Your Own Domain-Specific and General Programming Languages/.
-À cette structure, nous avons ajouté les éléments nécessaire à l'interprétation, par exemple, le corps des méthodes et leurs paramètres, et les valeurs que prennent les variables durant l'évaluation du programme.
+À cette structure, nous avons ajouté les éléments nécessaires à l'interprétation, par exemple, le corps des méthodes et leurs paramètres, et les valeurs que prennent les variables durant l'évaluation du programme.
 
 La table des symboles (cf. [[fig:symboltable][Figure 1]]) est divisée en 2 grandes classes: les Symboles et les Scopes.
 
@@ -46,7 +46,7 @@ Le processus de compilation du code Slip est divisé en 4 étapes principales:
   - Création de la table locale et vérification des types
 + Evaluation du code
 + Génération du code nbc
-Ces différentes étapes sont lancées à partir de méthode compile() de Main.java dans la mesure où l'étape précédente ne
+Ces différentes étapes sont lancées à partir de la méthode compile() de Main.java dans la mesure où l'étape précédente ne
 contenait pas d'erreur.
 
 Le projet est divisé en 3 packages: ~checking~, ~nbc~ et ~symboltable~.
@@ -66,8 +66,8 @@ et elle ajoute ce dernier à la table des symboles dans le scope global.
 *** CheckPhaseVisitor
 Cette classe fait la même chose que ~GlobalDefinitionPhase~ (le code commun est repris dans la classe ~CheckSlipVisitor~
 dont elles héritent) mais cette fois pour les variables locales. En plus elle va vérifier les types des expressions.
-Par exemple lors d'une assignation, elle va vérifier que le type de l'expression à gauche est bien le même que celui de
-l'expression à droite de ~:=~.
+Par exemple lors d'une assignation, elle va vérifier que le type de l'expression à gauche de ~:=~ est bien le même que celui de
+l'expression à droite.
 
 ** Package nbc
 Ce package est responsable de la traduction du code Slip en code nbc. Cette traduction se fait en 2 étapes:
@@ -113,7 +113,7 @@ compilateur.
 
 ** Amélioration
 Notre implémentation porte un peu trop le poids de la révélation par
-paliers des détails différentes étapes du projet (consignes par
+paliers des détails des différentes étapes du projet (consignes par
 étapes). Par exemple, si nous avions su dès le départ que nous allions
 interprèter le code, nous aurions fait la vérification des types lors
 de la phase d'interprétation.  Dès lors certaines parties peuvent
